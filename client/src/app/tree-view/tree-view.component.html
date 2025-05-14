@@ -1,0 +1,25 @@
+<ul style="list-style-type: none;">
+  <ng-container *ngIf="data.text">
+    <li>
+      <table>
+        <tr>
+        <td><input type="checkbox" class="form-check" *ngIf="data.isShowCheckox"></td><td>&nbsp;&nbsp;<span>{{data.text}}</span></td>
+        </tr>
+      </table>
+      <app-tree-view *ngIf="data.children" [(data)]="data.children"></app-tree-view>
+    </li>
+  </ng-container>
+  <ng-container *ngIf="!data.text">
+    <li *ngFor="let Obj of data">
+      <table>
+        <tr>
+          <td><input type="checkbox" class="form-check" *ngIf="Obj.isShowCheckox" [(ngModel)]="Obj.checked"></td><td>&nbsp;&nbsp;<span>{{Obj.text}}</span></td>
+        </tr>
+        <tr *ngIf="Obj.is_write">
+          <td>&nbsp;&nbsp;</td><td><input style="display: inline-block;" type="checkbox" class="form-check" (change)="writeChecked(Obj)" *ngIf="Obj.isShowCheckox" [(ngModel)]="Obj.value.is_write">&nbsp;&nbsp;<span>Write</span></td>
+          </tr>
+      </table>
+    <app-tree-view *ngIf="Obj.children" [(data)]="Obj.children"></app-tree-view>
+    </li>
+  </ng-container>
+</ul>

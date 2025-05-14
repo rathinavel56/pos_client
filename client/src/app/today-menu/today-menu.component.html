@@ -1,0 +1,115 @@
+<div class="card" style="position: relative;" >
+  <div class="card-body">
+     <h4 class="card-title">Todays Menu</h4>
+     <div class="row">
+      <div class="col-2 mobile-full-width" *ngIf="isShowLocation">
+        <label>Location*</label>
+      </div>
+      <div class="col-4 mobile-full-width" *ngIf="isShowLocation">
+        <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false" (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <br>
+    <div class="row" *ngIf="receipes && receipes.length > 0">
+      <div class="col-2 mobile-full-width table-responsive">
+        <label>Category</label>
+      </div>
+      <div class="col-3 categoryFilter mobile-full-width table-responsive">
+        <ngx-select-dropdown  *ngIf="categories && categories.length > 0" [(ngModel)]="selectedCategories" [config]="config" [options]="categories" [multiple]="true" (change)="filterItems()"></ngx-select-dropdown>
+      </div>
+      <div class="col-3 categoryFilter mobile-full-width table-responsive">
+
+      </div>
+      <div class="col-4 categoryFilter mobile-full-width table-responsive">
+        <span class="text-right" style="padding-bottom: 10px;"><input type="file" [(ngModel)]="requestUpload" (change)="onFileChange($event)" style="display: none;"
+          #file />
+        <button (click)="file.click()" *ngIf="!isChildOutletDisplay" type="button" class="btn btn-warning request-stock-import">Import <img
+            src="assets/images/excel.png" width="20"></button>
+            <button (click)="export()" style="margin-right: 10px;" *ngIf="!isChildOutletDisplay" type="button" class="btn btn-warning">Sample Import<img
+              src="assets/images/excel.png" width="20"></button></span>
+      </div>
+    </div>
+    <br>
+    <br>
+     <div class="table-responsive" *ngIf="!categoryLoading && receipes && receipes.length > 0">
+        <table id="today_stock" datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+           <thead>
+              <tr>
+                 <th class="text-dark font-medium fs-4">SR. No</th>
+                 <th class="text-dark font-medium fs-4">Receipe</th>
+                 <th class="text-dark font-medium fs-4" *ngIf="!exportHide">Stock In Hand</th>
+                 <th class="text-dark font-medium fs-4">Additional Stocks</th>
+                 <th class="text-dark font-medium fs-4" *ngIf="!exportHide">Total Stocks</th>
+                 <th class="text-dark font-medium fs-4">UOM</th>
+              </tr>
+           </thead>
+           <tbody>
+              <tr *ngFor="let receipe of receipes; let i = index;">
+                 <td class="fs-4">{{(i+1)}}</td>
+                 <td class="fs-4">{{receipe.name}}</td>
+                 <td class="fs-4" *ngIf="!exportHide">{{receipe.parent_stocks ? receipe.parent_stocks : 0}}</td>
+                 <td class="fs-4"><input type="text" [appTwoDigitDecimaNumber]="true" class="form-control" (change)="incQty(receipe, $event)" [(ngModel)]="receipe.inHand"></td>
+                 <td class="fs-4" *ngIf="!exportHide">{{receipe.quantity}}</td>
+                 <td class="fs-4">{{receipe.unit.name}}</td>
+              </tr>
+           </tbody>
+        </table>
+        <div style="margin-top: 10px;">
+          <button style="color: #fff;background-color: #28a745; border-color: #28a745;margin-left: 10px;" type="button" class="btn btn-rounded btn-primary text-right" (click)="submit()">Submit</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-rounded btn-primary text-right" (click)="isPreview = !isPreview;openPop(mymodal)">Preview</button>
+        </div>
+     </div>
+  </div>
+</div>
+<ng-template #mymodal let-modal>
+  <ng-container *ngIf="isPreview">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Preview</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();cancelPop()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-12 col-lg-12 pad-left-0">
+              <div class="col-12 mobile-full-width table-responsive">
+                <table id="today_stock_preview" class="table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-dark font-medium fs-4">SR. No</th>
+                      <th class="text-dark font-medium fs-4">Receipe</th>
+                      <th class="text-dark font-medium fs-4">Stock In Hand</th>
+                      <th class="text-dark font-medium fs-4">Additional Stocks</th>
+                      <th class="text-dark font-medium fs-4">Total Stocks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let receipe of receipeInHand; let i = index;">
+                      <tr>
+                        <td class="fs-4">{{(i+1)}}</td>
+                        <td class="fs-4">{{receipe.name}}</td>
+                        <td class="fs-4">{{receipe.parent_stocks ? receipe.parent_stocks : ''}}</td>
+                        <td class="fs-4">{{receipe.inHand}}</td>
+                        <td class="fs-4">{{receipe.quantity}} ({{receipe.unit.name}})</td>
+                      </tr>
+                    </ng-container>
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col-sm-6 text-left">
+          <button type="button" class="btn btn-rounded btn-default"
+            (click)="modal.dismiss();cancelPop()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>

@@ -1,0 +1,164 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()"  style="float: right;">Add User</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="isSearch">Users Search</h1>
+        <h1 *ngIf="isAdd">Add New User</h1>
+        <h1 *ngIf="isEdit">Edit User</h1>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Name<span *ngIf="isAdd || isEdit">*</span> </label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="name" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="isSearch">
+          <div class="col-2 mobile-full-width">
+            <label>Engineer</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <select class="form-control" [(ngModel)]="is_engineer">
+              <option value="">All</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+        </div>
+        <ng-container *ngIf="isAdd || isEdit">
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Login UserName* </label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [readonly]="isEdit" [(ngModel)]="username" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Role* </label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <select class="form-control" [(ngModel)]="role_id">
+              <option *ngFor="let option of roles;" [value]="option.id"
+                [selected]="option.id === role_id">
+                {{option.name}}</option>
+            </select>
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="role_id !== 0">
+            <div class="col-2 mobile-full-width">
+              <label>Location* </label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <select class="form-control" [(ngModel)]="location_id">
+                <option *ngFor="let option of locations;" [value]="option.id"
+                  [selected]="option.id === location_id">
+                  {{option.name}}</option>
+              </select>
+            </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="role_id !== 0">
+            <div class="col-2 mobile-full-width">
+              <label>Vendor* </label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <select class="form-control" [(ngModel)]="vendor_id">
+                <option *ngFor="let option of vendors;" [value]="option.id"
+                  [selected]="option.id === vendor_id">
+                  {{option.name}}</option>
+              </select>
+            </div>
+        </div>
+        <span *ngIf="role_id !== 0"><br></span>
+        <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Password* </label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <input type="text" class="form-control" [(ngModel)]="password" (keydown.enter)="onKeyDownEvent($event)">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Engineer</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="is_engineer" (change)="engineerChange($event)">
+                <span class="toggle-slider toggle-round"></span>
+              </label>
+            </div>
+          </div>
+          <br>
+          <div class="row" *ngIf="is_engineer">
+            <div class="col-2 mobile-full-width">
+              <label>Categories*</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <ngx-select-dropdown [config]="config" [options]="cats" [multiple]="true" [(ngModel)]="categories"></ngx-select-dropdown>
+            </div>
+          </div>
+          <div class="row" *ngIf="+role_id === 4">
+            <div class="col-2 mobile-full-width">
+              <label>Categories*</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <ngx-select-dropdown [config]="config" [options]="catOg" [multiple]="true" [(ngModel)]="categories"></ngx-select-dropdown>
+            </div>
+          </div>
+        </ng-container>
+        <br>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+            <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+          </div>
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+            <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' : 'Update'}}</button>
+          </div>
+        </div>
+        <div class="table-responsive" *ngIf="!isAdd && !isEdit">
+          <table class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                <th class="border-top-0" (click)="sorting('name')" [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">NAME</th>
+                <th class="border-top-0" (click)="sorting('username')" [ngClass]="{'sorting': sortBy !== 'username', 'sorting_asc': (sortBy === 'username' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'username' && sortOrder === 'DESC')}">USER NAME</th>
+                <th class="border-top-0" (click)="sorting('role')" [ngClass]="{'sorting': sortBy !== 'role', 'sorting_asc': (sortBy === 'role' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'role' && sortOrder === 'DESC')}">ROLE</th>
+                <th class="border-top-0" (click)="sorting('is_engineer')" [ngClass]="{'sorting': sortBy !== 'is_engineer', 'sorting_asc': (sortBy === 'is_engineer' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'is_engineer' && sortOrder === 'DESC')}">Engineer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of users; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
+                  <button type="button" (click)="edit(user)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" (click)="submit(user.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                </td>
+                <td>{{user.name}}</td>
+                <td>{{user.username}}</td>
+                <td>{{user.role.name}}</td>
+                <td>{{(user.is_engineer === 1) ? 'Yes' : 'No'}}</td>
+              </tr>
+              <tr *ngIf="users.length === 0">
+                <td colspan="5">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)"></app-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

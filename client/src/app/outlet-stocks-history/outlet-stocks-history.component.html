@@ -1,0 +1,120 @@
+<div class="card" style="position: relative;">
+  <div class="card-body">
+     <h4 class="card-title">Outlet Stocks History</h4>
+     <div class="row" *ngIf="isShowLocation">
+      <div class="col-2 mobile-full-width">
+        <label>Location</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="locations" [(ngModel)]="locationId" [multiple]="false" (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>From Date</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+         <input type="date" class="form-control" [(ngModel)]="from">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>To Date</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+         <input type="date" class="form-control" [(ngModel)]="to">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>Products/Receipe</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="products" [(ngModel)]="q1" (change)="productChanged($event)"></ngx-select-dropdown>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>Unit Size</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="text" class="form-control" [(ngModel)]="uom">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>Type</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <select class="form-control" [(ngModel)]="type">
+          <option value="">All</option>
+          <option value="0">Credit</option>
+          <option value="1">Debit</option>
+        </select>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="offset-md-3 col-12 mobile-full-width">
+        <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Reset</button>
+        <button type="button" class="btn btn-rounded btn-info" (click)="setPagination(1)">Search</button>
+        &nbsp;&nbsp;<button type="button" class="btn btn-rounded btn-primary" (click)="export()">Export</button>
+      </div>
+    </div>
+    <div class="table-responsive" id="history-data" [ngClass]="{'hide': (isExport)}">
+      <br>
+      <table class="table v-middle nowrap dataTable">
+           <thead>
+              <tr>
+                 <th class="text-dark font-medium fs-4">SR. No</th>
+                 <th class="text-dark font-medium fs-4">Request No</th>
+                 <th class="text-dark font-medium fs-4">Product/Receipe Name</th>
+                 <th class="text-dark font-medium fs-4">Category</th>
+                 <th class="text-dark font-medium fs-4">UOM</th>
+                 <th class="text-dark font-medium fs-4">Invoice Number</th>
+                 <th class="text-dark font-medium fs-4">Order Type</th>
+                 <th class="text-dark font-medium fs-4">Status</th>
+                 <th class="text-dark font-medium fs-4" (click)="sorting('type')" [ngClass]="{'sorting': sortBy !== 'type', 'sorting_asc': (sortBy === 'type' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'type' && sortOrder === 'DESC')}">Debit/Credit</th>
+                 <th class="text-dark font-medium fs-4">Before Quantity</th>
+                 <th class="text-dark font-medium fs-4" (click)="sorting('quantity')" [ngClass]="{'sorting': sortBy !== 'quantity', 'sorting_asc': (sortBy === 'quantity' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'quantity' && sortOrder === 'DESC')}">Quantity</th>
+                 <th class="text-dark font-medium fs-4">After Quantity</th>
+                 <th class="text-dark font-medium fs-4" (click)="sorting('date')" [ngClass]="{'sorting': sortBy !== 'date', 'sorting_asc': (sortBy === 'date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'date' && sortOrder === 'DESC')}">Date</th>
+                 <th class="text-dark font-medium fs-4">Created Date</th>
+                 <th class="text-dark font-medium fs-4">Vendor/Outlet</th>
+              </tr>
+           </thead>
+           <tbody>
+              <tr *ngFor="let stock of stocks; let i = index;">
+                  <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.request_stock ? stock.request_stock.id : '-'}} </td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}"><span *ngIf="stock.product">{{stock.product.name}}&nbsp;({{stock.product.brand.name}})</span><span *ngIf="stock.receipe">{{stock.receipe.name}}</span></td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{!stock.receipe ? stock.product?.category.name : stock.receipe?.category.name}}</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}"><span *ngIf="stock.unit_size">{{stock.unit_size}}&nbsp;({{!stock.receipe ? stock.product?.unit.name : stock.receipe?.unit.name}})</span></td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">
+                    {{stock.sale?.invoice_no}}
+                  </td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">
+                    {{stock.sale?.order_type.name}}
+                  </td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.order_status ? stock.order_status.name : ''}}</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{(stock.type === 0) ? 'Credit': 'Debit'}} <span *ngIf="stock.is_stock_expired === 1">(Wastage)</span></td>
+                  <td class="fs-4">{{stock.before_quantity}}&nbsp;({{stock.product ? stock.product?.unit.name : stock.receipe?.unit.name}})</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.quantity}}&nbsp;({{stock.product ? stock.product?.unit.name : stock.receipe?.unit.name}})</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.after_quantity}}&nbsp;({{stock.product ? stock.product?.unit.name : stock.receipe?.unit.name}})</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.date | date:'dd-MM-yyyy'}}</td>
+                  <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}">{{stock.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                 <td class="fs-4" [ngClass]="{'red-clr': (stock.type !== 0), 'green-clr': (stock.type === 0)}"><span class="history-span">{{(stock.request_stock && stock.type === 0) ? ('From: ' + stock.request_stock.from_location.name + ' To: ' + stock.request_stock.location.name) : ''}}{{(stock.request_stock && stock.type !== 0) ? ('From: ' + stock.request_stock.from_location.name + ' To:' + stock.request_stock.location.name) : ''}}{{stock.sale ? stock.sale.location.name : ''}}{{(stock.stocks_incoming !== null ? (stock.stocks_incoming.vendor.name + ' (' + stock.stocks_incoming.invoice_number + ') ') : '')}}{{stock.is_today_menu === 1 ? 'Today Menu' : ''}}</span></td>
+              </tr>
+              <tr *ngIf="stocks.length === 0"><td colspan="10">No Records</td></tr>
+           </tbody>
+        </table>
+        <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)"></app-pagination>
+     </div>
+  </div>
+</div>

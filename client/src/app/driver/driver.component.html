@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()"  style="float: right;">Add Driver</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="isSearch">Search</h1>
+        <h1 *ngIf="isAdd">Add New Driver</h1>
+        <h1 *ngIf="isEdit">Edit Driver</h1>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Name<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="name" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Vehicle Reg No<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="vehicle_reg_no" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Mobile No<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="mobile_no" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+            <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+          </div>
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+            <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' : 'Update'}}</button>
+          </div>
+        </div>
+        <div class="table-responsive" *ngIf="!isAdd && !isEdit">
+          <table class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                <th class="border-top-0" (click)="sorting('name')" [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">NAME</th>
+                <th class="border-top-0" (click)="sorting('vehicle_reg_no')" [ngClass]="{'sorting': sortBy !== 'vehicle_reg_no', 'sorting_asc': (sortBy === 'vehicle_reg_no' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'vehicle_reg_no' && sortOrder === 'DESC')}">Vehicle Reg No</th>
+                <th class="border-top-0" (click)="sorting('mobile_no')" [ngClass]="{'sorting': sortBy !== 'mobile_no', 'sorting_asc': (sortBy === 'mobile_no' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'mobile_no' && sortOrder === 'DESC')}">Mobile No</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let driver of drivers; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
+                  <button type="button" (click)="edit(driver)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" (click)="submit(driver.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                </td>
+                <td>{{driver.name}}</td>
+                <td>{{driver.vehicle_reg_no}}</td>
+                <td>{{driver.mobile_no}}</td>
+              </tr>
+              <tr *ngIf="drivers.length === 0">
+                <td>No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)"></app-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,1499 @@
+<div class="card" style="position: relative;">
+  <div class="card-body">
+    <h4 class="card-title">Reports</h4>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>Type*</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <select class="form-control" [(ngModel)]="type_id" (change)="typeChange()">
+          <option *ngFor="let option of types;" [value]="option.id">{{option.name}}</option>
+        </select>
+      </div>
+    </div>
+    <span *ngIf="isShowLocation"><br></span>
+    <div class="row"
+      *ngIf="isShowLocation && (type_id === '0' || type_id === '1' || type_id == '2' || type_id == '8' || type_id === '11' || type_id === '12' || type_id === '12.1')">
+      <div class="col-2 mobile-full-width">
+        <label><span *ngIf="type_id === '0' || type_id === '1' || type_id === '11' || type_id === '12' || type_id === '12.1'">Source
+          </span>Location</label>
+      </div>
+      <div class="col-4 mobile-full-width" *ngIf="type_id !== '8'">
+        <ngx-select-dropdown [config]="config" [options]="centralLocations" [(ngModel)]="centralLocationId"
+          [multiple]="false" (change)="centralLocationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+      <div class="col-4 mobile-full-width" *ngIf="type_id === '8'">
+        <ngx-select-dropdown [config]="config" [options]="locations" [(ngModel)]="centralLocationId" [multiple]="false"
+          (change)="centralLocationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <span
+      *ngIf="(type_id === '0' || type_id === '1' || type_id === '11' || type_id === '12' || type_id === '12.1')"><br></span>
+    <div class="row" *ngIf="((type_id !== '0' && type_id !== '2' && type_id !== '8') || (isShowLocation || type_id === '10')) && !(type_id === '19' || type_id === '20' || type_id === '21')">
+      <div class="col-2 mobile-full-width">
+        <label><span *ngIf="type_id === '0' || type_id === '1' || type_id === '11' || type_id === '12' || type_id === '12.1'">Destination
+          </span>Location*</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="locations" [(ngModel)]="locationId" [multiple]="(type_id === '19' || type_id === '20' || type_id === '21')"
+          (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <br>
+    <div class="row" *ngIf="isShowLocation && type_id === '0' && vendorLoaded">
+      <div class="col-2 mobile-full-width">
+        <label>Vendor</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="vendors" [(ngModel)]="vendorId" [multiple]="false"
+          (change)="vendorChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <span *ngIf="type_id === '0'"><br></span>
+    <div class="row" *ngIf="type_id !== '2' && !(type_id === '19' || type_id === '20' || type_id === '21')">
+      <div class="col-2 mobile-full-width">
+        <label>From Date*</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="date" class="form-control" [(ngModel)]="from">
+      </div>
+    </div>
+    <br>
+    <div class="row" *ngIf="type_id !== '2' && !(type_id === '19' || type_id === '20' || type_id === '21')">
+      <div class="col-2 mobile-full-width">
+        <label>To Date*</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="date" class="form-control" [(ngModel)]="to">
+      </div>
+    </div>
+    <!-- <span *ngIf="type_id === '1' "><br></span>
+    <div class="row" *ngIf="type_id === '1' ">
+      <div class="col-2 mobile-full-width">
+        <label>Search By</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <select class="form-control" [(ngModel)]="search_filter" (change)="searchByChange()">
+          <option *ngFor="let option of searchBy;" [value]="option.id">{{option.name}}</option>
+        </select>
+      </div>
+    </div> -->
+    <span *ngIf="type_id === '0' || search_filter === '1' || search_filter === '2' || search_filter === '3'"><br></span>
+    <div class="row" *ngIf="type_id === '0' || search_filter === '1' || search_filter === '2'">
+      <div class="col-2 mobile-full-width">
+        <label>Product</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="products" [(ngModel)]="productId" [multiple]="true"
+          (change)="productChanged($event)"></ngx-select-dropdown>
+      </div>
+    </div>
+    <span *ngIf="search_filter === '1'"><br></span>
+    <div class="row" *ngIf="search_filter === '1' || search_filter === '3'">
+      <div class="col-2 mobile-full-width">
+        <label>Receipe</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="receipes" [(ngModel)]="receipeId" [multiple]="true"
+          (change)="receipeChanged($event)"></ngx-select-dropdown>
+      </div>
+    </div>
+    <ng-container *ngIf="type_id === '12' || type_id === '12.1'">
+      <br>
+      <div class="row">
+        <div class="col-2 mobile-full-width">
+          <label>Categories</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <select class="form-control" [(ngModel)]="category_id">
+            <option *ngFor="let option of categories;" [value]="option.id">
+              {{option.name}}</option>
+          </select>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="type_id === '12' || type_id === '12.1'">
+      <br>
+      <div class="row">
+        <div class="col-2 mobile-full-width">
+          <label>Request No</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <input type="text" class="form-control" [(ngModel)]="request_no">
+        </div>
+      </div>
+    </ng-container>
+    <br>
+    <div class="row" *ngIf="type_id === '0'">
+      <div class="col-2 mobile-full-width">
+        <label>GST Report</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="checkbox" class="form-check" [(ngModel)]="isGst">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="offset-md-3 col-12 mobile-full-width">
+        <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Reset</button>
+        <button (click)="exportTable()" type="button" class="btn btn-warning" style="border-radius: 60px;">Export <img
+            src="assets/images/excel.png" width="20"></button>
+      </div>
+    </div>
+  </div>
+</div>
+<table class="datatable hide" id="stocksIn" *ngIf="type_id === '0' && !isGst">
+  <thead>
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Invoice Date</th>
+      <th class="border-top-0">Receipt Date</th>
+      <th class="border-top-0">Vendor Name</th>
+      <th class="border-top-0">Supplied to</th>
+      <th class="border-top-0">Invoice Number</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Product</th>
+      <th class="border-top-0">Brand</th>
+      <th class="border-top-0">Product UOM</th>
+      <th class="border-top-0">Unit Size</th>
+      <th class="border-top-0">Number of Units</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Net Amount</th>
+      <th class="border-top-0">Cost Per Unit</th>
+      <th class="border-top-0">Discount Amount</th>
+      <th class="border-top-0">SGST Percentage</th>
+      <th class="border-top-0">SGST Amount</th>
+      <th class="border-top-0">CGST Percentage</th>
+      <th class="border-top-0">CGST Amount</th>
+      <th class="border-top-0">IGST Percentage</th>
+      <th class="border-top-0">IGST Amount</th>
+      <th class="border-top-0">Cess Percentage</th>
+      <th class="border-top-0">Cess Amount</th>
+      <th class="border-top-0">Gross Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let report of reports; let i = index;">
+      <tr *ngFor="let stocks_incoming_detail of report.stocks_incoming_details">
+        <td>{{i +1 }}</td>
+        <td>{{report.invoice_date | date:'dd-MMM-yyyy'}}</td>
+        <td>{{report.receipt_date | date:'dd-MMM-yyyy'}}</td>
+        <td>{{report.vendor.name}}</td>
+        <td>{{report.location.name}}</td>
+        <td>{{report.invoice_number}}</td>
+        <td>{{stocks_incoming_detail.product.category.name}}</td>
+        <td>{{stocks_incoming_detail.product.name}}</td>
+        <td>{{stocks_incoming_detail.product.brand.name}}</td>
+        <td>{{stocks_incoming_detail.product.unit.name}}</td>
+        <td>{{stocks_incoming_detail.unit_size}}</td>
+        <td>{{stocks_incoming_detail.number_of_units}}</td>
+        <td>{{stocks_incoming_detail.quantity}}</td>
+        <td>{{((stocks_incoming_detail.number_of_units * stocks_incoming_detail.cost_per_unit) -
+          (stocks_incoming_detail.discount_amount > 0 ? stocks_incoming_detail.discount_amount : 0))}}</td>
+        <td>{{stocks_incoming_detail.cost_per_unit}}</td>
+        <td>{{stocks_incoming_detail.discount_amount}}</td>
+        <td>{{stocks_incoming_detail.SGST_percentage}}</td>
+        <td>{{stocks_incoming_detail.SGST_percentage ? (((stocks_incoming_detail.number_of_units *
+          stocks_incoming_detail.cost_per_unit) - (stocks_incoming_detail.discount_amount > 0 ?
+          stocks_incoming_detail.discount_amount : 0)) * (stocks_incoming_detail.SGST_percentage/100)) : 0}}</td>
+        <td>{{stocks_incoming_detail.CGST_percentage}}</td>
+        <td>{{stocks_incoming_detail.CGST_percentage ? (((stocks_incoming_detail.number_of_units *
+          stocks_incoming_detail.cost_per_unit) - (stocks_incoming_detail.discount_amount > 0 ?
+          stocks_incoming_detail.discount_amount : 0)) * (stocks_incoming_detail.CGST_percentage/100)) : 0}}</td>
+        <td>{{stocks_incoming_detail.IGST_percentage}}</td>
+        <td>{{stocks_incoming_detail.IGST_percentage ? (((stocks_incoming_detail.number_of_units *
+          stocks_incoming_detail.cost_per_unit) - (stocks_incoming_detail.discount_amount > 0 ?
+          stocks_incoming_detail.discount_amount : 0)) * (stocks_incoming_detail.IGST_percentage/100)) : 0}}</td>
+        <td>{{stocks_incoming_detail.cess_percentage}}</td>
+        <td>{{stocks_incoming_detail.cess_percentage ? (((stocks_incoming_detail.number_of_units *
+          stocks_incoming_detail.cost_per_unit) - (stocks_incoming_detail.discount_amount > 0 ?
+          stocks_incoming_detail.discount_amount : 0)) * (stocks_incoming_detail.cess_percentage/100)) : 0}}</td>
+        <td>{{(((stocks_incoming_detail.number_of_units * stocks_incoming_detail.cost_per_unit) -
+          (stocks_incoming_detail.discount_amount > 0 ? stocks_incoming_detail.discount_amount : 0)) +
+          ((stocks_incoming_detail.SGST_percentage || stocks_incoming_detail.CGST_percentage ||
+          stocks_incoming_detail.IGST_percentage) ? ((+(stocks_incoming_detail.SGST_percentage ?
+          stocks_incoming_detail.SGST_percentage : 0) + (+(stocks_incoming_detail.CGST_percentage ?
+          stocks_incoming_detail.CGST_percentage : 0)) + (+(stocks_incoming_detail.cess_percentage ?
+          stocks_incoming_detail.cess_percentage : 0)) + (+(stocks_incoming_detail.IGST_percentage ?
+          stocks_incoming_detail.IGST_percentage : 0)))/100) : 0) * ((stocks_incoming_detail.number_of_units *
+          stocks_incoming_detail.cost_per_unit)- (stocks_incoming_detail.discount_amount > 0 ?
+          stocks_incoming_detail.discount_amount : 0)))}}</td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+<table class="datatable hide" id="stocksIn" *ngIf="type_id === '0' && isGst && reports && reports.data">
+  <thead>
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Supplier Name</th>
+      <th class="border-top-0">Gstin</th>
+      <th class="border-top-0">Invoice Date</th>
+      <th class="border-top-0">Invoice Number</th>
+      <ng-container *ngIf="reports && reports.gstPercentages">
+        <th *ngIf="reports.gstPercentages.length === 0" class="border-top-0">GST</th>
+        <ng-container *ngFor="let gstPercentage of reports.gstPercentages">
+          <th class="border-top-0">GST {{gstPercentage.name}} %</th>
+        </ng-container>
+      </ng-container>
+      <th class="border-top-0">CESS</th>
+      <th class="border-top-0">Discount Amount</th>
+      <th class="border-top-0">Invoice total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let report of reports.data; let i = index;">
+      <tr>
+        <td>{{i +1 }}</td>
+        <td>{{report.vendor.name}}</td>
+        <td>{{report.vendor.gstin}}</td>
+        <td>{{report.invoice_date | date:'dd-MMM-yyyy'}}</td>
+        <td>{{report.invoice_number}}</td>
+        <ng-container *ngIf="report && report.gst">
+          <td *ngIf="report.gst.length === 0">{{0 | number:'1.2-2'}}</td>
+          <ng-container *ngFor="let gst of report.gst">
+            <td>{{gst.total | number:'1.2-2'}}</td>
+          </ng-container>
+        </ng-container>
+        <td>{{report.cess | number:'1.2-2'}}</td>
+        <td>{{report.discount_amount | number:'1.2-2'}}</td>
+        <td>{{report.total | number:'1.2-2'}}</td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+<table class="datatable hide" id="stocksOut" *ngIf="type_id === '1' ">
+  <thead>
+    <tr>
+      <th class="border-top-0">Request No</th>
+      <th class="border-top-0">Requested Delivery Date</th>
+      <th class="border-top-0">Approved Delivery Date</th>
+      <th class="border-top-0">Source</th>
+      <th class="border-top-0">Destination</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Name</th>
+      <th class="border-top-0">UOM</th>
+      <th class="border-top-0">Unit Size</th>
+      <th class="border-top-0">Requested Quantity</th>
+      <th class="border-top-0">Approved Quantity</th>
+      <th class="border-top-0">Pickup Quantity</th>
+      <th class="border-top-0">Rejected Quantity</th>
+      <th class="border-top-0">Accepted Quantity</th>
+      <th class="border-top-0">Status</th>
+      <th class="border-top-0">Manufacturing price</th>
+      <th class="border-top-0">Total Manufacturing price</th>
+      <th class="border-top-0">Unit price</th>
+      <th class="border-top-0">Amount</th>
+      <th class="border-top-0">SGST Percentage</th>
+      <th class="border-top-0">SGST Amount</th>
+      <th class="border-top-0">CGST Percentage</th>
+      <th class="border-top-0">CGST Amount</th>
+      <th class="border-top-0">IGST Percentage</th>
+      <th class="border-top-0">IGST Amount</th>
+      <th class="border-top-0">CESS Percentage</th>
+      <th class="border-top-0">CESS Amount</th>
+      <th class="border-top-0">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let report of reports; let i = index;">
+      <tr *ngFor="let request_outlet_detail of report.request_outlet_details; let j = index;">
+        <td>{{report.id}}</td>
+        <td>{{report.delivery_date | date:'dd-MMM-yyyy'}}</td>
+        <td>{{report.delivery_approved_date | date:'dd-MMM-yyyy'}}</td>
+        <td>{{report.from_location.name}}</td>
+        <td >{{report.location.name}}</td>
+        <td>{{request_outlet_detail.product ? request_outlet_detail.product.category.name :
+          request_outlet_detail.receipe.category.name}}</td>
+        <td>{{request_outlet_detail.product ? request_outlet_detail.product.name : request_outlet_detail.receipe.name}}
+        </td>
+        <td>{{request_outlet_detail.product ? request_outlet_detail.product.unit.name :
+          request_outlet_detail.receipe.unit.name}}</td>
+        <td>{{request_outlet_detail.unit_size}}</td>
+        <td>{{request_outlet_detail.requested_quantity}}</td>
+        <td>{{request_outlet_detail.approved_quantity}}</td>
+        <td>{{request_outlet_detail.pickup_quantity}}</td>
+        <td>{{request_outlet_detail.wastage_quantity}}</td>
+        <td>{{report.order_status_id === 6 ? request_outlet_detail.accepted_quantity : 0}}</td>
+        <td>{{report.order_status.name}}</td>
+        <td>{{((request_outlet_detail.product) ? ((request_outlet_detail.product.manufacturing_price && request_outlet_detail.product.manufacturing_price.price) ? request_outlet_detail.product.manufacturing_price.price : request_outlet_detail.product.purchase_price) : ((request_outlet_detail.receipe.manufacturing_price && request_outlet_detail.receipe.manufacturing_price.price) ? request_outlet_detail.receipe.manufacturing_price.price : 0))}}</td>
+        <td *ngIf="report.order_status_id === 1 || report.order_status_id === 4 || report.order_status_id === 5">{{((request_outlet_detail.product) ? ((request_outlet_detail.product.manufacturing_price && request_outlet_detail.product.manufacturing_price.price) ? (request_outlet_detail.product.manufacturing_price.price * request_outlet_detail.requested_quantity) : (request_outlet_detail.product.purchase_price * request_outlet_detail.requested_quantity)) : ((request_outlet_detail.receipe.manufacturing_price && request_outlet_detail.receipe.manufacturing_price.price) ? (request_outlet_detail.receipe.manufacturing_price.price * request_outlet_detail.requested_quantity) : 0))}}</td>
+        <td *ngIf="report.order_status_id === 2 || report.order_status_id === 3">{{((request_outlet_detail.product) ? ((request_outlet_detail.product.manufacturing_price && request_outlet_detail.product.manufacturing_price.price) ? (request_outlet_detail.product.manufacturing_price.price * request_outlet_detail.approved_quantity) : (request_outlet_detail.product.purchase_price * request_outlet_detail.approved_quantity)) : ((request_outlet_detail.receipe.manufacturing_price && request_outlet_detail.receipe.manufacturing_price.price) ? (request_outlet_detail.receipe.manufacturing_price.price * request_outlet_detail.approved_quantity) : 0))}}</td>
+        <td *ngIf="report.order_status_id === 6">{{((request_outlet_detail.product) ? ((request_outlet_detail.product.manufacturing_price && request_outlet_detail.product.manufacturing_price.price) ? (request_outlet_detail.product.manufacturing_price.price * request_outlet_detail.accepted_quantity) : (request_outlet_detail.product.purchase_price * request_outlet_detail.accepted_quantity)) : ((request_outlet_detail.receipe.manufacturing_price && request_outlet_detail.receipe.manufacturing_price.price) ? (request_outlet_detail.receipe.manufacturing_price.price * request_outlet_detail.accepted_quantity) : 0))}}</td>
+        <td *ngIf="report.order_status_id === 7">{{((request_outlet_detail.product) ? ((request_outlet_detail.product.manufacturing_price && request_outlet_detail.product.manufacturing_price.price) ? (request_outlet_detail.product.manufacturing_price.price * request_outlet_detail.pickup_quantity) : (request_outlet_detail.product.purchase_price * request_outlet_detail.pickup_quantity)) : ((request_outlet_detail.receipe.manufacturing_price && request_outlet_detail.receipe.manufacturing_price.price) ? (request_outlet_detail.receipe.manufacturing_price.price * request_outlet_detail.pickup_quantity) : 0))}}</td>
+        <td>{{((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0)}}</td>
+        <ng-container *ngIf="report.order_status_id > 1 && report.order_status_id < 6">
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <ng-container *ngIf="report.order_status_id === 2"><td>0</td></ng-container>
+        </ng-container>
+        <ng-container *ngIf="report.order_status_id === 7">
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.price > 0) ? request_outlet_detail.price :
+            0) * request_outlet_detail.pickup_quantity) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.SGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.SGST_percentage ?
+            request_outlet_detail.SGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.pickup_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.CGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.CGST_percentage ?
+            request_outlet_detail.CGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.pickup_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.IGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.IGST_percentage ?
+            request_outlet_detail.IGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.pickup_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.cess_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.cess_percentage ?
+            request_outlet_detail.cess_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.pickup_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{(((request_outlet_detail.price > 0) ? (((request_outlet_detail.price > 0) ? request_outlet_detail.price
+            : 0) * request_outlet_detail.pickup_quantity) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.SGST_percentage ? request_outlet_detail.SGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.pickup_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.CGST_percentage ? request_outlet_detail.CGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.pickup_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.IGST_percentage ? request_outlet_detail.IGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.pickup_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.cess_percentage ? request_outlet_detail.cess_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.pickup_quantity)) : 0)) | number:'1.2-2'}}</td>
+        </ng-container>
+        <ng-container *ngIf="report.order_status_id === 6">
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.price > 0) ? request_outlet_detail.price :
+            0) * request_outlet_detail.accepted_quantity) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.SGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.SGST_percentage ?
+            request_outlet_detail.SGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.accepted_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.CGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.CGST_percentage ?
+            request_outlet_detail.CGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.accepted_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.IGST_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.IGST_percentage ?
+            request_outlet_detail.IGST_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.accepted_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{+request_outlet_detail.cess_percentage}}</td>
+          <td>{{((request_outlet_detail.price > 0) ? (((request_outlet_detail.cess_percentage ?
+            request_outlet_detail.cess_percentage : 0)/100) * (((request_outlet_detail.price > 0) ?
+            request_outlet_detail.price : 0) * request_outlet_detail.accepted_quantity)) : 0) | number:'1.2-2'}}</td>
+          <td>{{(((request_outlet_detail.price > 0) ? (((request_outlet_detail.price > 0) ? request_outlet_detail.price
+            : 0) * request_outlet_detail.accepted_quantity) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.SGST_percentage ? request_outlet_detail.SGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.accepted_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.CGST_percentage ? request_outlet_detail.CGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.accepted_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.IGST_percentage ? request_outlet_detail.IGST_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.accepted_quantity)) : 0) + ((request_outlet_detail.price > 0) ?
+            (((request_outlet_detail.cess_percentage ? request_outlet_detail.cess_percentage : 0)/100) *
+            (((request_outlet_detail.price > 0) ? request_outlet_detail.price : 0) *
+            request_outlet_detail.accepted_quantity)) : 0)) | number:'1.2-2'}}</td>
+        </ng-container>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+<table class="datatable hide" id="outletStocks" *ngIf="type_id === '2'">
+  <thead>
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Product Name</th>
+      <th class="border-top-0">Product Category</th>
+      <th class="border-top-0">Product Issued Quantity</th>
+      <th class="border-top-0">Product UOM</th>
+      <th class="border-top-0">Product Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let report of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{report.product.name}}</td>
+      <td>{{report.product.category.name}}</td>
+      <td>{{report.quantity}}</td>
+      <td>{{report.product.unit.name}}</td>
+      <td>{{report.product.selling_price}}</td>
+    </tr>
+  </tbody>
+</table>
+<table class="datatable hide" id="dailySalesReport" *ngIf="type_id === '3'">
+  <thead>
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Branch Name</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">SGST Amount</th>
+      <th class="border-top-0">CGST Amount</th>
+      <th class="border-top-0">IGST Amount</th>
+      <th class="border-top-0">CESS Amount</th>
+      <th class="border-top-0">GST Total</th>
+      <th class="border-top-0">Net Sales</th>
+      <th class="border-top-0">Gross Sales</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let report of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{report.createdAt | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{report.location_name}}</td>
+      <td>{{report.category_name}}</td>
+      <td>{{((+report.SGST_percentage > 0) ? ((+report.SGST_percentage / 100) * report.price) : 0)}}</td>
+      <td>{{((+report.CGST_percentage > 0) ? ((+report.CGST_percentage / 100) * report.price) : 0)}}</td>
+      <td>{{((+report.IGST_percentage > 0) ? ((+report.IGST_percentage / 100) * report.price) : 0)}}</td>
+      <td>{{((+report.cess_percentage > 0) ? ((+report.cess_percentage / 100) * report.price) : 0)}}</td>
+      <td>{{(((+report.SGST_percentage > 0) ? ((+report.SGST_percentage / 100) * report.price) : 0) +
+        ((+report.CGST_percentage > 0) ? ((+report.CGST_percentage / 100) * report.price) : 0) +
+        ((+report.IGST_percentage > 0) ? ((+report.IGST_percentage / 100) * report.price) : 0) +
+        ((+report.cess_percentage > 0) ? ((+report.cess_percentage / 100) * report.price) : 0))}}</td>
+      <td>{{report.price}}</td>
+      <td>{{report.total}}</td>
+    </tr>
+  </tbody>
+</table>
+<table class="datatable hide" id="dailySalesReportCount" *ngIf="type_id === '4'">
+  <thead>
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Branch Name</th>
+      <th class="border-top-0">Branch Code</th>
+      <ng-container *ngFor="let orderStat of orderType">
+        <th class="border-top-0">Bill Count - {{orderStat.name}}</th>
+        <th class="border-top-0">Total Gross Amount - {{orderStat.name}}</th>
+        <th class="border-top-0">Total Discount - {{orderStat.name}}</th>
+        <th class="border-top-0">Total GST - {{orderStat.name}}</th>
+        <th class="border-top-0">Net Revenue - {{orderStat.name}}</th>
+      </ng-container>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let report of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{report.updated_at | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{report.location_name}}</td>
+      <td>{{report.location_code}}</td>
+      <ng-container *ngFor="let orderStat of report.orderType">
+        <td>{{orderStat}}</td>
+      </ng-container>
+    </tr>
+  </tbody>
+</table>
+<div class="hide" id="salesSummaryReport" *ngIf="type_id === '5'">
+  <table class="dataTable" style="width: 35%;margin-left: 10px;">
+    <tbody>
+      <ng-container *ngIf="from === to">
+        <tr>
+          <th style="font-size: 12px !important;">Sales Date : </th>
+          <td colspan="3" style="font-size: 12px !important;">{{from | date: 'dd-MM-yyyy'}}</td>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="from !== to">
+        <tr>
+          <th colspan="4" style="font-size: 12px !important;">Sales Date : ({{from | date: 'dd-MM-yyyy'}} - {{to | date: 'dd-MM-yyyy'}})</th>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="location_id > 0 && location">
+        <tr>
+          <th colspan="4" style="font-size: 12px !important;text-align: center !important">{{location.name}}
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 12px !important;text-align: center !important">{{location.address}}.
+            Ph: {{location.phone_no}}
+          </th>
+        </tr>
+        <tr *ngIf="location.gstin">
+          <th colspan="4" style="font-size: 12px !important;text-align: center !important">
+            GSTIN:{{location.gstin}}</th>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="location_id === 0">
+        <tr>
+          <th colspan="4" style="font-size: 12px !important;text-align: center !important">All Location</th>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="reports.start">
+        <tr
+          style="border-bottom: 0px;border-style: dotted;border-top: 1px solid grey;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Start Bill No</th>
+          <td>{{reports.start}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">End Bill No</th>
+          <td>{{reports.end}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total No.of Bill</th>
+          <td>{{reports.bill_count}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total Cancel No.of Bill</th>
+          <td>0</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Total NCB Bill</th>
+          <td>{{reports.ncb_bill_count}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Total Order of Bill</th>
+          <td>{{reports.bill_count + reports.ncb_bill_count}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total No.of Item</th>
+          <td>{{reports.itemsCnt}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Gross Total After Discount</th>
+          <td>{{reports.subtotal | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Discount (On Gross sales)</th>
+          <td>{{reports.discount | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total CGST</th>
+          <td>{{reports.CGST | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total SGST</th>
+          <td>{{reports.SGST | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total IGST</th>
+          <td>{{reports.IGST | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <th style="font-size: 12px !important;">Total Cess</th>
+          <td>{{reports.cess | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Round Off</th>
+          <td>{{reports.roundoff | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Net Sales</th>
+          <td>{{(reports.subtotal-(reports.CGST + reports.SGST + reports.IGST + reports.cess)) | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th colspan="2">Sales Summary</th>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;text-align: center;">Pay Mode</th>
+          <th style="font-size: 12px !important;text-align: center;">Count</th>
+          <th style="font-size: 12px !important;text-align: center;">Advance Amt</th>
+          <th style="font-size: 12px !important;text-align: center;">Discount Amt</th>
+          <th style="font-size: 12px !important;text-align: center;">Net Total</th>
+          <th style="font-size: 12px !important;text-align: center;">Tax</th>
+          <th style="font-size: 12px !important;text-align: center;">Gross Total</th>
+        </tr>
+        <tr *ngFor="let sale_summary of reports.sales_summary;">
+          <td style="text-align: center;">{{sale_summary.name}}</td>
+          <td style="text-align: center;">{{sale_summary.cnt}}</td>
+          <td style="text-align: center;">{{sale_summary.advance_amount | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{sale_summary.discount_amount | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{(sale_summary.amount - sale_summary.gst) | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{sale_summary.gst | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{sale_summary.amount | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 1px solid grey;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Net Total</th>
+          <td>{{reports.payTotalNet | number:'1.2-2'}}</td>
+          <th style="font-size: 12px !important;">Gross Total</th>
+          <td>{{reports.payTotal | number:'1.2-2'}}</td>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="reports.orders && reports.orders.length">
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th colspan="2">Orders</th>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;text-align: center;">Pay Mode</th>
+          <th style="font-size: 12px !important;text-align: center;">Count</th>
+          <th style="font-size: 12px !important;text-align: center;">Advance Total</th>
+        </tr>
+        <tr *ngFor="let order of reports.orders;">
+          <td style="text-align: center;">{{order.name}}</td>
+          <td style="text-align: center;">{{order.cnt}}</td>
+          <td style="text-align: center;">{{order.amount | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 1px solid grey;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Total</th>
+          <td style="text-align: center;">{{orderCnt}}</td>
+          <td style="text-align: center;">{{orderTotal | number:'1.2-2'}}</td>
+        </tr>
+      </ng-container>
+      <ng-container *ngIf="reports.start">
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th colspan="2">Service Wise Sales</th>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;text-align: center;">ServiceTypeName</th>
+          <th style="font-size: 12px !important;text-align: center;">Count</th>
+          <th style="font-size: 12px !important;text-align: center;">Discount Amt</th>
+          <th style="font-size: 12px !important;text-align: center;">Net Total</th>
+          <th style="font-size: 12px !important;text-align: center;">Tax</th>
+          <th style="font-size: 12px !important;text-align: center;">Gross Total</th>
+        </tr>
+        <tr *ngFor="let service_sale of reports.service_sales;">
+          <td style="text-align: center;">{{service_sale.name}}</td>
+          <td style="text-align: center;">{{service_sale.cnt}}</td>
+          <td style="text-align: center;">{{service_sale.discount_amount | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{(service_sale.amount - service_sale.gst) | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{service_sale.gst | number:'1.2-2'}}</td>
+          <td style="text-align: center;">{{service_sale.amount | number:'1.2-2'}}</td>
+        </tr>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 1px solid grey;border-right: 0px;border-left: 0px;">
+          <th style="font-size: 12px !important;">Net Total</th>
+          <td>{{reports.payTotalNetService | number:'1.2-2'}}</td>
+          <th style="font-size: 12px !important;">Gross Total</th>
+          <td>{{reports.orderTotal | number:'1.2-2'}}</td>
+        </tr>
+      </ng-container>
+      <tr>
+        <td colspan="2"><br></td>
+      </tr>
+      <tr>
+        <th style="font-size: 12px !important;">Cashier Signature</th>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="hide" id="detailSalesReportCount" *ngIf="type_id === '6'">
+  <table class="dataTable" *ngFor="let report of reports;">
+    <ng-container *ngIf="report.title !== 'Order Wise'">
+      <thead>
+        <tr>
+          <th colspan="10" class="border-top-0" style="text-align: center;">{{report.title}}</th>
+        </tr>
+        <tr>
+          <th class="border-top-0">#</th>
+          <th class="border-top-0">Title</th>
+          <th class="border-top-0">Qty</th>
+          <th class="border-top-0">Net Rev.</th>
+          <th class="border-top-0">SGST</th>
+          <th class="border-top-0">CGST</th>
+          <th class="border-top-0">IGST</th>
+          <th class="border-top-0">CESS</th>
+          <th class="border-top-0">Disc.</th>
+          <th class="border-top-0">Gross Rev.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of report.data; let i = index;">
+          <td>{{(i + 1 ) }}</td>
+          <td>{{data.title}}</td>
+          <td>{{data.qty}}</td>
+          <td>{{data.net_rev}}</td>
+          <td>{{data.SGST}}</td>
+          <td>{{data.CGST}}</td>
+          <td>{{data.IGST}}</td>
+          <td>{{data.CESS}}</td>
+          <td>{{data.discount_amount}}</td>
+          <td>{{data.net_rev + data.SGST + data.CGST + data.IGST + data.CESS}}</td>
+        </tr>
+      </tbody>
+    </ng-container>
+    <ng-container *ngIf="report.title === 'Order Wise'">
+      <thead>
+        <tr>
+          <th colspan="3" class="border-top-0" style="text-align: center;">{{report.title}}</th>
+        </tr>
+        <tr>
+          <th class="border-top-0">#</th>
+          <th class="border-top-0">Order Id</th>
+          <th class="border-top-0">Order Amount</th>
+          <th class="border-top-0">Advance Amount</th>
+          <th class="border-top-0">Payment Mode</th>
+          <th class="border-top-0">Amount Due</th>
+          <th class="border-top-0">Delivery Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of report.data; let i = index;">
+          <td>{{(i + 1 ) }}</td>
+          <td>{{data.order_no}}</td>
+          <td>{{data.total}}</td>
+          <td>{{data.advance_amount}}</td>
+          <td>{{data.payment_mode.name}}</td>
+          <td>{{(data.total - data.advance_amount)}}</td>
+          <td>{{data.delivery_date | date: 'dd-MMM-yyyy'}}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </ng-container>
+  </table>
+</div>
+<div class="hide" id="detailSalesItemReport" *ngIf="type_id === '6.1'">
+  <table class="dataTable">
+    <thead>
+      <tr>
+        <th class="border-top-0">#</th>
+        <th class="border-top-0">Location</th>
+        <th class="border-top-0">Title</th>
+        <th class="border-top-0">Category</th>
+        <th class="border-top-0">Qty</th>
+        <th class="border-top-0">Net Rev.</th>
+        <th class="border-top-0">SGST</th>
+        <th class="border-top-0">CGST</th>
+        <th class="border-top-0">IGST</th>
+        <th class="border-top-0">CESS</th>
+        <th class="border-top-0">Disc.</th>
+        <th class="border-top-0">Gross Rev.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of reports; let i = index;">
+        <td>{{(i + 1 ) }}</td>
+        <td>{{data.name}}</td>
+        <td>{{data.title}}</td>
+        <td>{{data.category_name}}</td>
+        <td>{{data.qty}}</td>
+        <td>{{data.net_rev}}</td>
+        <td>{{data.SGST}}</td>
+        <td>{{data.CGST}}</td>
+        <td>{{data.IGST}}</td>
+        <td>{{data.CESS}}</td>
+        <td>{{data.discount_amount}}</td>
+        <td>{{data.net_rev + data.SGST + data.CGST + data.IGST + data.CESS}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="hide" id="discountSalesReportCount" *ngIf="type_id === '7'">
+  <table class="dataTable">
+    <thead>
+      <tr>
+        <th class="border-top-0">#</th>
+        <th class="border-top-0">Location</th>
+        <th class="border-top-0">Bill No.</th>
+        <th class="border-top-0">Bill DateTime</th>
+        <th class="border-top-0">Customer</th>
+        <th class="border-top-0">Order Type</th>
+        <th class="border-top-0">Settlement</th>
+        <th class="border-top-0">Item name</th>
+        <th class="border-top-0">Amount (Before Discount)</th>
+        <th class="border-top-0">Qty</th>
+        <th class="border-top-0">Discount %</th>
+        <th class="border-top-0">Discount Amt</th>
+        <th class="border-top-0">Amount (After Discount)</th>
+        <th class="border-top-0">SGST</th>
+        <th class="border-top-0">CGST</th>
+        <th class="border-top-0">IGST</th>
+        <th class="border-top-0">CESS</th>
+        <th class="border-top-0">Gross Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of reports; let i = index;">
+        <td>{{(i + 1 ) }}</td>
+        <td>{{data.location_name}}</td>
+        <td>{{data.invoice_no}}</td>
+        <td>{{data.created_at | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+        <td>{{data.customer_name}}</td>
+        <td>{{data.order_type}}</td>
+        <td>{{data.settlement}}</td>
+        <td>{{data.item_name}}</td>
+        <td>{{data.net_price_b_d}}</td>
+        <td>{{data.qty}}</td>
+        <td>{{data.discount_percentage}}</td>
+        <td>{{data.discount_amount}}</td>
+        <td>{{data.net_price_a_d}}</td>
+        <td>{{data.SGST}}</td>
+        <td>{{data.CGST}}</td>
+        <td>{{data.IGST}}</td>
+        <td>{{data.CESS}}</td>
+        <td>{{data.gross_amount}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="hide" id="billWiseReport" *ngIf="type_id === '7.1'">
+  <table class="dataTable">
+    <thead>
+      <tr>
+        <th class="border-top-0">#</th>
+        <th class="border-top-0">Bill DateTime</th>
+        <th class="border-top-0">Invoice No</th>
+        <th class="border-top-0">Location</th>
+        <th class="border-top-0">Item</th>
+        <th class="border-top-0">Quantity</th>
+        <th class="border-top-0">Total</th>
+        <th class="border-top-0">SGST %</th>
+        <th class="border-top-0">CGST %</th>
+        <th class="border-top-0">IGST %</th>
+        <th class="border-top-0">cess_percentage</th>
+        <th class="border-top-0">Selling Price</th>
+        <th class="border-top-0">Paymode Mode</th>
+        <th class="border-top-0">Order Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of reports; let i = index;">
+        <td>{{(i + 1 ) }}</td>
+        <td>{{data.created_at | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+        <td>{{data.invoice_no}}</td>
+        <td>{{data.location_name}}</td>
+        <td>{{data.item_name}}</td>
+        <td>{{data.quantity}}</td>
+        <td>{{data.total}}</td>
+        <td>{{data.SGST_percentage}}</td>
+        <td>{{data.CGST_percentage}}</td>
+        <td>{{data.IGST_percentage}}</td>
+        <td>{{data.cess_percentage}}</td>
+        <td>{{data.selling_price}}</td>
+        <td>{{data.paymode_mode}}</td>
+        <td>{{data.order_type}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="hide" id="commissaryProductionRequest" *ngIf="type_id === '8'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Source</th>
+      <th class="border-top-0">Destination</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Item Name</th>
+      <th class="border-top-0">Pack Size</th>
+      <th class="border-top-0">UOM</th>
+      <th class="border-top-0">Request Placed On</th>
+      <th class="border-top-0">Delivery Date</th>
+      <th class="border-top-0">Approved Quantity</th>
+      <th class="border-top-0">Accepted Quantity</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.slocation_name}}</td>
+      <td>{{item.dlocation_name}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.name}}</td>
+      <td>{{item.unit_size}}</td>
+      <td>{{item.uom}}</td>
+      <td>{{item.created_at | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+      <td>{{item.delivery_date | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+      <td>{{item.approved_quantity}}</td>
+      <td>{{item.accepted_quantity}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="wastageClosing" *ngIf="type_id === '9'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Item Name</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">UOM</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Amount</th>
+      <th class="border-top-0">Line Total</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.created_at | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+      <td>{{item.location_name}}</td>
+      <td>{{item.name}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.uom}}</td>
+      <td>{{item.quantity}}</td>
+      <td>{{item.net_price}}</td>
+      <td>{{(item.quantity * item.net_price) | number:'1.2-2'}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="wastageRequest" *ngIf="type_id === '10'">
+  <table datatable >
+    <thead>
+      <tr>
+        <th class="text-dark font-medium fs-4">SR. No</th>
+        <th class="text-dark font-medium fs-4">Source</th>
+        <th class="text-dark font-medium fs-4">Reported Destination</th>
+        <th class="text-dark font-medium fs-4">Name</th>
+        <th class="text-dark font-medium fs-4">Category</th>
+        <th class="text-dark font-medium fs-4">UOM</th>
+        <th class="text-dark font-medium fs-4">Requested Qty</th>
+        <th class="text-dark font-medium fs-4">Pickup Qty</th>
+        <th class="text-dark font-medium fs-4">Accepted Qty</th>
+        <th class="text-dark font-medium fs-4">Qty Miss Match Reported</th>
+        <th class="text-dark font-medium fs-4">Delivery Date</th>
+        <th class="text-dark font-medium fs-4">Miss Match Qty Reported on</th>
+        <th class="text-dark font-medium fs-4">Credit To Source</th>
+        <th class="text-dark font-medium fs-4">Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stock of reports; let i = index;">
+        <td class="fs-4">{{(i+1)}}</td>
+        <td class="fs-4">{{stock.request_outlet.from_location.name}}</td>
+        <td class="fs-4">{{stock.request_outlet.location.name}}</td>
+        <td class="fs-4">{{stock.product ? stock.product.name : stock.receipe.name}}</td>
+        <td class="fs-4">{{stock.product ? stock.product.category.name : stock.receipe.category.name}}</td>
+        <td class="fs-4">{{stock.product ? stock.product.unit.name : stock.receipe.unit.name}}</td>
+        <td class="fs-4">{{stock.requested_quantity}}</td>
+        <td class="fs-4">{{stock.pickup_quantity}}</td>
+        <td class="fs-4">{{stock.accepted_quantity}}</td>
+        <td class="fs-4">{{stock.wastage_quantity}}</td>
+        <td class="fs-4">{{stock.wastage_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+        <td class="fs-4">{{stock.wastage_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+        <td class="fs-4">{{stock.wastage_quantity_update}}</td>
+        <td class="fs-4">{{stock.request_outlet.accepted_notes ? stock.request_outlet.accepted_notes.notes : ''}}</td>
+      </tr>
+    </tbody>
+    <tfoot *ngIf="reports && reports.length === 0">
+      <td colspan="13">No Records</td>
+    </tfoot>
+    </table>
+</div>
+<div class="hide" id="pickuplist" *ngIf="type_id === '11'">
+  <style>
+    table,
+    th,
+    td {
+      border: 1px solid;
+    }
+
+    @media print {
+      .page-break {
+        page-break-after: always;
+      }
+    }
+  </style>
+  <table class="dataTable page-break" *ngFor="let report of reports; let i = index;" style="width: 100%;">
+    <tr>
+      <th colspan="6" style="font-size: 10px !important;text-align: center !important">
+        <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
+      </th>
+    </tr>
+    <tr>
+      <th colspan="6" style="font-size: 12px !important;text-align: center !important">
+        {{userDetail.session_detail.settings['bill_address']}}</th>
+    </tr>
+    <tr>
+      <th colspan="6" style="font-size: 12px !important;text-align: center !important">
+        {{userDetail.session_detail.settings['bill_gstin']}}</th>
+    </tr>
+    <tr>
+      <th colspan="6"><br></th>
+    </tr>
+    <tr>
+      <th colspan="1" style="font-size: 12px !important;text-align:left;">From</th>
+      <td colspan="4" style="font-size: 12px !important;text-align:left;"> : {{report.from_location.billing_name}}</td>
+    </tr>
+    <tr *ngIf="report.from_location.addres || report.from_location.phone_no">
+      <th colspan="1"></th>
+      <td colspan="4" style="font-size: 12px !important;text-align:left;">
+        <pre></pre>{{report.from_location.address}}.<br>Ph: {{report.from_location.phone_no}}
+      </td>
+    </tr>
+    <tr *ngIf="report.from_location.gstin">
+      <th colspan="1"></th>
+      <td colspan="4" style="font-size: 12px !important;text-align: center !important;">
+        <pre></pre>GSTIN:{{report.from_location.gstin}}
+      </td>
+    </tr>
+    <tr>
+      <th colspan="1" style="font-size: 12px !important;text-align:left;">To</th>
+      <td colspan="4" style="font-size: 12px !important;text-align:left;"> : {{report.location.billing_name}}</td>
+    </tr>
+    <tr *ngIf="report.location.addres || report.location.phone_no">
+      <th colspan="1"></th>
+      <td colspan="4" style="font-size: 12px !important;text-align:left;">
+        <pre></pre>{{report.location.address}}.<br>Ph: {{report.location.phone_no}}
+      </td>
+    </tr>
+    <tr *ngIf="report.location.gstin">
+      <th colspan="1"></th>
+      <td colspan="4" style="font-size: 12px !important;text-align: center !important">
+        <pre></pre>GSTIN:{{report.location.gstin}}
+      </td>
+    </tr>
+    <tr>
+      <th colspan="1" style="font-size: 12px !important;text-align: center !important;">Delivery Date</th>
+      <td colspan="4" style="font-size: 12px !important;text-align:left;"> : {{report.delivery_approved_date | date:
+        'dd-MMM-yyyy'}}</td>
+    </tr>
+    <tr>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Sr.No.</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Category</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Item Name</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Approved Qty</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">UOM</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Comments</th>
+    </tr>
+    <tr *ngFor="let item of report.request_outlet_details_approved; let i = index;">
+      <td style="font-size: 12px !important;text-align: center !important">{{(i + 1 ) }}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{item.product ? item.product.category.name :
+        item.receipe.category.name}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{item.product ? item.product.name :
+        item.receipe.name}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{item.approved_quantity}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{item.product ? item.product.unit.name :
+        item.receipe.unit.name}}</td>
+      <td></td>
+    </tr>
+    <tr *ngIf="reports.length > 1">
+      <td colspan="10"><br><br><br><br>
+        <p style="page-break-after: always;">&nbsp;</p>
+      </td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="dcr" *ngIf="type_id === '12'">
+  <table class="dataTable page-break" style="width: 100%;" *ngFor="let report of reports.data;">
+    <tr>
+      <th colspan="10" style="font-size: 10px !important;text-align: center !important">
+        <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
+      </th>
+    </tr>
+    <tr>
+      <th colspan="10" style="font-size: 12px !important;text-align: center !important">
+        {{userDetail.session_detail.settings['bill_address']}}</th>
+    </tr>
+    <tr>
+      <th colspan="10" style="font-size: 12px !important;text-align: center !important">
+        {{userDetail.session_detail.settings['bill_gstin']}}</th>
+    </tr>
+    <tr>
+      <th colspan="10"><br></th>
+    </tr>
+    <tr>
+      <th colspan="5" style="font-size: 12px !important;text-align:left;">From</th>
+      <th colspan="5" style="font-size: 12px !important;text-align:left;">To</th>
+    </tr>
+    <tr>
+      <th colspan="5" style="font-size: 12px !important;text-align:left;">{{report.from_location.billing_name ?
+        report.from_location.billing_name : report.from_location.name}}</th>
+      <th colspan="5" style="font-size: 12px !important;text-align:left;">{{report.location.billing_name ?
+        report.location.billing_name : report.location.name}}</th>
+    </tr>
+    <tr>
+      <td colspan="5" style="font-size: 12px !important;text-align:left;"><span
+          *ngIf="report.from_location.address || report.from_location.phone_no">{{report.from_location.address}}.<br>Ph:
+          {{report.from_location.phone_no}}</span></td>
+      <td colspan="5" style="font-size: 12px !important;text-align:left;"><span
+          *ngIf="report.location.address || report.location.phone_no">{{report.location.address}}.<br>Ph:
+          {{report.location.phone_no}}</span></td>
+    </tr>
+    <tr *ngIf="report.from_location.gstin || report.location.gstin">
+      <td colspan="5" style="font-size: 12px !important;text-align: center !important;">
+        GSTIN:{{report.from_location.gstin}}</td>
+      <td colspan="5" style="font-size: 12px !important;text-align: center !important">GSTIN:{{report.location.gstin}}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="5" style="font-size: 12px !important;">Request No : {{report.id}}</td>
+      <td colspan="5" style="font-size: 12px !important;">Delivery Date : {{report.delivery_approved_date | date:
+        'dd-MMM-yyyy'}}</td>
+    </tr>
+    <tr *ngIf="reports.data.length > 1">
+      <td colspan="10"><br><br></td>
+    </tr>
+    <ng-container *ngFor="let category of report.categories;">
+      <tr class="dc-border">
+        <th class="border-top-0" colspan="10" style="font-size: 15px !important;text-align: center !important">
+          {{category.name}}</th>
+      </tr>
+      <tr class="dc-border">
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">Sr.No.</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Item Name</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Unit Price</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Qty</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Amount</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">SGST</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">CGST</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">IGST</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">CESS</th>
+        <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Line Total</th>
+      </tr>
+      <tr class="dc-border" *ngFor="let item of category.data; let i = index;">
+        <td style="font-size: 12px !important;text-align: center !important">{{(item.name !== 'Total') ? (i + 1 ) : ''}}
+        </td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.name}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.price | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.dc_quantity}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.total | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.SGST | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.CGST | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.IGST | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.cess | number:'1.2-2'}}</td>
+        <td style="font-size: 12px !important;text-align: center !important">{{item.line_total | number:'1.2-2'}}</td>
+      </tr>
+    </ng-container>
+    <tr class="dc-border">
+      <th colspan="3" style="font-size: 12px !important;text-align: center !important">Overall Total</th>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.totalQty | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.totalAll | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.SGSTAll | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.CGSTAll | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.IGSTAll | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.cessAll | number:'1.2-2'}}</td>
+      <td style="font-size: 12px !important;text-align: center !important">{{report.lineTotalAll | number:'1.2-2'}}</td>
+    </tr>
+    <ng-container *ngIf="report.taxs.length > 0">
+      <tr class="dc-border">
+        <th colspan="4" style="font-size: 12px !important;text-align: center !important">Taxable Amount</th>
+        <th colspan="6" style="font-size: 12px !important;text-align: center !important">Total</th>
+      </tr>
+    </ng-container>
+    <ng-container *ngFor="let tax of report.taxs;">
+      <tr class="dc-border">
+        <td colspan="4" style="font-size: 12px !important;;text-align: center !important">{{tax.name}}</td>
+        <td colspan="6" style="font-size: 12px !important;text-align: center !important">{{tax.amount | number:'1.2-2'}}
+        </td>
+      </tr>
+    </ng-container>
+    <ng-container *ngIf="report.taxs.length > 0">
+      <tr class="dc-border">
+        <td colspan="4" style="font-size: 12px !important;text-align: center !important">Total</td>
+        <td colspan="6" style="font-size: 12px !important;text-align: center !important">{{report.taxTotal |
+          number:'1.2-2'}}</td>
+      </tr>
+    </ng-container>
+    <tr>
+      <td colspan="4" style="font-size: 12px !important;text-align: left;text-align: center !important">Challan
+        Generated By : </td>
+      <td colspan="6" style="font-size: 12px !important;text-align: left;text-align: center !important">
+        {{userDetail.full_name}}</td>
+    </tr>
+    <tr>
+      <th colspan="4" style="font-size: 12px !important;text-align: left;text-align: center !important">Challan
+        Generated On : </th>
+      <td colspan="6" style="font-size: 12px !important;text-align: left;text-align: center !important">{{curDate |
+        date:'dd-MMM-yyyy hh:mm a'}}</td>
+    </tr>
+    <tr *ngIf="reports.data.length > 1">
+      <td colspan="10"><br><br><br><br>
+        <p style="page-break-after: always;">&nbsp;</p>
+      </td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="dcrExcel" *ngIf="type_id === '12.1'">
+  <table class="dataTable page-break" style="width: 100%;">
+    <tr class="dc-border">
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">Sr.No</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">Delivery Date</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">From</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">To</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">Request No</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important;">Category</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Item Name</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Unit Price</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Qty</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Amount</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">SGST</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">CGST</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">IGST</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">CESS</th>
+      <th class="border-top-0" style="font-size: 12px !important;text-align: center !important">Line Total</th>
+    </tr>
+    <ng-container *ngFor="let report of reports.data;">
+      <ng-container *ngFor="let category of report.categories;">
+        <tr class="dc-border" *ngFor="let item of category.data; let i = index;">
+          <td style="font-size: 12px !important;text-align: center !important">{{item.sNo}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{(report.delivery_approved_date ?
+            report.delivery_approved_date : report.delivery_date) | date:'dd-MMM-yyyy'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{report.from_location.name}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{report.location.name}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{report.id}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{category.name}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.name}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.price | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.dc_quantity}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.total | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.SGST | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.CGST | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.IGST | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.cess | number:'1.2-2'}}</td>
+          <td style="font-size: 12px !important;text-align: center !important">{{item.line_total | number:'1.2-2'}}</td>
+        </tr>
+      </ng-container>
+    </ng-container>
+  </table>
+</div>
+<div class="hide" id="eod" *ngIf="type_id === '13'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Item</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Actual Closing</th>
+      <th class="border-top-0">Reported Closing</th>
+      <th class="border-top-0">Day Wastage</th>
+      <th class="border-top-0">Book Stock</th>
+      <th class="border-top-0">Status</th>
+      <th class="border-top-0">Variance</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.date | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{item.location.name}}</td>
+      <td>{{item.product ? item.product.name : item.receipe.name}}</td>
+      <td>{{item.product ? item.product.category.name : item.receipe.category.name}}</td>
+      <td>{{item.quantity}}</td>
+      <td>{{item.stock_used}}</td>
+      <td>{{item.stock_expired}}</td>
+      <td>{{item.quantity - item.stock_expired}}</td>
+      <td>{{((item.quantity - item.stock_expired) === item.stock_used) ? 'MATCH' : 'UNMATCH'}}</td>
+      <td>{{((item.quantity - item.stock_expired) - item.stock_used)}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="itemWiseSummary" *ngIf="type_id === '14'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Item</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Unit Size</th>
+      <th class="border-top-0">UOM</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Total</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.date | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{item.location_name}}</td>
+      <td>{{item.title}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.unit_size}}</td>
+      <td>{{item.uom}}</td>
+      <td>{{item.quantity}}</td>
+      <td>{{item.amount}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="itemWiseSoldOutTime" *ngIf="type_id === '15'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Item</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Sold Out Time</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{item.no}}</td>
+      <td>{{item.datetime | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{item.location_name}}</td>
+      <td>{{item.title}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.datetime  | date: 'hh:mm a'}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="cakeOrderReport" *ngIf="type_id === '16'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">Id</th>
+      <th class="border-top-0">Order Taken Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Order No</th>
+      <th class="border-top-0">Delivery Date</th>
+      <th class="border-top-0">Customer Mobile No</th>
+      <th class="border-top-0">Item</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Shape</th>
+      <th class="border-top-0">Net Price</th>
+      <th class="border-top-0">SGST</th>
+      <th class="border-top-0">CGST</th>
+      <th class="border-top-0">IGST</th>
+      <th class="border-top-0">Cess</th>
+      <th class="border-top-0">Total</th>
+      <th class="border-top-0">Payment Mode</th>
+      <th class="border-top-0">Balance Payment</th>
+      <th class="border-top-0">Notes</th>
+      <th class="border-top-0">Message</th>
+      <th class="border-top-0">Cancel Notes</th>
+      <th class="border-top-0">Status</th>
+    </tr>
+    <ng-container *ngFor="let report of reports; let i = index;">
+      <tr *ngFor="let item of report.details;">
+        <td>{{item.sno}}</td>
+        <td>{{report.created_at | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+        <td>{{report.location.name}}</td>
+        <td>{{report.order_no}}</td>
+        <td>{{report.delivery_date | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+        <td>{{report.customer.customer_mobile}}</td>
+        <td>{{item.product ? item.product.name : item.receipe.name}}</td>
+        <td>{{item.product ? item.product.category.name : item.receipe.category.name}}</td>
+        <td>{{item.quantity}}</td>
+        <td>{{item.shape?.name}}</td>
+        <td>{{item.total_net_price}}</td>
+        <td>{{item.SGST_percentage ? ((item.selling_price > 0 ?
+          (item.selling_price * item.quantity) : 0) * (item.SGST_percentage/100)) : 0}}</td>
+        <td>{{item.CGST_percentage ? ((item.selling_price > 0 ?
+          (item.selling_price * item.quantity) : 0) * (item.CGST_percentage/100)) : 0}}</td>
+        <td>{{item.IGST_percentage ? ((item.selling_price > 0 ?
+         (item.selling_price * item.quantity) : 0) * (item.IGST_percentage/100)) : 0}}</td>
+        <td>{{item.cess_percentage ? ((item.selling_price > 0 ?
+          (item.selling_price * item.quantity) : 0) * (item.cess_percentage/100)) : 0}}</td>
+        <td>{{item.total}}</td>
+        <td>{{report.payment_mode.name}}</td>
+        <td>{{report.total - report.advance_amount}}</td>
+        <td>{{report.notes ? report.notes.notes : ''}}</td>
+        <td>{{report.message ? report.message.notes : ''}}</td>
+        <td>{{report.cancel_note ? report.cancel_note.notes : ''}}</td>
+        <td>{{(report.status === 1 || report.is_active === 0) ? 'Closed' : 'Inprogress'}}</td>
+      </tr>
+    </ng-container>
+  </table>
+</div>
+<div class="hide" id="settlementModeWiseSaleReport" *ngIf="type_id === '17'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Date</th>
+      <th class="border-top-0">Location</th>
+      <th class="border-top-0">Settlement Mode</th>
+      <th class="border-top-0">Item Name</th>
+      <th class="border-top-0">Category</th>
+      <th class="border-top-0">Item Sale Count</th>
+      <th class="border-top-0">Net Revenue</th>
+      <th class="border-top-0">SGST</th>
+      <th class="border-top-0">CGST</th>
+      <th class="border-top-0">IGST</th>
+      <th class="border-top-0">CESS</th>
+      <th class="border-top-0">DISCOUNT</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{item.no}}</td>
+      <td>{{item.date | date: 'dd-MMM-yyyy'}}</td>
+      <td>{{item.name}}</td>
+      <td>{{item.payment_mode_name}}</td>
+      <td>{{item.title}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.cnt}}</td>
+      <td>{{item.net_rev}}</td>
+      <td>{{item.SGST}}</td>
+      <td>{{item.CGST}}</td>
+      <td>{{item.IGST}}</td>
+      <td>{{item.CESS}}</td>
+      <td>{{item.discount_amount}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="mptrackingReport" *ngIf="type_id === '18'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Name</th>
+      <th class="border-top-0">Show In Pos</th>
+      <th class="border-top-0">Request Stock</th>
+      <th class="border-top-0">Category Name</th>
+      <th class="border-top-0">Price</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{item.name}}</td>
+      <td>{{item.is_show_in_pos ? 'Yes' : 'No'}}</td>
+      <td>{{item.is_request_stock ? 'Yes' : 'No'}}</td>
+      <td>{{item.category_name}}</td>
+      <td>{{item.price}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="stocksSource" *ngIf="type_id === '19' || type_id === '20' || type_id === '21'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Location Name</th>
+      <th class="border-top-0">Name</th>
+      <th class="border-top-0">Category Name</th>
+      <th class="border-top-0">quantity</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.location_name}}</td>
+      <td>{{item.Item_name}}</td>
+      <td>{{item.cat_name}}</td>
+      <td>{{item.quantity}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="weeklyCategoryWiseSaleReport" *ngIf="type_id === '22'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Month</th>
+      <th class="border-top-0">Week Name</th>
+      <th class="border-top-0">Category Name</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Net</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.month_name}}</td>
+      <td>{{item.sales_week}}</td>
+      <td>{{item.category}}</td>
+      <td>{{item.quantity}}</td>
+      <td>{{item.net}}</td>
+    </tr>
+  </table>
+</div>
+<div class="hide" id="billWiseFoodCost" *ngIf="type_id === '23'">
+  <table class="dataTable">
+    <tr>
+      <th class="border-top-0">#</th>
+      <th class="border-top-0">Invoice No</th>
+      <th class="border-top-0">Quantity</th>
+      <th class="border-top-0">Gross</th>
+      <th class="border-top-0">Net</th>
+      <th class="border-top-0">Total MP Price</th>
+      <th class="border-top-0">Food Cost Percentage</th>
+      <th class="border-top-0">Payment Mode</th>
+      <th class="border-top-0">Order Type</th>
+      <th class="border-top-0">Created</th>
+    </tr>
+    <tr *ngFor="let item of reports; let i = index;">
+      <td>{{(i + 1 ) }}</td>
+      <td>{{item.invoice_no}}</td>
+      <td>{{item.quantity}}</td>
+      <td>{{item.gross}}</td>
+      <td>{{item.net}}</td>
+      <td>{{item.total_mp_price}}</td>
+      <td>{{item.food_cost_percentage}}</td>
+      <td>{{item.paymode}}</td>
+      <td>{{item.ordertype}}</td>
+      <td>{{item.created_at}}</td>
+    </tr>
+  </table>
+</div>

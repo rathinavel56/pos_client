@@ -1,0 +1,53 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <h1>Price Alert History</h1>
+          <table datatable [dtOptions]="recipeService.dtOptionsSmallPrice" class="table v-middle nowrap" *ngIf="priceAlerts">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0">PRODUCT</th>
+                <th class="border-top-0">BRAND</th>
+                <th class="border-top-0">CURRENT PRICE</th>
+                <th class="border-top-0">PREVIOUS PRICE</th>
+                <th class="border-top-0">PRECENTAGE</th>
+                <th class="border-top-0">CURRENT VENDOR</th>
+                <th class="border-top-0">PREVIOUS VENDOR</th>
+                <th class="border-top-0">CURRENT INVOICE DATE</th>
+                <th class="border-top-0">PREVIOUS INVOICE DATE</th>
+                <th class="border-top-0">CURRENT INVOICE NUMBER</th>
+                <th class="border-top-0">PREVIOUS INVOICE NUMBER</th>
+                <th class="border-top-0">UPDATED AT</th>
+                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let priceAlert of priceAlerts; let i = index;">
+                <td>{{(i+1)}}</td>
+                <td>{{priceAlert.product?.name}}</td>
+                <td>{{priceAlert.product?.brand?.name}}</td>
+                <td>{{priceAlert.current_price | number:'1.2-2'}}</td>
+                <td>{{priceAlert.previous_price | number:'1.2-2'}}</td>
+                <td>{{priceAlert.percentage | number:'1.2-2'}}</td>
+                <td>{{priceAlert.current_stocks_incoming?.vendor?.name}}</td>
+                <td>{{priceAlert.previous_stocks_incoming?.vendor?.name}}</td>
+                <td>{{priceAlert.current_stocks_incoming?.invoice_date | date: 'dd-MM-yyyy'}}</td>
+                <td>{{priceAlert.previous_stocks_incoming?.invoice_date | date: 'dd-MM-yyyy'}}</td>
+                <td>{{priceAlert.current_stocks_incoming?.invoice_number}}</td>
+                <td>{{priceAlert.previous_stocks_incoming?.invoice_number}}</td>
+                <td>{{priceAlert.updated_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                <td class="ingredientbutton" *ngIf="!recipeService.isReadOnly">
+                  <button type="button" (click)="deleteAlertPrice(priceAlert.id)"><img src="assets/images/Icon-delete.png"  width="16"></button></td>
+              </tr>
+              <tr *ngIf="priceAlerts.length === 0">
+                <td [attr.colspan]="(!recipeService.isReadOnly) ? 13 : 12">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

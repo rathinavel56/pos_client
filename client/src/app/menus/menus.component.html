@@ -1,0 +1,189 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+                <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()" style="float: right;">Add
+                    Menus</button>
+            </div>
+            <div class="card-body">
+                <h1 *ngIf="isSearch">Search</h1>
+                <h1 *ngIf="isAdd">Add New Menus</h1>
+                <h1 *ngIf="isEdit">Edit Menus</h1>
+                <br>
+                <div class="row">
+                    <div class="col-2 mobile-full-width">
+                        <label>Menu Name<span *ngIf="isAdd || isEdit">*</span></label>
+                    </div>
+                    <div class="col-4 mobile-full-width">
+                        <input type="text" class="form-control" [ngClass]="{'error-field': isSubmitted && !name}" [(ngModel)]="name" (keydown.enter)="onKeyDownEvent($event)">
+                    </div>
+                </div>
+                <br>
+                <div class="row" *ngIf="isSearch">
+                    <div class="col-12 col-md-2">
+                        <label>Category</label>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !category_id}"
+                            [config]="config" [options]="categories" [multiple]="false" [(ngModel)]="category_id"
+                            (change)="categorySelectionChanged($event)">
+                        </ngx-select-dropdown>
+                    </div>
+                </div>
+                <span *ngIf="isSearch"><br></span>
+                <div class="row" *ngIf="isSearch">
+                    <div class="col-12 col-md-2">
+                        <label>SubCategory</label>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !sub_category_id}"
+                            [config]="config" [options]="subcategories" [multiple]="false" [(ngModel)]="sub_category_id"
+                            (change)="subCategorySelectionChanged($event)">
+                        </ngx-select-dropdown>
+                    </div>
+                </div>
+                <span *ngIf="isSearch"><br></span>
+                <!-- [dragula]='"menu-details"' [dragulaModel]='menudetails' -->
+                <div *ngIf="!isSearch">
+                    <div class="card" style="border: 1px solid;" *ngFor=" let menudetail of menudetails;let
+                        indexOfelement=index;">
+                        <div class="card-body">
+                            <h4 class="card-title parent">
+                                <span>#{{indexOfelement + 1}}</span>
+                                <input type="hidden" class="order_id" id="order_id_{{indexOfelement}}" [(ngModel)]="menudetail.order_id">
+                            </h4>
+                            <div class="row">
+                                <div class="col-2 mobile-full-width">
+                                  <label>Name* </label>
+                                </div>
+                                <div class="col-10 mobile-full-width">
+                                  <input type="text" class="form-control" [ngClass]="{'error-field': isSubmitted && !menudetail.name}" [(ngModel)]="menudetail.name">
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-2 mobile-full-width">
+                                    <label>Category*</label>
+                                </div>
+                                <div class="col-4 mobile-full-width">
+                                    <select class="form-control" [ngClass]="{'error-field': isSubmitted && !menudetail.category_id}" [(ngModel)]="menudetail.category_id">
+                                        <option *ngFor="let option of categories;" [value]="option.id"
+                                          [selected]="option.id === menudetail.category_id">
+                                          {{option.name}}</option>
+                                      </select>
+                                </div>
+                                <div class="col-2 mobile-full-width">
+                                    <label>Sub Category</label>
+                                </div>
+                                <div class="col-4 mobile-full-width">
+                                    <select class="form-control" [(ngModel)]="menudetail.sub_category_id">
+                                        <option *ngFor="let option of subcategories;" [value]="option.id"
+                                          [selected]="option.id === menudetail.sub_category_id">
+                                          {{option.name}}</option>
+                                      </select>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-2 mobile-full-width">
+                                    <label>Description</label>
+                                </div>
+                                <div class="col-4 mobile-full-width">
+                                    <textarea class="form-control" [(ngModel)]="menudetail.description"></textarea>
+                                </div>
+                                <div class="col-2 mobile-full-width">
+                                  <label>Price</label>
+                                </div>
+                                <div class="col-2 mobile-full-width">
+                                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true" [(ngModel)]="menudetail.price"><i class="fa fa-inr"></i>
+                                </div>
+                                <div class="col-2 mobile-full-width" *ngIf="menudetail.order_id != 1">
+                                    <button type="button"><img src="assets/images/Icon-delete.png" width="16"
+                                            (click)="removeMenu(indexOfelement, menudetail.id)"></button>
+                                </div>
+                            </div>
+                            <br>
+                            <ng-container *ngIf="!menudetail.price || menudetail.price < 0">
+                              <ng-container *ngFor="let price of menudetail.prices;let
+                              indexOfPrice=index;">
+                                <h4 class="card-title parent">
+                                  <span>#{{indexOfPrice + 1}}</span>
+                                </h4>
+                                <div class="row">
+                                    <div class="col-2 mobile-full-width">
+                                        <label>Quantity*</label>
+                                    </div>
+                                    <div class="col-4 mobile-full-width">
+                                      <input type="text" class="form-control" [(ngModel)]="price.quantity" [ngClass]="{'error-field': isSubmitted && !price.quantity}">
+                                    </div>
+                                    <div class="col-2 mobile-full-width">
+                                        <label>Price</label>
+                                    </div>
+                                    <div class="col-2 mobile-full-width">
+                                      <input type="text" class="form-control" [(ngModel)]="price.price" [ngClass]="{'error-field': isSubmitted && !price.price}">
+                                    </div>
+                                    <div class="col-2 mobile-full-width" *ngIf="indexOfPrice != 0">
+                                      <button type="button"><img src="assets/images/Icon-delete.png" width="16"
+                                              (click)="removeMenu(indexOfelement, menudetail.id)"></button>
+                                    </div>
+                                </div>
+                                <br>
+                              </ng-container>
+                            </ng-container>
+                            <div *ngIf="!menudetail.price || menudetail.price < 0"><a
+                              style="display:block; color: #d93d33;  font-weight: bold; text-decoration: underline;  vertical-align: top; padding-left: 10px;"
+                              (click)="addprice(indexOfelement)">Add Quantity</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" *ngIf="isAdd || isEdit">
+                  <div><a
+                        style="display:block; color: #d93d33;  font-weight: bold; text-decoration: underline;  vertical-align: top; padding-left: 10px;"
+                        (click)="addmenus()">Add Menus</a></div>
+                  </div>
+                <div class="row">
+                    <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+                        <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+                        <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+                    </div>
+                    <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+                        <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+                        <button type="button" class="btn btn-rounded btn-primary"
+                            (click)="submit(null)">{{isAdd ? 'Submit' : 'Update'}}</button>
+                    </div>
+                </div>
+                <div class="table-responsive" *ngIf="!isAdd && !isEdit">
+                    <table class="datatable table v-middle nowrap">
+                        <thead>
+                            <tr>
+                                <th class="border-top-0">#</th>
+                                <th class="border-top-0" (click)="sorting('name')"
+                                    [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">
+                                    NAME</th>
+                                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let menu of menus; let i = index;">
+                                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                                <td>{{menu.name}}</td>
+                                <td class="ingredientbutton" *ngIf="!recipeService.isReadOnly">
+                                    <button type="button" (click)="edit(menu)"><img src="assets/images/Icon-edit.png"
+                                            width="16"></button>
+                                    <button type="button" (click)="submit(menu.id)"><img
+                                            src="assets/images/Icon-delete.png" width="16"></button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="menus.length === 0">
+                                <td>No Records</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)">
+                    </app-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

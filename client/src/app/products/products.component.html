@@ -1,0 +1,418 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;"
+        *ngIf="isSearch && !recipeService.isReadOnly && !priceHistory">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()" style="float: right;">Add
+          Products</button>
+      </div>
+      <div class="card-body">
+        <span *ngIf="!priceHistory">
+          <h1 *ngIf="isSearch">Products Search</h1>
+          <h1 *ngIf="isAdd">Add New Products</h1>
+          <h1 *ngIf="isEdit">Edit Products</h1>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Name<span *ngIf="isAdd || isEdit">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <input type="text" class="form-control" [(ngModel)]="productInfo.name"
+                (keydown.enter)="onKeyDownEvent($event)">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Category<span *ngIf="isAdd || isEdit">*</span> </label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <select class="form-control" [(ngModel)]="productInfo.category_id">
+                <option *ngFor="let option of categories;" [value]="option.id"
+                  [selected]="option.id === productInfo.category_id">
+                  {{option.name}}</option>
+              </select>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Brand<span *ngIf="isAdd || isEdit">*</span> </label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <select class="form-control" [(ngModel)]="productInfo.brand_id">
+                <option *ngFor="let option of brands;" [value]="option.id"
+                  [selected]="option.id === productInfo.brand_id">
+                  {{option.name}}</option>
+              </select>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Unit of Measure(UOM)<span *ngIf="isAdd || isEdit">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <select class="form-control" [(ngModel)]="productInfo.unit_id">
+                <option value="0" *ngIf="!isAdd && !isEdit">Any</option>
+                <option *ngFor="let option of units;" [value]="option.id"
+                  [selected]="option.id === productInfo.unit_id">
+                  {{option.name}}</option>
+              </select>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>HSN Code</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                [(ngModel)]="productInfo.hsn_code" />
+            </div>
+          </div>
+          <span *ngIf="(isAdd || isEdit)"><br></span>
+          <div class="row" *ngIf="isAdd || isEdit">
+            <div class="col-2 mobile-full-width">
+              <label>Upload URL</label>
+            </div>
+            <div class="col-3 mobile-full-width">
+              <input class="form-control" type="text" [(ngModel)]="productInfo.image_url" />
+            </div>
+          </div>
+          <br>
+          <span *ngIf="(isAdd || isEdit)"><br></span>
+          <div class="row" *ngIf="isAdd || isEdit">
+            <div class="col-2 mobile-full-width">
+              <label>NoN Veg</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="productInfo.food_type">
+                <span class="toggle-slider toggle-round"></span>
+              </label>
+            </div>
+          </div>
+          <span *ngIf="(isAdd || isEdit)"><br></span>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Show In POS</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="productInfo.is_show_in_pos" (change)="posChange()">
+                <span class="toggle-slider toggle-round"></span>
+              </label>
+            </div>
+          </div>
+          <ng-container *ngIf="!productInfo.is_show_in_pos && (isAdd || isEdit)">
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>End In Eod Days</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <ngx-select-dropdown [config]="dayConfig" [options]="days" [multiple]="true"
+                  [(ngModel)]="productInfo.eod_days"></ngx-select-dropdown>
+              </div>
+            </div>
+            <br>
+          </ng-container>
+          <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Show In Dashboard</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="productInfo.is_dashbord">
+                  <span class="toggle-slider toggle-round"></span>
+                </label>
+              </div>
+            </div>
+            <br>
+            <div class="row" *ngIf="isAdd || isEdit">
+              <div class="col-2 mobile-full-width">
+                <label>Use As Add ON</label>
+              </div>
+              <div class="col-6 mobile-full-width">
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="productInfo.addon">
+                  <span class="toggle-slider toggle-round"></span>
+                </label>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Online Sale</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="productInfo.is_online_sale">
+                  <span class="toggle-slider toggle-round"></span>
+                </label>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Return</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="productInfo.pos_return">
+                  <span class="toggle-slider toggle-round"></span>
+                </label>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Net Purchase Price (Rs.)</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                {{productInfo.purchase_price}}
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Purchase SGST (%)</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                {{productInfo.purchase_SGST_percentage}}
+              </div>
+              <div class="col-2 mobile-full-width">
+                <label>Purchase CGST (%)</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                {{productInfo.purchase_CGST_percentage}}
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Purchase IGST (%)</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                {{productInfo.purchase_IGST_percentage}}
+              </div>
+              <div class="col-2 mobile-full-width">
+                <label>Purchase Cess (%)</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                {{productInfo.purchase_cess_percentage}}
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
+            <br>
+            <div *ngFor="let price of prices; let i = index;" class="card" style="border: 1px solid;">
+              <div class="card-body">
+                <h4 class="card-title">#{{i + 1}}</h4>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Location<span>*</span></label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <span *ngIf="i < paymentModes.length">Any</span>
+                    <span *ngIf="i >= paymentModes.length">
+                      <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false"
+                        [(ngModel)]="price.location"
+                        (change)="locationSelectionChanged(price, $event)"></ngx-select-dropdown>
+                    </span>
+                  </div>
+                  <div class="col-2 mobile-full-width" *ngIf="i >= paymentModes.length">
+                    <button type="button"><img src="assets/images/Icon-delete.png" width="16"
+                        (click)="removePrice(i)"></button>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Types</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <span *ngIf="i < paymentModes.length">{{price.payment_mode.name}}</span>
+                    <span *ngIf="i >= paymentModes.length">
+                      <ngx-select-dropdown [config]="config" [options]="paymentModes" [multiple]="false"
+                        [(ngModel)]="price.payment_mode"
+                        (change)="paymentModeSelectionChanged(price, $event)"></ngx-select-dropdown>
+                    </span>
+                  </div>
+                  <div class="col-2 mobile-full-width">
+                    <label>Net Selling Price (Rs.)</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.selling_price" (focus)="onFocusZeroClear(price, 'selling_price')" />
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Selling SGST (%)</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.selling_SGST_percentage"
+                      (focus)="onFocusZeroClear(price, 'selling_SGST_percentage')" />
+                  </div>
+                  <div class="col-2 mobile-full-width">
+                    <label>Selling CGST (%)</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.selling_CGST_percentage"
+                      (focus)="onFocusZeroClear(price, 'selling_CGST_percentage')" />
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Selling IGST (%)</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.selling_IGST_percentage"
+                      (focus)="onFocusZeroClear(price, 'selling_IGST_percentage')" />
+                  </div>
+                  <div class="col-2 mobile-full-width">
+                    <label>Selling Cess (%)</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.selling_cess_percentage"
+                      (focus)="onFocusZeroClear(price, 'selling_cess_percentage')" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div *ngIf="productInfo.is_show_in_pos"><a
+                style="display:block; color: #d93d33;  font-weight: bold; text-decoration: underline;  vertical-align: top; padding-left: 10px;"
+                (click)="addNewPrices(true)">Add More Location Price</a></div>
+            <br>
+          </ng-container>
+          <div class="row">
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+              <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+              <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+            </div>
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+              <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+              <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' :
+                'Update'}}</button>
+            </div>
+          </div>
+        </span>
+        <div class="table-responsive" *ngIf="!isAdd && !isEdit">
+          <table class="datatable table v-middle nowrap" *ngIf="!priceHistory">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                <th class="border-top-0" (click)="sorting('name')"
+                  [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">
+                  NAME</th>
+                <th class="border-top-0" (click)="sorting('category')"
+                  [ngClass]="{'sorting': sortBy !== 'category', 'sorting_asc': (sortBy === 'category' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'category' && sortOrder === 'DESC')}">
+                  CATEGORY</th>
+                <th class="border-top-0" (click)="sorting('brand')"
+                  [ngClass]="{'sorting': sortBy !== 'brand', 'sorting_asc': (sortBy === 'brand' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'brand' && sortOrder === 'DESC')}">
+                  BRAND</th>
+                <th class="border-top-0" (click)="sorting('unit')"
+                  [ngClass]="{'sorting': sortBy !== 'unit', 'sorting_asc': (sortBy === 'unit' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'unit' && sortOrder === 'DESC')}">
+                  UNIT</th>
+                <th class="border-top-0" (click)="sorting('purchase_price')"
+                  [ngClass]="{'sorting': sortBy !== 'purchase_price', 'sorting_asc': (sortBy === 'purchase_price' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'purchase_price' && sortOrder === 'DESC')}">
+                  PURCHASE PRICE</th>
+                <th class="border-top-0" (click)="sorting('selling_price')"
+                  [ngClass]="{'sorting': sortBy !== 'selling_price', 'sorting_asc': (sortBy === 'selling_price' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'selling_price' && sortOrder === 'DESC')}">
+                  SELLING PRICE</th>
+                <th class="border-top-0" (click)="sorting('is_show_in_pos')"
+                  [ngClass]="{'sorting': sortBy !== 'is_show_in_pos', 'sorting_asc': (sortBy === 'is_show_in_pos' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'is_show_in_pos' && sortOrder === 'DESC')}">
+                  Show In Pos</th>
+                <th class="border-top-0">UPDATED AT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of products; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td class="ingredientbutton" *ngIf="!recipeService.isReadOnly">
+                  <button type="button" (click)="edit(product)"><img src="assets/images/Icon-edit.png"
+                      width="16"></button>
+                  <button type="button" (click)="submit(product.id, true)"><img src="assets/images/Icon-delete.png"
+                      width="16"></button>
+                  <button *ngIf="(product.purchase_price > 0)" type="button"
+                    style="color: #fff;background-color: #28a745;border-color: #28a745;"
+                    class="btn btn-rounded btn-primary" (click)="showPriceHistory(product)">View Price History</button>
+                </td>
+                <td>{{product.name}}</td>
+                <td>{{product.category.name}}</td>
+                <td>{{product.brand.name}}</td>
+                <td>{{product.unit.name}}</td>
+                <td>{{product.purchase_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{product.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{(product.is_show_in_pos === 1) ? 'Yes' : 'No'}}</td>
+                <td>{{product.updated_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+              </tr>
+              <tr *ngIf="products.length === 0">
+                <td colspan="10">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <h1 *ngIf="priceHistory">Price History Of {{productName}}</h1>
+          <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table v-middle nowrap"
+            *ngIf="priceHistory && prices && prices.length > 0">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0">CREATED</th>
+                <th class="border-top-0">INVOICE /<br>TRANSCATION DATE</th>
+                <th class="border-top-0">INVOICE NUMBER</th>
+                <th class="border-top-0">VENDOR</th>
+                <th class="border-top-0">PRICE</th>
+                <th class="border-top-0">SGST %</th>
+                <th class="border-top-0">CGST %</th>
+                <th class="border-top-0">IGST %</th>
+                <th class="border-top-0">CESS %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let price of prices; let i = index;">
+                <td>{{(i+1)}}</td>
+                <td>{{price.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                <td>{{price.transcation_date | date: 'dd-MM-yyyy'}}</td>
+                <ng-container *ngIf="price.stocks_incoming">
+                  <td>{{price.stocks_incoming.invoice_number}}</td>
+                  <td>{{price.stocks_incoming.vendor.name}}</td>
+                </ng-container>
+                <ng-container *ngIf="!price.stocks_incoming">
+                  <td></td>
+                  <td></td>
+                </ng-container>
+                <td>{{price.purchase_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{price.purchase_SGST_percentage}}</td>
+                <td>{{price.purchase_CGST_percentage}}</td>
+                <td>{{price.purchase_IGST_percentage}}</td>
+                <td>{{price.purchase_cess_percentage}}</td>
+              </tr>
+              <tr *ngIf="prices.length === 0">
+                <td colspan="6">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <button *ngIf="priceHistory" type="button" class="btn btn-rounded btn-default"
+            (click)="cancelPriceHistory()">Cancel</button>
+          <span *ngIf="!priceHistory">
+            <app-pagination [(lastPage)]="lastPage" [(page)]="page"
+              (pageChangeEvent)="setPagination($event)"></app-pagination>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

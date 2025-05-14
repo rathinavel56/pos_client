@@ -1,0 +1,246 @@
+<div class="card" style="position: relative;" >
+  <div class="card-body">
+     <h4 class="card-title">End Of Day Closing</h4>
+     <div class="row">
+      <div class="col-2 mobile-full-width" *ngIf="isShowLocation">
+        <label>Location*</label>
+      </div>
+      <div class="col-4 mobile-full-width" *ngIf="isShowLocation">
+        <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false" (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+      <div class="col-2 mobile-full-width" *ngIf="isCloseStocks">
+        <input type="date" [(ngModel)]="choose_date" [disabled]="isYesterday" class="form-control">
+      </div>
+      <div class="col-1 mobile-full-width">
+        <button type="button" class="btn btn-rounded btn-primary" [disabled]="(!location_id && isShowLocation) || (isCloseStocks && !choose_date)" (click)="getRecords(false)">Search</button>
+      </div>
+    </div>
+    <br>
+     <div class="table-responsive" *ngIf="stocks && stocks.length > 0">
+      <div class="row">
+        <div class="col-2 mobile-full-width table-responsive">
+          <label>Category</label>
+        </div>
+        <div class="col-3 categoryFilter mobile-full-width table-responsive">
+          <ngx-select-dropdown  *ngIf="categories && categories.length > 0" [(ngModel)]="selectedCategories" [config]="config" [options]="categories" [multiple]="true" (change)="filterItems()"></ngx-select-dropdown>
+        </div>
+      </div>
+      <br>
+      <br>
+        <div *ngIf="!categoryLoading">
+          <table datatable id="closing_stock" [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+            <thead>
+                <tr>
+                  <th class="text-dark font-medium fs-4">SR. No</th>
+                  <th class="text-dark font-medium fs-4" *ngIf="!closeStocksEdit">Reported By</th>
+                  <th class="text-dark font-medium fs-4">Category</th>
+                  <th class="text-dark font-medium fs-4">Name</th>
+                  <th class="text-dark font-medium fs-4" *ngIf="!isNext">Reported Carry Forward</th>
+                  <th class="text-dark font-medium fs-4" *ngIf="isNext">Reported Wastage</th>
+                  <!-- <th class="text-dark font-medium fs-4">{{!closeStocksEdit ? 'Reported Closing Stock' : 'Total Stock Used'}}</th> -->
+                  <th *ngIf="isShowLocation && !closeStocksEdit" class="text-dark font-medium fs-4">Book Stock</th>
+                  <th *ngIf="isShowLocation && !closeStocksEdit">Match</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let stock of stocks | categoryfilter: selectedCategories; let i = index;">
+                  <ng-container *ngIf="stock.product || stock.receipe">
+                    <td class="fs-4">{{(i+1)}}</td>
+                    <td class="fs-4" *ngIf="!closeStocksEdit">{{stock.user ? stock.user.name : ''}}</td>
+                    <td class="fs-4">{{stock.product ? stock.product.category.name : stock.receipe.category.name}}</td>
+                    <td class="fs-4">{{stock.product ? stock.product.name : stock.receipe.name}}&nbsp;<span *ngIf="stock.product">({{stock.product?.brand.name}})</span>&nbsp;({{stock.product ? stock.product.unit.name : stock.receipe.unit.name}})</td>
+                    <td class="fs-4" *ngIf="!isNext"><input type="text" (blur)="onFocusUsed(stock, true)" (focus)="onFocusUsed(stock)" *ngIf="closeStocksEdit" [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="stock.stock_used" (keydown)="addStocks(stock)"><span *ngIf="!closeStocksEdit">{{stock.stock_used ? stock.stock_used : 0}}</span></td>
+                    <td class="fs-4" *ngIf="isNext"><input type="text" (blur)="onFocusExpired(stock, true)" (focus)="onFocusExpired(stock)" *ngIf="closeStocksEdit" [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="stock.stock_expired" (keydown)="addStocks(stock)"><span *ngIf="!closeStocksEdit">{{stock.stock_expired ? stock.stock_expired : 0}}</span></td>
+                    <!-- <td class="fs-4"><span>{{+stock.stock_used + +stock.stock_expired}}</span>&nbsp;({{stock.product ? stock.product.unit.name : stock.receipe.unit.name}})</td> -->
+                    <td *ngIf="isShowLocation && !closeStocksEdit"><span>{{stock.quantity - +stock.stock_expired}}</span></td>
+                    <td *ngIf="isShowLocation && !closeStocksEdit">{{stock.match}}</td>
+                  </ng-container>
+                  <ng-container >
+                    <td [attr.colspan]="(isShowLocation && !closeStocksEdit) ? 8 : (!closeStocksEdit ? 6 : 5)" *ngIf="!stock.product && !stock.receipe">No Records</td>
+                  </ng-container>
+                </tr>
+            </tbody>
+          </table>
+          <div style="padding: 20px;">
+            <button *ngIf="isNext && closeStocksEdit && stocks && stocks.length > 0 && (stocks[0].product || stocks[0].receipe)" style="color: #fff;background-color: #28a745; border-color: #28a745;" type="button" class="btn btn-rounded btn-primary text-right" (click)="submitStock(stocks, true, mymodal, false)">Submit</button>
+            <button *ngIf="isNext && closeStocksEdit && stocks && stocks.length > 0 && (stocks[0].product || stocks[0].receipe)" style="color: #fff;background-color: #28a745; margin-right: 20px;border-color: #28a745;" type="button" class="btn btn-rounded btn-primary text-right" (click)="openPreview(mymodal)">Preview</button>
+            <button *ngIf="closeStocksEdit && stocks && stocks.length > 0 && (stocks[0].product || stocks[0].receipe)" style="color: #fff;background-color: #28a745; border-color: #28a745;margin-right: 20px;" type="button" class="btn btn-rounded btn-primary text-right" (click)="nextPage()">{{!isNext ? 'Next' : 'Previous'}}</button>
+            <button *ngIf="closeStocks && wasteDetails && wasteDetails.length > 0" style="color: #fff;background-color: #28a745; border-color: #28a745;" type="button" class="btn btn-rounded btn-primary text-right" (click)="printCloseStock()">Print</button>
+          </div>
+        </div>
+     </div>
+  </div>
+</div>
+<ng-template #mymodal let-modal>
+  <ng-container *ngIf="!isPreview">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Wastage Quantity Confirmation</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <table datatable id="closing_stock" [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+            <thead>
+                <tr>
+                  <th class="text-dark font-medium fs-4">SR. No</th>
+                  <th class="text-dark font-medium fs-4">Category</th>
+                  <th class="text-dark font-medium fs-4">Name</th>
+                  <th class="text-dark font-medium fs-4">Reported Wastage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let stock of wasteDetails; let i = index;">
+                  <ng-container *ngIf="stock.product || stock.receipe">
+                    <td class="fs-4">{{(i+1)}}</td>
+                    <td class="fs-4" *ngIf="!closeStocksEdit">{{stock.user ? stock.user.name : ''}}</td>
+                    <td class="fs-4">{{stock.product ? stock.product.category.name : stock.receipe.category.name}}</td>
+                    <td class="fs-4">{{stock.product ? stock.product.name : stock.receipe.name}}&nbsp;<span *ngIf="stock.product">({{stock.product?.brand.name}})</span></td>
+                    <td class="fs-4">{{stock.stock_expired ? stock.stock_expired : 0}}({{stock.product ? stock.product.unit.name : stock.receipe.unit.name}})</td>
+                  </ng-container>
+                  <ng-container >
+                    <td colspan="4" *ngIf="!stock.product && !stock.receipe">No Records</td>
+                  </ng-container>
+                </tr>
+            </tbody>
+            <tfoot *ngIf="closeStocksEdit && stocks && stocks.length > 0 && (stocks[0].product || stocks[0].receipe)">
+              <td colspan="4"><button style="color: #fff;background-color: #28a745; border-color: #28a745;" type="button" class="btn btn-rounded btn-primary text-right" (click)="submitStock(stocks, true, mymodal, true)">Submit</button></td>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="isPreview">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Preview</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();closePreview();">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <table datatable id="closing_stock" [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="text-dark font-medium fs-4">SR. No</th>
+                <th class="text-dark font-medium fs-4">Category</th>
+                <th class="text-dark font-medium fs-4">Name</th>
+                <th class="text-dark font-medium fs-4">Reported Carry Forward</th>
+                <th class="text-dark font-medium fs-4">Reported Wastage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let stock of stocks | categoryfilter: selectedCategories; let i = index;">
+                <td class="fs-4">{{(i+1)}}</td>
+                <td class="fs-4">{{stock.product ? stock.product.category.name : stock.receipe.category.name}}</td>
+                <td class="fs-4">{{stock.product ? stock.product.name : stock.receipe.name}}&nbsp;<span *ngIf="stock.product">({{stock.product?.brand.name}})</span>&nbsp;({{stock.product ? stock.product.unit.name : stock.receipe.unit.name}})</td>
+                <td class="fs-4">{{stock.stock_used ? stock.stock_used : 0}}</td>
+                <td class="fs-4">{{stock.stock_expired ? stock.stock_expired : 0}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+<div id="print_closing_stock" class="hide" *ngIf="closeStocks && wasteDetails && wasteDetails.length > 0">
+  <table style="width: 85%; margin-left: 30px;" *ngFor="let printCopy of printCopies">
+      <tr>
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+          <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
+        </th>
+      </tr>
+      <tr>
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{userDetail.session_detail.settings['bill_address']}}</th>
+      </tr>
+      <tr>
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{userDetail.session_detail.settings['bill_gstin']}}</th>
+      </tr>
+      <tr>
+        <th colspan="4"><br></th>
+      </tr>
+      <tr>
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.name}}
+        </th>
+      </tr>
+      <tr>
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.address}}.
+          Ph: {{selectedLocation.phone_no}}
+        </th>
+      </tr>
+      <tr *ngIf="selectedLocation.gstin">
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+          GSTIN:{{selectedLocation.gstin}}</th>
+      </tr>
+      <tr style="border-bottom: 1px solid grey;">
+        <th colspan="4" style="font-size: 10px !important;text-align: center !important">Date & Time:
+          {{wasteDetails[0].date | date: 'dd-MM-yyyy'}}</th>
+      </tr>
+      <ng-container *ngFor="let wasteDetail of wasteDetails">
+          <tr style="border-bottom: 1px solid grey;">
+            <th colspan="4" style="font-size: 10px !important;text-align: center !important">Category:
+              {{wasteDetail.name}}</th>
+          </tr>
+          <tr style="border-bottom: 1px solid grey;">
+            <th style="font-size: 10px !important;">Item</th>
+            <th style="font-size: 10px !important;">Rate</th>
+            <th style="font-size: 10px !important;">Qty</th>
+            <th style="font-size: 10px !important;">Amt</th>
+          </tr>
+          <tr
+            style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;" *ngFor="let detail of wasteDetail.data">
+            <td style="font-size: 10px !important;">{{detail.name}}</td>
+            <td style="font-size: 10px !important;">{{detail.price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+            <td style="font-size: 10px !important;">{{detail.stock_expired}} </td>
+            <td style="font-size: 10px !important;">{{detail.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+          </tr>
+    </ng-container>
+      <tr style="border-top: 1px solid grey;">
+        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Total Qty</td>
+        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{wasteQty}}</td>
+      </tr>
+      <tr style="border-top: 1px solid grey;">
+        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Total Amt</td>
+        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(wastePrice ? wastePrice : 0) |
+          currency:'INR':'symbol-narrow':'1.2-2'}}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <img style="display: block;margin: 0 auto;width: 60px;height: 60px;margin-top: 0px;"
+            src="{{hostName}}/assets/images/fssai.png">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="font-size: 10px !important;text-align: center !important">FSSAI
+          NO:{{selectedLocation.fssai_no}}</td>
+      </tr>
+      <tr>
+        <td colspan="4"><br></td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <div style="text-align: center;"><span style="font-size: 10px !important;text-align: justify;">I/We hereby
+              certily that food foods mentioned in this invoice is/are warranted to be of nature & quality which
+              it/these purport/purported to be.</span></div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <div style="text-align: center;"><span
+              style="font-size: 10px !important;">www.{{hostName}}.co.in</span><br><span
+              style="font-size: 10px !important;">
+              www.{{hostName}}rewards.com</span></div>
+        </td>
+      </tr>
+      <tr class="print-message" *ngIf="selectedLocation.message">
+        <th colspan="4" style="font-size: 10px !important;text-align: center;">{{selectedLocation.message}}</th>
+      </tr>
+  </table>
+</div>

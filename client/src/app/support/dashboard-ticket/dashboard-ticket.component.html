@@ -1,0 +1,327 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="!ticketDetails && !isAdd && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()" style="float: right;">Create Ticket</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="!isAdd && !ticketDetails">Search</h1>
+        <h1 *ngIf="ticketDetails">Ticket Details</h1>
+        <h1 *ngIf="isAdd">Create Ticket</h1>
+        <span *ngIf="isShowLocation"><br></span>
+        <ng-container *ngIf="!ticketDetails">
+          <div class="row" *ngIf="isShowLocation">
+            <div class="col-12 col-md-2">
+              <label>Location<span *ngIf="isAdd || isEdit">*</span></label>
+            </div>
+            <div class="col-12 col-md-4">
+              <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !questionDetail.location}" [config]="config"
+                [options]="locations" [multiple]="false" [(ngModel)]="questionDetail.location">
+              </ngx-select-dropdown>
+            </div>
+          </div>
+          <span *ngIf="!isAdd"><br></span>
+          <div class="row" *ngIf="!isAdd">
+            <div class="col-2 mobile-full-width">
+              <label>Ticket No<span *ngIf="isAdd">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <input type="text" class="form-control" [(ngModel)]="ticketNo" (keydown.enter)="onKeyDownEvent($event)">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label>Category<span *ngIf="isAdd">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width" [ngClass]="{'error-dropdown': isSubmitted && !questionDetail.category_id}">
+              <ngx-select-dropdown [config]="config" [options]="categories" [(ngModel)]="questionDetail.category" [multiple]="false" (change)="getQuestionCategoryDetail($event)">
+              </ngx-select-dropdown>
+            </div>
+          </div>
+          <span *ngIf="!isAdd"><br></span>
+          <div class="row" *ngIf="!isAdd">
+            <div class="col-2 mobile-full-width">
+              <label>Status</label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <ngx-select-dropdown [config]="config" [options]="ticketStatus" [(ngModel)]="questionDetail.status" [multiple]="false">
+              </ngx-select-dropdown>
+            </div>
+          </div>
+          <br>
+          <div class="row" *ngIf="questions && questions.length > 0">
+            <div class="col-2 mobile-full-width">
+              <label>Questions<span *ngIf="isAdd">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width" [ngClass]="{'error-dropdown': isSubmitted && !question}">
+              <ngx-select-dropdown [config]="config" [options]="questions" [(ngModel)]="question" [multiple]="false" (change)="questionChange($event)">
+              </ngx-select-dropdown>
+            </div>
+          </div>
+          <span *ngIf="questionDetail.id"><br></span>
+          <ng-container *ngIf="questionDetail.id">
+            <div class="card" style="border: 1px solid;">
+              <div class="card-body">
+                <h4 class="card-title">{{questionDetail.name}}</h4>
+                <ng-container  *ngFor="let detail of questionDetail.question_details; let i = index;">
+                  <div class="row">
+                    <div class="col-2 mobile-full-width">
+                      <label>{{detail.name}}*</label>
+                    </div>
+                    <div class="col-4 mobile-full-width">
+                      <input [(ngModel)]="detail.answer" *ngIf="detail.question_type.name === 'Textbox'" type="text" class="form-control" />
+                      <input [(ngModel)]="detail.answer" *ngIf="detail.question_type.name === 'DatePicker'" type="date" class="form-control" />
+                      <textarea [(ngModel)]="detail.answer" *ngIf="detail.question_type.name === 'TextArea'" class="form-control"></textarea>
+                      <input [(ngModel)]="detail.answer" *ngIf="detail.question_type.name === 'FileUpload'" type="file" (change)="uploadQuestionFile($event, detail)"/>
+                      <div class="datetimepicker" *ngIf="detail.question_type.name === 'DateTimePicker'">
+                        <input type="date" [(ngModel)]="detail.value1" (change)="datetimepickerChg(detail)">
+                        <input style="padding-right: 10px;" type="time" [(ngModel)]="detail.value2" value="00:00" (change)="datetimepickerChg(detail)">
+                      </div>
+                      <ngx-select-dropdown [config]="configPlain" *ngIf="detail.question_type.name === 'DropDown'" [options]="detail.options" [multiple]="false" (change)="selectionChang($event, detail)">
+                      </ngx-select-dropdown>
+                      <ng-container *ngIf="detail.question_type.name === 'Checkbox'">
+                        <div class="flex-container">
+                          <div *ngFor="let option of detail.options;">
+                            <label>
+                              <input name="checkbox" (change)="checkBoxSelected($event, detail, option)" type="checkbox">{{option}}
+                            </label>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf="detail.question_type.name === 'Radio Button'">
+                        <div class="flex-container">
+                          <div *ngFor="let option of detail.options;">
+                            <label>
+                              <input name="checkbox" type="radio" (change)="radioSelected($event, detail, option)" >{{option}}
+                            </label>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </div>
+                  <span *ngIf="(questionDetail.question_details.length - 1) !== i"><br></span>
+                </ng-container>
+                <br>
+              </div>
+            </div>
+          </ng-container>
+          <br>
+          <div class="row">
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="!isAdd">
+              <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+              <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+            </div>
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd">
+              <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+              <button type="button" *ngIf="questionDetail.category_id && questionDetail.id" class="btn btn-rounded btn-primary" (click)="submit()">Submit</button>
+            </div>
+          </div>
+          <div class="table-responsive" *ngIf="!isAdd">
+            <table class="datatable table v-middle nowrap">
+              <thead>
+                <tr>
+                  <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                  <th class="border-top-0" (click)="sorting('name')" [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">Ticket No</th>
+                  <th class="border-top-0" *ngIf="isShowLocation">Location</th>
+                  <th class="border-top-0">Created By</th>
+                  <th class="border-top-0">Assigned To</th>
+                  <th class="border-top-0">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ticket of tickets; let i = index;">
+                  <td class="ingredientbutton" *ngIf="!recipeService.isReadOnly">
+                    <button type="button" (click)="ticketDetail(ticket.id)"><i class="fa" [ngClass]="(isShowLocation || (isEngineer && (ticket.assigned_user && ticket.assigned_user.id === loginId))) ? 'fa-edit' : 'fa-eye'" aria-hidden="true"></i></button>
+                  </td>
+                  <td>{{ticket.id}}</td>
+                  <td>{{ticket.location.name}}</td>
+                  <td>{{ticket.created_user.name}}</td>
+                  <td>{{ticket.assigned_user ? ticket.assigned_user.name : 'Unassigned'}}</td>
+                  <td>{{ticket.status.name}}</td>
+                </tr>
+                <tr *ngIf="tickets.length === 0">
+                  <td colspan="3">No Records</td>
+                </tr>
+              </tbody>
+            </table>
+            <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)"></app-pagination>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="ticketDetails">
+          <div class="row">
+            <ng-container *ngIf="ticketDetails.status_id !== 4 && (isShowLocation || (isEngineer && (ticket.assigned_user && ticket.assigned_user.id === loginId)))">
+              <div class="col-6 mobile-full-width">
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Assigned To*</label>
+                  </div>
+                  <div class="col-9 mobile-full-width">
+                    <ngx-select-dropdown [config]="config" [options]="locationEngineers" [multiple]="false" [(ngModel)]="ticketDetails.assigned_user"></ngx-select-dropdown>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Notes*</label>
+                  </div>
+                  <div class="col-9 mobile-full-width">
+                    <textarea class="form-control" [(ngModel)]="ticketDetails.note"></textarea>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Upload File</label>
+                  </div>
+                  <div class="col-3 mobile-full-width">
+                    <input type="file" id="ticketDetailsFile" (change)="uploadFile($event)">
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Status</label>
+                  </div>
+                  <div class="col-9 mobile-full-width">
+                    <ngx-select-dropdown [config]="config" [options]="ticketStatus" [(ngModel)]="ticketDetails.status" [multiple]="false">
+                    </ngx-select-dropdown>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="offset-md-3 col-12 mobile-full-width">
+                    <button type="button" class="btn btn-rounded btn-default" (click)="clearTicketDetails()">Cancel</button>
+                    <button type="button" class="btn btn-rounded btn-primary" (click)="ticketDetailUpdate()">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container>
+              <div class="col-6 mobile-full-width">
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Ticket No</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.id}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Location</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.location.name}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Created By</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.created_user.name}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3 mobile-full-width">
+                    <label>Created On</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.created_at | date: 'dd-MM-yyyy hh:mm a'}}
+                  </div>
+                </div>
+                <div class="row" *ngIf="(ticketDetails.status_id === 4 || !(isShowLocation || (isEngineer && (ticket.assigned_user && ticket.assigned_user.id === loginId))))">
+                  <div class="col-3 mobile-full-width">
+                    <label>Assigned To</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.assigned_user ? ticketDetails.assigned_user.name : 'Unassigned'}}
+                  </div>
+                </div>
+                <div class="row" *ngIf="(ticketDetails.status_id === 4 || !(isShowLocation || (isEngineer && (ticket.assigned_user && ticket.assigned_user.id === loginId))))">
+                  <div class="col-3 mobile-full-width">
+                    <label>Status</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    {{ticketDetails.status.name}}
+                  </div>
+                </div>
+                <div class="row" *ngFor="let detail of ticketDetails.ticket_details;">
+                  <div class="col-3 mobile-full-width">
+                    <label>{{detail.question_detail.name}}</label>
+                  </div>
+                  <div class="col-4 mobile-full-width ingredientbutton">
+                    <span *ngIf="!detail.attachment">{{detail.answer}}</span>
+                    <button *ngIf="detail.attachment" type="button" (click)="downloadFile(detail.attachment)"><i class="fa fa-download" aria-hidden="true"></i></button>
+                  </div>
+                </div>
+                <ng-container *ngIf="ticketDetails.notes && ticketDetails.notes.length > 0">
+                  <br>
+                  <br>
+                  <h3>Notes</h3>
+                  <ng-container *ngFor="let note of ticketDetails.notes;let indexOfelement=index;">
+                    <div class="card" style="border: 1px solid;">
+                      <div class="card-body">
+                        <h4 class="card-title">#{{(ticketDetails.notes.length - indexOfelement)}}</h4>
+                        <div class="row">
+                          <div class="col-3 mobile-full-width">
+                            <label>Updated By</label>
+                          </div>
+                          <div class="col-4 mobile-full-width">
+                            {{note.created_user.name}}
+                          </div>
+                        </div>
+                        <div class="row" *ngIf="note.assigned_user">
+                          <div class="col-3 mobile-full-width">
+                            <label>Re-Assign To</label>
+                          </div>
+                          <div class="col-4 mobile-full-width">
+                            {{note.assigned_user.name}}
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-3 mobile-full-width">
+                            <label>Updated On</label>
+                          </div>
+                          <div class="col-4 mobile-full-width">
+                            {{note.created_at | date: 'dd-MM-yyyy hh:mm a'}}
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-3 mobile-full-width">
+                            <label>Notes</label>
+                          </div>
+                          <div class="col-4 mobile-full-width">
+                            {{note.notes}}
+                          </div>
+                        </div>
+                        <div class="row" *ngIf="note.attachment">
+                          <div class="col-3 mobile-full-width">
+                            <label>Attachment</label>
+                          </div>
+                          <div class="col-1 mobile-full-width ingredientbutton">
+                            <button type="button" (click)="downloadFile(note.attachment)"><i class="fa fa-download"
+                                aria-hidden="true"></i></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                </ng-container>
+                <ng-container *ngIf="(ticketDetails.status_id === 4 || !(isShowLocation || (isEngineer && (ticket.assigned_user && ticket.assigned_user.id === loginId))))">
+                  <br>
+                  <div class="row">
+                    <div class="offset-md-3 col-12 mobile-full-width">
+                      <button type="button" class="btn btn-rounded btn-default" (click)="clearTicketDetails()">Cancel</button>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

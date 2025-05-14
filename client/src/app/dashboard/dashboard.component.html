@@ -1,0 +1,271 @@
+<div class="alert alert-dark" role="alert">
+  <div class="row">
+    <div class="col-sm-12 col-md-3 col-lg-2">
+      <label *ngIf="!is_time_sale">From</label>&nbsp;
+      <input type="date" [(ngModel)]="chooseDateFrom" class="form-control" (change)="populateToDate()" />&nbsp;&nbsp;
+    </div>
+    <div class="col-sm-12 col-md-3 col-lg-2" *ngIf="!is_time_sale">
+      <label>To</label>&nbsp;
+      <input type="date" [(ngModel)]="chooseDateTo" class="form-control">&nbsp;&nbsp;
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-8">
+      <br>
+      <!-- <span>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="is_new" (change)="clearView()">
+          <span class="toggle-slider toggle-round"></span>
+        </label>
+        New&nbsp;&nbsp;
+      </span>
+      <span>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="is_time_sale" (change)="clearView()">
+          <span class="toggle-slider toggle-round"></span>
+        </label>Extend View&nbsp;&nbsp;
+      </span> -->
+      <span *ngIf="!router.url.includes('/fulfilment-report')">
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="isAutoRefresh">
+          <span class="toggle-slider toggle-round"></span>
+        </label>
+        Auto Refresh&nbsp;&nbsp;
+      </span>
+      <button type="button" class="btn btn-rounded btn-primary"
+        (click)="dateChange()">Submit</button>&nbsp;&nbsp;<button *ngIf="!is_time_sale && sales && sales.length > 0 && !router.url.includes('/fulfilment-report')"
+        (click)="exportTable()" type="button" class="btn btn-rounded btn-warning">Export <img
+          src="assets/images/excel.png" width="20"></button>
+    </div>
+  </div>
+</div>
+<div *ngIf="sectionSales.length === 0 && sales && sales.length > 0">
+  <ng-container *ngFor="let sale of sales; let i = index;">
+    <div class="alert alert-dark" role="alert" *ngIf="sale.title">
+      <label>{{sale.title}}</label><span
+        *ngIf="sale.title !== 'Stocks'">&nbsp;From&nbsp;&nbsp;:&nbsp;&nbsp;{{chooseDateFrom |
+        date:'dd-MM-yyyy'}}</span>
+      <span *ngIf="sale.title !== 'Stocks'">&nbsp;&nbsp;To&nbsp;&nbsp;:&nbsp;&nbsp;{{chooseDateTo |
+        date:'dd-MM-yyyy'}}</span>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-6 grab" [ngClass]="{'col-lg-3': !is_time_sale, 'col-lg-4': is_time_sale}"
+        *ngFor="let cardData of sale.data;" style="cursor: pointer;">
+        <div class="card" *ngIf="sale.title !== 'Fulfilment Tracker'"
+          [ngClass]="{'min-height-125': is_time_sale}"
+          style="position: relative;min-height: 150px;background-color: white;"
+          (click)="getdishRecords(sale, cardData)">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12" *ngIf="!sale.title?.includes('Discount')">
+                <h4 class="font-medium font-14 text-uppercase">{{cardData.title}}&nbsp;&nbsp;<span
+                    *ngIf="cardData.small">({{cardData.small}})</span></h4>
+                <span
+                  *ngIf="(cardData.amount > 0 || (cardData.count !== undefined && cardData.count > 0)) && (sale.isClickable === true || cardData.isClickable === true)"
+                  style="position: absolute;top: -1px;right: -1px;"><img width="20" height="20"
+                    src="assets/images/arrow-up-right-square-fill.svg"></span>
+                <div class="d-flex align-items-center mb-1" *ngIf="!is_new">
+                  <span class="text-muted">{{cardData.currency}}</span>&nbsp;&nbsp;
+                  <div class="ml-auto">
+                    <h5 class="font-medium mb-0"><span *ngIf="!cardData.quantity">{{cardData.amount ? (cardData.amount |
+                        currency:'INR':'symbol-narrow':'1.2-2') : (0 |
+                        currency:'INR':'symbol-narrow':'1.2-2')}}</span><span
+                        *ngIf="cardData.quantity">{{cardData.amount ? ((cardData.amount |
+                        currency:'INR':'symbol-narrow':'1.2-2') + ' (' + (cardData.quantity | number: '2.') + ')') :
+                        0}}</span></h5>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center mb-1" *ngIf="is_new && cardData.amount !== undefined">
+                  <!-- <span class="text-muted">{{cardData.currency}}</span>&nbsp;&nbsp; -->
+                  <div class="ml-auto">
+                    <table style="width:100%">
+                      <tr *ngIf="cardData.count">
+                        <th>Bill Count : </th>
+                        <td [attr.title]="((+cardData.count ? (+cardData.count) : 0) | numberToWords)">
+                          {{((+cardData.count ? (+cardData.count) : 0) | number:'1.2-2')}}</td>
+                      </tr>
+                      <tr *ngIf="cardData.itemscount">
+                        <th>Items Count : </th>
+                        <td [attr.title]="((+cardData.itemscount ? (+cardData.itemscount) : 0) | numberToWords)">
+                          {{((+cardData.itemscount ? (+cardData.itemscount) : 0) | number:'1.2-2')}}</td>
+                      </tr>
+                      <tr *ngIf="!is_time_sale">
+                        <th>Net : </th>
+                        <td [attr.title]="((+cardData.amount ? +cardData.amount : 0) | numberToWords)">
+                          {{(+cardData.amount ? +cardData.amount : 0) |
+                          currency:'INR':'symbol-narrow':'1.2-2'}}&nbsp;&nbsp;</td>
+                      </tr>
+                      <tr *ngIf="!is_time_sale">
+                        <th>Dis : </th>
+                        <td [attr.title]="((+cardData.amount ? +cardData.amount : 0) | numberToWords)">
+                          {{(+cardData.discount_amount ? +cardData.discount_amount : 0) |
+                          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                      </tr>
+                      <tr *ngIf="!is_time_sale">
+                        <th>Tax : </th>
+                        <td [attr.title]="((+cardData.tax ? +cardData.tax : 0) | numberToWords)">{{(+cardData.tax ?
+                          +cardData.tax : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}&nbsp;&nbsp;</td>
+                      </tr>
+                      <tr *ngIf="!is_time_sale">
+                        <th>Gross : </th>
+                        <td
+                          [attr.title]="((+cardData.amount ? ((+cardData.amount + +cardData.tax + (+cardData.roundoff ? +cardData.roundoff : 0)) - +cardData.discount_amount) : 0) | numberToWords)">
+                          {{(+cardData.amount ? ((+cardData.amount + +cardData.tax + (+cardData.roundoff ?
+                          +cardData.roundoff : 0)) - +cardData.discount_amount) : 0) |
+                          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                      </tr>
+                      <tr *ngIf="is_time_sale">
+                        <th>Gross : </th>
+                        <td [attr.title]="((+cardData.amount ? +cardData.amount: 0) | numberToWords)">
+                          {{(+cardData.amount ? +cardData.amount: 0) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                      </tr>
+                      <tr *ngIf="!is_time_sale && cardData.wastage_amount !== undefined">
+                        <th>Wastage Amount : </th>
+                        <td [attr.title]="((+cardData.wastage_amount ? +cardData.wastage_amount: 0) | numberToWords)">
+                          {{(+cardData.wastage_amount ? +cardData.wastage_amount: 0) |
+                          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                      </tr>
+                      <tr *ngIf="cardData.percentage_net_sale !== undefined">
+                        <th>% of Net Sales : </th>
+                        <td
+                          [attr.title]="((+cardData.percentage_net_sale ? +cardData.percentage_net_sale: 0) | numberToWords)">
+                          {{(+cardData.percentage_net_sale ? +cardData.percentage_net_sale: 0) | number:'1.2-2'}} (%)
+                        </td>
+                      </tr>
+                    </table>
+                    <!-- <h5 class="font-medium mb-0"><span *ngIf="!cardData.quantity">{{cardData.amount ? (cardData.amount |
+                        currency:'INR':'symbol-narrow':'1.2-2') : (0 |
+                        currency:'INR':'symbol-narrow':'1.2-2')}}</span><span
+                        *ngIf="cardData.quantity">{{cardData.amount ? ((cardData.amount |
+                        currency:'INR':'symbol-narrow':'1.2-2') + ' (' + (cardData.quantity | number: '2.') + ')') :
+                        0}}</span></h5> -->
+                  </div>
+                </div>
+                <div class="d-flex align-items-center mb-1"
+                  *ngIf="cardData.count !== undefined && cardData.amount === undefined">
+                  <div class="ml-auto">
+                    <h5 class="font-medium mb-0"><span>{{cardData.count}}</span></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12" *ngIf="sale.title?.includes('Discount')">
+                <h4 class="font-medium font-14 text-uppercase">{{cardData.title}}&nbsp;&nbsp;<span
+                    *ngIf="cardData.small">({{cardData.small}})</span></h4>
+                <span
+                  *ngIf="(+cardData.discount_amount > 0) && (sale.isClickable === true || cardData.isClickable === true)"
+                  style="position: absolute;top: -1px;right: -1px;"><img width="20" height="20"
+                    src="assets/images/arrow-up-right-square-fill.svg"></span>
+                <div class="d-flex align-items-center mb-1">
+                  <span class="text-muted">{{cardData.currency}}</span>&nbsp;&nbsp;
+                  <div class="ml-auto">
+                    <h5 class="font-medium mb-0"><span>{{((+cardData.discount_amount ? cardData.discount_amount : 0) |
+                        currency:'INR':'symbol-narrow':'1.2-2')}}</span></h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card" *ngIf="sale.title === 'Fulfilment Tracker'"
+          style="position: relative; min-height: 150px;background-color: white;">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12">
+                <h4 class="font-medium font-14 text-uppercase">{{cardData.title}}&nbsp;&nbsp;</h4>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="ml-auto">
+                    <table style="width: 100%;">
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Category : </th>
+                        <td>{{cardData.category_name}}</td>
+                      </tr>
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Requested Quantity : </th>
+                        <td>{{+cardData.requested_quantity  | number:'1.2-2'}}</td>
+                      </tr>
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Total Approved Qty : </th>
+                        <td>{{+cardData.approved_quantity | number:'1.2-2'}}</td>
+                      </tr>
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Total Picked Up Qty : </th>
+                        <td>{{+cardData.pickup_quantity | number:'1.2-2'}}</td>
+                      </tr>
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Total Accepted Qty : </th>
+                        <td>{{+cardData.accepted_quantity | number:'1.2-2'}}</td>
+                      </tr>
+                      <tr
+                        [ngClass]="{'text-green': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) === 100), 'text-red': (cardData.pickup_quantity && cardData.approved_quantity && ((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 94.99), 'text-blue': (cardData.pickup_quantity && cardData.approved_quantity && ((((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) > 94.99) && (((+cardData.pickup_quantity/+cardData.approved_quantity) * 100) < 99.99)))}">
+                        <th>Fulfillment Rate : </th>
+                        <td><span
+                            *ngIf="cardData.pickup_quantity && cardData.approved_quantity">{{cardData.fulfillment_rate_per | number:'1.2-2'}}%</span><span
+                            *ngIf="!(cardData.pickup_quantity && cardData.approved_quantity)">N/A</span></td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+<div class="alert alert-info" role="alert" *ngIf="isLoaded && sales && sales.length === 0 && sectionSales.length === 0">
+  No Records found
+</div>
+<div class="card" style="position: relative;" *ngIf="sectionSales && sectionSales.length > 0">
+  <a style="position: absolute;top: -13px;right: -9px;" href="javascript:void(0)" (click)="clearDish()"><img width="30"
+      height="30" src="assets/images/x-circle-fill.svg"></a>
+  <div class="card-body">
+    <h4 class="card-title">{{title}} (From : {{chooseDateFrom | date:'dd-MM-yyyy'}} To : {{chooseDateTo |
+      date:'dd-MM-yyyy'}})</h4>
+    <div class="table-responsive">
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">{{(currentCase === 'Payment Mode') ? 'Location Name' : 'Item Name'}}
+            </th>
+            <th class="text-dark font-medium fs-4" *ngIf="currentCase !== 'Payment Mode'">Quantity</th>
+            <th class="text-dark font-medium fs-4">Net Revenue(INR)</th>
+            <th class="text-dark font-medium fs-4">Discount(INR)</th>
+            <th class="text-dark font-medium fs-4">Tax (INR)</th>
+            <th class="text-dark font-medium fs-4">Gross Revenue (INR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sectionSale of sectionSales; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{sectionSale.title}}</td>
+            <td class="fs-4" *ngIf="currentCase !== 'Payment Mode'">{{sectionSale.quantity | number:'1.2-2'}}</td>
+            <td>
+              <h5 class="mb-0 fw-normal">{{sectionSale.amount | number:'1.2-2'}}</h5>
+            </td>
+            <td>
+              <h5 class="mb-0 fw-normal">{{sectionSale.discount_amount | number:'1.2-2'}}</h5>
+            </td>
+            <td class="fs-4">{{(sectionSale.tax > 0 ? (sectionSale.tax) : 0) | number:'1.2-2'}}</td>
+            <td class="fs-4">{{((+sectionSale.amount) + (+sectionSale.tax)) | number:'1.2-2'}}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th style="text-align:right">Total:</th>
+            <th></th>
+            <th *ngIf="currentCase !== 'Payment Mode'">{{totalQuantity > 0 ? (totalQuantity | number: '2.') : 0}}</th>
+            <th>{{netAmount > 0 ? (netAmount | currency:'INR':'symbol-narrow':'1.2-2') : 0}}</th>
+            <th>{{discountAmount > 0 ? (discountAmount | currency:'INR':'symbol-narrow':'1.2-2') : 0}}</th>
+            <th>{{taxAmount > 0 ? (taxAmount | currency:'INR':'symbol-narrow':'1.2-2') : 0}}</th>
+            <th>{{grossAmount > 0 ? ((grossAmount - discountAmount) | currency:'INR':'symbol-narrow':'1.2-2') : 0}}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

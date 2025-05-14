@@ -1,0 +1,554 @@
+<div class="row" *ngIf="!stockdetails || stockdetails.length === 0">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()" style="float: right;">Add
+          Stocks</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="isSearch">Incoming Stocks Search</h1>
+        <h1 *ngIf="isAdd">Add New Stocks</h1>
+        <h1 *ngIf="isEdit">Edit Stocks</h1>
+        <br>
+        <div class="row" *ngIf="isShowLocation">
+          <div class="col-12 col-md-2">
+            <label>Location<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-12 col-md-4">
+            <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !location_id}" [config]="config"
+              [options]="locations" [multiple]="false" [(ngModel)]="location_in_id" (change)="locationSelectionChanged($event)">
+            </ngx-select-dropdown>
+          </div>
+          <br><br><br>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-2">
+            <label>Vendor<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-12 col-md-4">
+            <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !stocksIncomingData.vendor_id}"
+              [config]="config" [options]="vendors" [multiple]="false" [(ngModel)]="vendor_id"
+              (change)="vendorSelectionChanged($event)">
+            </ngx-select-dropdown>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Invoice Date<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="date" class="form-control"
+              [ngClass]="{'error-field': isSubmitted && !stocksIncomingData.invoice_date}"
+              [(ngModel)]="stocksIncomingData.invoice_date" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Receipt Date<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="date" class="form-control"
+              [ngClass]="{'error-field': isSubmitted && !stocksIncomingData.receipt_date}"
+              [(ngModel)]="stocksIncomingData.receipt_date" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Invoice Number<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control"
+              [ngClass]="{'error-field': isSubmitted && !stocksIncomingData.invoice_number}"
+              [(ngModel)]="stocksIncomingData.invoice_number" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Upload Invoice</label>
+          </div>
+          <div class="col-3 mobile-full-width">
+            <input type="file" id="stocksIncomingFile" (change)="uploadFile($event)">
+          </div>
+          <div class="col-1 mobile-full-width ingredientbutton" *ngIf="stocksIncomingData.attachment">
+            <button type="button" (click)="downloadFile(stocksIncomingData)"><i class="fa fa-download"
+                aria-hidden="true"></i></button>
+          </div>
+          <div class="col-2 mobile-full-width" *ngIf="stocksIncomingData.attachment">
+            <label>Remove Attachment</label>
+          </div>
+          <div class="col-1 mobile-full-width ingredientbutton" *ngIf="stocksIncomingData.attachment">
+            <button type="button" (click)="deleteAttachment()"><img src="assets/images/Icon-delete.png"  width="16"></button>
+          </div>
+        </div>
+        <br>
+        <div *ngIf="((location_id || !isShowLocation) && (isAdd || isEdit)) && !isCurrentStockLoading">
+          <div class="card" style="border: 1px solid;"
+            *ngFor="let detail of stocksIncomingData.details;let indexOfelement=index;">
+            <div class="card-body">
+              <h4 class="card-title">#{{indexOfelement+1}}<span class="pull-right ingredientbutton" *ngIf="indexOfelement != 0">
+                <button type="button"><img src="assets/images/Icon-delete.png" width="16"
+                    (click)="removeRecipe(indexOfelement)"></button>
+              </span></h4>
+              <div class="row">
+                <div class="col-2 mobile-full-width">
+                  <label style="color: red;">Current Stock : {{detail.current_stocks ? detail.current_stocks : 0}}<br></label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-2 mobile-full-width">
+                  <label>Product* </label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <ngx-select-dropdown [ngClass]="{'error-dropdown': isSubmitted && !detail.product_id}"
+                    [config]="config" [options]="products" [(ngModel)]="detail.product_name" [multiple]="false"
+                    (change)="selectionChanged($event, indexOfelement)">
+                  </ngx-select-dropdown>
+                </div>
+                <div class="col-2 mobile-full-width" *ngIf="detail.product_id">
+                  <label>Unit Size<span *ngIf="!detail.unit_name">*</span> <span *ngIf="detail.unit_name"> In ({{detail.unit_name}})*</span></label>
+                </div>
+                <div class="col-4 mobile-full-width" *ngIf="detail.product_id">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
+                    [ngClass]="{'error-field': isSubmitted && !detail.unit_size}" [(ngModel)]="detail.unit_size">
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-2 mobile-full-width">
+                  <label>Number of Units* </label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
+                    [ngClass]="{'error-field': isSubmitted && !detail.number_of_units}"
+                    [(ngModel)]="detail.number_of_units">
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <label>Total Quantity* </label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <span
+                    *ngIf="detail.unit_size && detail.number_of_units">{{(detail.unit_size * detail.number_of_units) | number:'1.2-2'}}&nbsp;{{detail.unit_name}}</span>
+                  <span *ngIf="!(detail.unit_size && detail.number_of_units)">0</span>
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-2 mobile-full-width">
+                  <label>Cost Per Unit In (<i class="fa fa-inr"></i>) </label>
+                  <span style="color: red;"><br>Last Purchased @{{(detail.product_name ? detail.product_name.purchase_price: 0) |
+                    currency:'INR':'symbol-narrow':'1.2-2'}}</span>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
+                    [(ngModel)]="detail.cost_per_unit">
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <label>Discount Amount </label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
+                    [(ngModel)]="detail.discount_amount">
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-2 mobile-full-width">
+                  <label>Batch Number</label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="text" class="form-control" [(ngModel)]="detail.batch_number">
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <label>Manufacturing Date</label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="date" class="form-control" [(ngModel)]="detail.manufacturing_date">
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-2 mobile-full-width">
+                  <label>Expiry Date</label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                  <input type="date" class="form-control" [(ngModel)]="detail.expiry_date">
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-1 mobile-full-width">
+                  <label>SGST %</label>
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
+                    [(ngModel)]="detail.SGST_percentage">
+                </div>
+                <div class="col-1 mobile-full-width">
+                  <label>CGST %</label>
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true" [(ngModel)]="detail.CGST_percentage">
+                </div>
+                <div class="col-1 mobile-full-width">
+                  <label>IGST %</label>
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true" [(ngModel)]="detail.IGST_percentage">
+                </div>
+                <div class="col-1 mobile-full-width">
+                  <label>CESS %</label>
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true" [(ngModel)]="detail.cess_percentage">
+                </div>
+              </div>
+              <span *ngIf="detail.product_id"><br></span>
+              <div class="row" *ngIf="detail.product_id">
+                <div class="col-9 mobile-full-width">
+                  <table border="2" style="width:100%" *ngIf="detail.number_of_units && detail.cost_per_unit">
+                    <tr>
+                      <th>Net Amount</th>
+                      <th>Discount Amount</th>
+                      <th>SGST Amount</th>
+                      <th>CGST Amount</th>
+                      <th>IGST Amount</th>
+                      <th>CESS Amount</th>
+                      <th>Gross Total</th>
+                    </tr>
+                    <tbody>
+                      <tr>
+                        <td>{{((detail.number_of_units * detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0)) | currency:"&#8377;"}}</td>
+                        <td>{{detail.discount_amount | currency:"&#8377;"}}</td>
+                        <td>{{+(detail.SGST_percentage ? ((detail.SGST_percentage/100) * ((+detail.number_of_units * +detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0))) : 0) | currency:"&#8377;"}}</td>
+                        <td>{{+(detail.CGST_percentage ? ((detail.CGST_percentage/100) * ((+detail.number_of_units * +detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0))) : 0) | currency:"&#8377;"}}</td>
+                        <td>{{+(detail.IGST_percentage ? ((detail.IGST_percentage/100) * ((+detail.number_of_units * +detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0))) : 0) | currency:"&#8377;"}}</td>
+                        <td>{{+(detail.cess_percentage ? ((detail.cess_percentage/100) * ((+detail.number_of_units * +detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0))) : 0) | currency:"&#8377;"}}</td>
+                        <td>{{(((+detail.number_of_units * +detail.cost_per_unit) - (+detail.discount_amount > 0 ? +detail.discount_amount : 0)) + ((+detail.SGST_percentage || +detail.CGST_percentage || +detail.IGST_percentage || +detail.cess_percentage) ? (((+detail.cess_percentage ? +detail.cess_percentage : 0) + (+detail.SGST_percentage ? +detail.SGST_percentage : 0) + ((+detail.CGST_percentage ? +detail.CGST_percentage : 0)) + ((+detail.IGST_percentage ? +detail.IGST_percentage : 0)))/100) : 0) * ((+detail.number_of_units * +detail.cost_per_unit)- (+detail.discount_amount > 0 ? +detail.discount_amount : 0))) | currency:"&#8377;"}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <br>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 mobile-full-width" *ngIf="(isAdd || isEdit)">
+              {{getTotal()}}
+              <table border="2" style="width:100%">
+                <tr>
+                  <th>Total Net Amount</th>
+                  <th>Total Discount Amount</th>
+                  <th>Total SGST Amount</th>
+                  <th>Total CGST Amount</th>
+                  <th>Total IGST Amount</th>
+                  <th>Total CESS Amount</th>
+                  <th>Total Tax Percentage</th>
+                  <th>Total Tax Amount</th>
+                  <th>Total Gross Amount</th>
+                </tr>
+                <tbody>
+                  <tr>
+                    <td>{{totalData.base | currency:"&#8377;"}}</td>
+                    <td>{{totalData.discount | currency:"&#8377;"}}</td>
+                    <td>{{totalData.SGST | currency:"&#8377;"}}</td>
+                    <td>{{totalData.CGST | currency:"&#8377;"}}</td>
+                    <td>{{totalData.IGST | currency:"&#8377;"}}</td>
+                    <td>{{totalData.cess | currency:"&#8377;"}}</td>
+                    <td>{{totalPercentage}}%</td>
+                    <td>{{((totalData.SGST > 0 || totalData.CGST > 0 || totalData.IGST > 0 || totalData.cess > 0) ? (totalData.SGST + totalData.CGST + totalData.IGST + totalData.cess) : 0) | currency:"&#8377;"}}</td>
+                    <td>{{stocksIncomingData.total | currency:"&#8377;"}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="row" *ngIf="((location_id || !isShowLocation) && (isAdd || isEdit))">
+          <div><a *ngIf="isAdd || stocksIncomingData.enable_edit === 1" style="display:block; color: #d93d33;  font-weight: bold; text-decoration: underline;  vertical-align: top; padding-left: 10px;padding-top: 20px;"
+              (click)="addstocks()">Add Stocks</a></div>
+        </div>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+            <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+          </div>
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel(false)">Cancel</button>
+            <button type="button" class="btn btn-rounded btn-primary" *ngIf="isAdd || stocksIncomingData.enable_edit === 1" (click)="submit(null)">{{isAdd ? 'Submit' : 'Update'}}</button>
+          </div>
+        </div>
+        <div class="table-responsive" *ngIf="!isAdd && !isEdit">
+          <table class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" *ngIf="isShowLocation">ACTION</th>
+                <th class="border-top-0" (click)="sorting('id')" [ngClass]="{'sorting': sortBy !== 'id', 'sorting_asc': (sortBy === 'id' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'id' && sortOrder === 'DESC')}">GRN NO</th>
+                <th class="border-top-0" (click)="sorting('location')" [ngClass]="{'sorting': sortBy !== 'location', 'sorting_asc': (sortBy === 'location' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'location' && sortOrder === 'DESC')}" *ngIf="isShowLocation">LOCATION</th>
+                <th class="border-top-0" (click)="sorting('vendor')" [ngClass]="{'sorting': sortBy !== 'vendor', 'sorting_asc': (sortBy === 'vendor' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'vendor' && sortOrder === 'DESC')}">VENDOR NAME</th>
+                <th class="border-top-0" (click)="sorting('invoice_date')" [ngClass]="{'sorting': sortBy !== 'invoice_date', 'sorting_asc': (sortBy === 'invoice_date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'invoice_date' && sortOrder === 'DESC')}">INVOICE DATE</th>
+                <th class="border-top-0" (click)="sorting('receipt_date')" [ngClass]="{'sorting': sortBy !== 'receipt_date', 'sorting_asc': (sortBy === 'receipt_date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'receipt_date' && sortOrder === 'DESC')}">RECEIPT DATE</th>
+                <th class="border-top-0" (click)="sorting('invoice_number')" [ngClass]="{'sorting': sortBy !== 'invoice_number', 'sorting_asc': (sortBy === 'invoice_number' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'invoice_number' && sortOrder === 'DESC')}">INVOICE NUMBER</th>
+                <th class="border-top-0" (click)="sorting('total')" [ngClass]="{'sorting': sortBy !== 'total', 'sorting_asc': (sortBy === 'total' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'total' && sortOrder === 'DESC')}">TOTAL BILL AMOUNT</th>
+                <th class="border-top-0" (click)="sorting('user')" [ngClass]="{'sorting': sortBy !== 'user', 'sorting_asc': (sortBy === 'user' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'user' && sortOrder === 'DESC')}">CREATED BY</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let stocksIncoming of stocksIncomings; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td class="ingredientbutton" *ngIf="isShowLocation">
+                  <button type="button" (click)="getStocksDetails(stocksIncoming.id, false)"><i class="fa fa-eye"
+                      aria-hidden="true"></i></button>
+                  <!-- <button type="button" *ngIf="stocksIncoming.location.enable_edit === 1" (click)="getStocksDetails(stocksIncoming.id, true)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" *ngIf="stocksIncoming.location.enable_edit === 1" (click)="delete(stocksIncoming.id)"><img src="assets/images/Icon-delete.png"  width="16"></button> -->
+                </td>
+                <td>{{stocksIncoming.id}}</td>
+                <td *ngIf="isShowLocation">{{stocksIncoming.location.name}}</td>
+                <td>{{stocksIncoming.vendor.name}}</td>
+                <td>{{stocksIncoming.invoice_date | date:'dd-MM-yyyy'}}</td>
+                <td>{{stocksIncoming.receipt_date | date:'dd-MM-yyyy'}}</td>
+                <td>{{stocksIncoming.invoice_number}}</td>
+                <td>{{stocksIncoming.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{stocksIncoming.user.name}}</td>
+              </tr>
+              <tr *ngIf="stocksIncomings.length === 0">
+                <td [attr.colspan]="isShowLocation ? 10 : 9">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <app-pagination [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)">
+          </app-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card" style="position: relative;" *ngIf="stockdetails && stockdetails.length > 0">
+  <div class="card-body">
+    <h4 class="card-title">
+      Stocks<button type="button" class="btn btn-rounded btn-info pull-right" (click)="printInvoice()">Print</button>
+    </h4>
+    <br>
+    <div class="table-responsive">
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>GRN NO</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.id}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Created By</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.user.name}}
+        </div>
+        <div class="col-3 mobile-full-width">
+          <label>Location</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.location.name}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Vendor Name</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.vendor.name}}
+        </div>
+        <div class="col-3 mobile-full-width">
+          <label>Invoice Date</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.invoice_date | date:'dd-MM-yyyy'}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Invoice Number</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.invoice_number}}
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="stockdetail.attachment">
+          <label>Download Invoice</label>
+        </div>
+        <div class="col-3 mobile-full-width ingredientbutton" *ngIf="stockdetail.attachment">
+          <button type="button" (click)="downloadFile(stockdetail)"><i class="fa fa-download"
+              aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Total Bill Amount</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{stockdetail.total | currency:'INR':'symbol-narrow':'1.2-2'}}
+        </div>
+      </div>
+      <br>
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4"><label>SR. No</label></th>
+            <th class="text-dark font-medium fs-4"><label>Created</label></th>
+            <th class="text-dark font-medium fs-4"><label>Product</label></th>
+            <th class="text-dark font-medium fs-4"><label>Unit Size</label></th>
+            <th class="text-dark font-medium fs-4"><label>Batch Number</label></th>
+            <th class="text-dark font-medium fs-4"><label>Manufacturing Date</label></th>
+            <th class="text-dark font-medium fs-4"><label>Expiry Date</label></th>
+            <th class="text-dark font-medium fs-4"><label>Number of Units</label></th>
+            <th class="text-dark font-medium fs-4"><label>Quantity</label></th>
+            <th class="text-dark font-medium fs-4"><label>Cost Per Unit</label></th>
+            <th class="text-dark font-medium fs-4"><label>Discount</label></th>
+            <th class="text-dark font-medium fs-4"><label>SGST</label></th>
+            <th class="text-dark font-medium fs-4"><label>CGST</label></th>
+            <th class="text-dark font-medium fs-4"><label>IGST</label></th>
+            <th class="text-dark font-medium fs-4"><label>CESS</label></th>
+            <th class="text-dark font-medium fs-4"><label>Line Total</label></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of stockdetails; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{stock.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+            <td class="fs-4">{{stock.product.name}}&nbsp;({{stock.product.brand.name}})</td>
+            <td class="fs-4">{{stock.unit_size}}&nbsp;({{stock.product.unit.name}})</td>
+            <td class="fs-4">{{stock.batch_number ? stock.batch_number : 'N/A'}}</td>
+            <td class="fs-4">{{stock.manufacturing_date ? stock.manufacturing_date : 'N/A'}}</td>
+            <td class="fs-4">{{stock.expiry_date ? stock.expiry_date : 'N/A'}}</td>
+            <td class="fs-4">{{stock.number_of_units	}}</td>
+            <td class="fs-4">{{stock.quantity | number:'1.2-2'}}&nbsp;({{stock.product.unit.name}})</td>
+            <td class="fs-4">{{(stock.cost_per_unit > 0 ? stock.cost_per_unit : 0) | number:'1.2-2'}}</td>
+            <td class="fs-4"><span *ngIf="stock.discount_amount === 0">N/A</span><span *ngIf="stock.discount_amount > 0">{{stock.discount_amount | number:'1.2-2'}}</span></td>
+            <td class="fs-4"><span *ngIf="stock.SGST_percentage === 0">N/A</span><span *ngIf="stock.SGST_percentage > 0">{{stock.SGST_amount | number:'1.2-2'}} ({{stock.SGST_percentage}}%)</span></td>
+            <td class="fs-4"><span *ngIf="stock.CGST_percentage === 0">N/A</span><span *ngIf="stock.CGST_percentage > 0">{{stock.CGST_amount | number:'1.2-2'}} ({{stock.CGST_percentage}}%)</span></td>
+            <td class="fs-4"><span *ngIf="stock.IGST_percentage === 0">N/A</span><span *ngIf="stock.IGST_percentage > 0">{{stock.IGST_amount | number:'1.2-2'}} ({{stock.IGST_percentage}}%)</span></td>
+            <td class="fs-4"><span *ngIf="stock.cess_percentage === 0">N/A</span><span *ngIf="stock.cess_percentage > 0">{{stock.cess_amount | number:'1.2-2'}} ({{stock.cess_percentage}}%)</span></td>
+            <td class="fs-4">
+              {{stock.line_amount | number:'1.2-2'}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div>
+        <table class="table align-middle mb-0" style="width:30%">
+          <tbody>
+          <tr>
+            <td><button type="button" class="btn btn-rounded btn-default"
+                (click)="cancelStocksDetails()">Cancel</button></td>
+            <td><label>Total</label></td>
+            <td><label>{{totalPrice | currency:'INR':'symbol-narrow':'1.2-2'}}</label></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="position: relative;" *ngIf="isPrint && stockdetails && stockdetails.length > 0" id="printIncoming">
+  <table style="width:100%" border="1">
+    <thead>
+      <tr>
+        <th colspan="4">Stocks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>GRN NO</th>
+        <td colspan="3">
+          {{stockdetail.id}}
+        </td>
+      </tr>
+      <tr>
+        <th>Created By</th>
+        <td>
+          {{stockdetail.user.name}}
+        </td>
+        <th>Location</th>
+        <td>{{stockdetail.location.name}}</td>
+      </tr>
+      <tr>
+        <th>Vendor Name</th>
+        <td>{{stockdetail.vendor.name}}</td>
+        <th>Invoice Date</th>
+        <td>{{stockdetail.invoice_date | date:'dd-MM-yyyy'}}</td>
+      </tr>
+      <tr>
+        <th>Invoice Number</th>
+        <td>{{stockdetail.invoice_number}}</td>
+        <th>Total Bill Amount</th>
+        <td>
+          {{stockdetail.total | currency:'INR':'symbol-narrow':'1.2-2'}}
+        </td>
+    </tbody>
+  </table>
+  <br>
+  <table class="table align-middle mb-0" style="width:100%" border="1">
+    <thead>
+      <tr>
+        <th>SR. No</th>
+        <th>Created</th>
+        <th>Product</th>
+        <th>Unit Size</th>
+        <th>Batch Number</th>
+        <th>Manufacturing Date</th>
+        <th>Expiry Date</th>
+        <th>Number of Units</th>
+        <th>Quantity</th>
+        <th>Cost Per Unit</th>
+        <th>Discount</th>
+        <th>SGST</th>
+        <th>CGST</th>
+        <th>IGST</th>
+        <th>CESS</th>
+        <th>Line Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stock of stockdetails; let i = index;">
+        <td>{{(i+1)}}</td>
+        <td>{{stock.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+        <td>{{stock.product.name}}&nbsp;({{stock.product.brand.name}})</td>
+        <td>{{stock.unit_size}}&nbsp;({{stock.product.unit.name}})</td>
+        <td>{{stock.batch_number ? stock.batch_number : 'N/A'}}</td>
+        <td>{{stock.manufacturing_date ? stock.manufacturing_date : 'N/A'}}</td>
+        <td>{{stock.expiry_date ? stock.expiry_date : 'N/A'}}</td>
+        <td>{{stock.number_of_units }}</td>
+        <td>{{stock.quantity | number:'1.2-2'}}&nbsp;({{stock.product.unit.name}})</td>
+        <td>{{(stock.cost_per_unit > 0 ? stock.cost_per_unit : 0) | number:'1.2-2'}}</td>
+        <td><span *ngIf="stock.discount_amount === 0">N/A</span><span
+            *ngIf="stock.discount_amount > 0">{{stock.discount_amount | number:'1.2-2'}}</span></td>
+        <td><span *ngIf="stock.SGST_percentage === 0">N/A</span><span
+            *ngIf="stock.SGST_percentage > 0">{{stock.SGST_amount | number:'1.2-2'}} ({{stock.SGST_percentage}}%)</span>
+        </td>
+        <td><span *ngIf="stock.CGST_percentage === 0">N/A</span><span
+            *ngIf="stock.CGST_percentage > 0">{{stock.CGST_amount | number:'1.2-2'}} ({{stock.CGST_percentage}}%)</span>
+        </td>
+        <td><span *ngIf="stock.IGST_percentage === 0">N/A</span><span
+            *ngIf="stock.IGST_percentage > 0">{{stock.IGST_amount | number:'1.2-2'}} ({{stock.IGST_percentage}}%)</span>
+        </td>
+        <td><span *ngIf="stock.cess_percentage === 0">N/A</span><span
+            *ngIf="stock.cess_percentage > 0">{{stock.cess_amount | number:'1.2-2'}} ({{stock.cess_percentage}}%)</span>
+        </td>
+        <td>
+          {{stock.line_amount | number:'1.2-2'}}
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total</td>
+        <td colspan="15">{{totalPrice | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

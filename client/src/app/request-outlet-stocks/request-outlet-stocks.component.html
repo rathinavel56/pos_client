@@ -1,0 +1,430 @@
+<div class="row" *ngIf="!requestOutletStocksdetails || requestOutletStocksdetails.length === 0">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="reqStock(false)" style="float: right;">Request
+          Stocks</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="isSearch">Request Stocks Search</h1>
+        <h1 *ngIf="isAdd">Request Stocks</h1>
+        <br>
+        <div class="row" *ngIf="(!isAdd && !isEdit)">
+          <div class="col-2 mobile-full-width">
+            <label>Request No</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="requestOutletStocks.id">
+          </div>
+        </div>
+        <span  *ngIf="(!isAdd && !isEdit)"><br></span>
+        <div class="row" *ngIf="isShowLocation || isKitchen">
+          <div class="col-2 mobile-full-width">
+            <label>Destination <span *ngIf="((isShowLocation || isKitchen) && (isAdd || isEdit))">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width" *ngIf="!isLocationLoading">
+            <ngx-select-dropdown [(ngModel)]="to_loc"
+              [ngClass]="{'error-dropdown': isSubmitted && !requestOutletStocks.location_id || (requestOutletStocks.from_location_id && requestOutletStocks.location_id && requestOutletStocks.from_location_id === requestOutletStocks.location_id)}"
+              [config]="config" [options]="locationsAll" [multiple]="false" (change)="locationSelectionChangedRequest($event)">
+            </ngx-select-dropdown>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Source<span *ngIf="(isAdd || isEdit)">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width" *ngIf="!isLocationLoading">
+            <ngx-select-dropdown *ngIf="isAdd" [(ngModel)]="from_loc"
+              [ngClass]="{'error-dropdown': isSubmitted && (!requestOutletStocks.from_location_id || (requestOutletStocks.from_location_id && requestOutletStocks.location_id && requestOutletStocks.from_location_id === requestOutletStocks.location_id))}"
+              [config]="config" [options]="locationssources" [multiple]="false"
+              (change)="fromLocationSelectionChanged($event)">
+            </ngx-select-dropdown>
+            <ngx-select-dropdown *ngIf="!isAdd" [(ngModel)]="from_loc"
+              [ngClass]="{'error-dropdown': isSubmitted && (!requestOutletStocks.from_location_id || (requestOutletStocks.from_location_id && requestOutletStocks.location_id && requestOutletStocks.from_location_id === requestOutletStocks.location_id))}"
+              [config]="config" [options]="locationsAll" [multiple]="false"
+              (change)="fromLocationSelectionChanged($event)">
+            </ngx-select-dropdown>
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="((isAdd || isEdit) && from_loc)">
+          <div class="col-2 mobile-full-width">
+            <label>Notes</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <textarea class="form-control" [(ngModel)]="requestOutletStocks.request_notes"></textarea>
+          </div>
+        </div>
+        <span *ngIf="(!(isAdd || isEdit) || ((isAdd || isEdit) && from_loc))"><br></span>
+        <div class="row" *ngIf="(!(isAdd || isEdit) || ((isAdd || isEdit) && from_loc))">
+          <div class="col-2 mobile-full-width">
+            <label>Delivery Date<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="date" class="form-control"
+              [ngClass]="{'error-field': isSubmitted && !requestOutletStocks.delivery_date}"
+              [(ngModel)]="requestOutletStocks.delivery_date" (change)="checkDateGreaterThanToday()"><span *ngIf="requestOutletStocks.delivery_date && ((isAdd || isEdit) && location?.order_cutt_off_time)">{{location.order_cutt_off_time}}</span>
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="!isAdd && !isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Status</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <select class="form-control" [(ngModel)]="order_status_id" (change)="clearRequestStocks()">
+              <option *ngFor="let stat of status;" [value]="stat.id" [selected]="stat.id === order_status_id">
+                {{stat.name}}</option>
+            </select>
+          </div>
+        </div>
+        <br>
+        <div
+          *ngIf="(isPickupCompleted && requestOutletStocks.from_location_id && (!isShowLocation || (isShowLocation && requestOutletStocks.location_id)) && (isAdd || isEdit))">
+          <div class="card" style="border: 1px solid;">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 mobile-full-width table-responsive">
+                  <div class="row">
+                    <div class="col-2 mobile-full-width table-responsive">
+                      <label>Category</label>
+                    </div>
+                    <div class="col-3 categoryFilter mobile-full-width table-responsive">
+                     <ngx-select-dropdown  *ngIf="!categoryLoading" [(ngModel)]="selectedCategories" [config]="config" [options]="childCategories" [multiple]="true" (change)="filterItems()"></ngx-select-dropdown>
+                    </div>
+                  </div>
+                  <br>
+                  <span class="text-right" style="padding-bottom: 10px;"><input type="file" [(ngModel)]="requestUpload" (change)="onFileChange($event)" style="display: none;"
+                    #file />
+                  <button (click)="file.click()" type="button" class="btn btn-warning request-stock-import">Import <img
+                      src="assets/images/excel.png" width="20"></button>
+                      <button (click)="export()" style="margin-right: 10px;" type="button" class="btn btn-warning">Sample Import<img
+                        src="assets/images/excel.png" width="20"></button></span>
+                    <table *ngIf="!categoryLoading" datatable [dtOptions]="recipeService.dtOptionsSmall" id="import" class="table align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th class="text-dark font-medium fs-4"><label>#</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Title</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Brand</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Category</label></th>
+                          <th class="text-dark font-medium fs-4"><label>HSN Code</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Pack Size</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Request Quantity</label></th>
+                          <th class="text-dark font-medium fs-4"><label>Uom</label></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let stock of stocks | categoryfilter: selectedCategories; let i = index;">
+                          <td>{{i+1}}</td>
+                          <td>{{stock.name}}</td>
+                          <td>{{stock.brand?.name}}</td>
+                          <td>{{stock.category.name}}</td>
+                          <td>{{stock.hsn_code}}</td>
+                          <td>{{stock.unit_size}}</td>
+                          <td><input type="text" [appTwoDigitDecimaNumber]="true"
+                              class="form-control" [(ngModel)]="stock.requested_quantity" (change)="checkProductQuantity(stock)"></td>
+                          <td>({{stock.unit?.name}})</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                </div>
+              </div>
+            </div>
+            <br>
+          </div>
+        </div>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel(false)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+          </div>
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel(true)">Cancel</button>
+            <button type="button" class="btn btn-rounded btn-primary" *ngIf="(requestOutletStocks.from_location_id && (!isShowLocation || (isShowLocation && requestOutletStocks.location_id)))"
+              (click)="isPreview = !isPreview;openPop(mymodal)">Preview</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' :
+              'Update'}}</button>
+          </div>
+        </div>
+        <div class="table-responsive" *ngIf="!requestOutletStocksdetails && !(isAdd || isEdit)">
+          <table class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">ACTION</th>
+                <th class="border-top-0">Request No</th>
+                <th class="border-top-0">STATUS</th>
+                <th class="border-top-0" (click)="sorting('created_at')"
+                  [ngClass]="{'sorting': sortBy !== 'created_at', 'sorting_asc': (sortBy === 'created_at' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'created_at' && sortOrder === 'DESC')}">
+                  CREATED DATE</th>
+                <th class="border-top-0" (click)="sorting('delivery_date')"
+                  [ngClass]="{'sorting': sortBy !== 'delivery_date', 'sorting_asc': (sortBy === 'delivery_date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'delivery_date' && sortOrder === 'DESC')}">REQUESTED DELIVERY DATE</th>
+                <th class="border-top-0" *ngIf="(order_status_id === '2' || order_status_id === '3' || order_status_id === '6')" (click)="sorting('delivery_approved_date')"
+                  [ngClass]="{'sorting': sortBy !== 'delivery_approved_date', 'sorting_asc': (sortBy === 'delivery_approved_date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'delivery_approved_date' && sortOrder === 'DESC')}">APPROVED DELIVERY DATE</th>
+                <th class="border-top-0">USER</th>
+                <th class="border-top-0" (click)="sorting('from_location')"
+                  [ngClass]="{'sorting': sortBy !== 'from_location', 'sorting_asc': (sortBy === 'from_location' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'from_location' && sortOrder === 'DESC')}">
+                  SOURCE</th>
+                <th class="border-top-0" (click)="sorting('location')"
+                  [ngClass]="{'sorting': sortBy !== 'location', 'sorting_asc': (sortBy === 'location' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'location' && sortOrder === 'DESC')}">
+                  DESTINATION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let requestOutletStock of requestOutletStocksData; let i = index;">
+                <td class="ingredientbutton">
+                  <button type="button" (click)="getRequestOutletStocksdetails(requestOutletStock)"><i class="fa fa-eye"
+                      aria-hidden="true"></i></button>
+                </td>
+                <td>{{requestOutletStock.id}}</td>
+                <td>{{requestOutletStock.order_status.name}}</td>
+                <td>{{requestOutletStock.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                <td>{{requestOutletStock.delivery_date | date: 'dd-MM-yyyy'}}<span *ngIf="requestOutletStock.from_location.order_cutt_off_time"> {{requestOutletStock.from_location.order_cutt_off_time}}</span></td>
+                <td *ngIf="(order_status_id === '2' || order_status_id === '3' || order_status_id === '6')">{{requestOutletStock.delivery_approved_date | date: 'dd-MM-yyyy'}}</td>
+                <td>{{requestOutletStock.user ? requestOutletStock.user.name : ''}}</td>
+                <td>{{requestOutletStock.from_location.name}}</td>
+                <td>{{requestOutletStock.location.name}}</td>
+              </tr>
+              <tr *ngIf="!requestOutletStocksData || requestOutletStocksData.length === 0">
+                <td colspan="8">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <app-pagination *ngIf="requestOutletStocksData && requestOutletStocksData.length > 0" [(lastPage)]="lastPage" [(page)]="page" (pageChangeEvent)="setPagination($event)">
+          </app-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card" style="position: relative;" *ngIf="requestOutletStocksdetails">
+  <div class="card-body">
+    <h4 class="card-title">Stocks</h4>
+    <br>
+    <div class="table-responsive">
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Request No</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.id}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Delivery Date</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.delivery_date | date: 'dd-MM-yyyy'}}
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.order_status_id === 2 || requestOutletStocksdetails.order_status_id === 3 || requestOutletStocksdetails.order_status_id === 6">
+          <label>Approved Delivery</label>
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.order_status_id === 2 || requestOutletStocksdetails.order_status_id === 3 || requestOutletStocksdetails.order_status_id === 6">
+          {{currentStock.delivery_approved_date | date: 'dd-MM-yyyy'}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Created</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.created_at | date: 'dd-MM-yyyy hh:mm a'}}
+        </div>
+        <div class="col-3 mobile-full-width">
+          <label>Source</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.from_location.name}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.request_notes">
+          <label>Request Notes</label>
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.request_notes">
+          {{requestOutletStocksdetails.request_notes.notes}}
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.approved_notes">
+          <label>Approved Notes</label>
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.approved_notes">
+          {{requestOutletStocksdetails.approved_notes.notes}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.pickup_notes">
+          <label>Pickup Notes</label>
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.pickup_notes">
+          {{requestOutletStocksdetails.pickup_notes.notes}}
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.accepted_notes">
+          <label>Accepted Notes</label>
+        </div>
+        <div class="col-3 mobile-full-width" *ngIf="requestOutletStocksdetails.accepted_notes">
+          {{requestOutletStocksdetails.accepted_notes.notes}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3 mobile-full-width">
+          <label>Total Approx Price On Approved Without Tax</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{total  | currency:'INR':'symbol-narrow':'1.2-2'}}
+        </div>
+      </div>
+      <div class="row" *ngIf="isShowLocation">
+        <div class="col-3 mobile-full-width">
+          <label>Destination</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.location.name}}
+        </div>
+        <div class="col-3 mobile-full-width">
+          <label>Created By</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.user.name}}
+        </div>
+        <ng-container *ngIf="requestOutletStocksdetails.approved_user">
+          <div class="col-3 mobile-full-width">
+            <label>Approved By</label>
+          </div>
+          <div class="col-3 mobile-full-width">
+            {{requestOutletStocksdetails.approved_user.name}}
+          </div>
+        </ng-container>
+      </div>
+      <div class="row" *ngIf="requestOutletStocksdetails.order_status_id === 6 && currentStock.accepted_notes && currentStock.accepted_notes.notes">
+        <div class="col-3 mobile-full-width">
+          <label>Wastage Mesaage</label>
+        </div>
+        <div class="col-3 mobile-full-width">
+          {{currentStock.accepted_notes.notes}}
+        </div>
+      </div>
+      <br>
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4"><label>SR. No</label></th>
+            <th class="text-dark font-medium fs-4"><label>Created</label></th>
+            <th class="text-dark font-medium fs-4"><label>Category</label></th>
+            <th class="text-dark font-medium fs-4"><label>Name</label></th>
+            <th class="text-dark font-medium fs-4"><label>Pack Size</label></th>
+            <th class="text-dark font-medium fs-4"><label>UOM</label></th>
+            <th class="text-dark font-medium fs-4"><label>Requested Quantity</label></th>
+            <th class="text-dark font-medium fs-4"><label>Approved Quantity</label></th>
+            <th class="text-dark font-medium fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 6 || requestOutletStocksdetails.order_status_id === 7"><label>Pickup Qty</label></th>
+            <th class="text-dark font-medium fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 6 || requestOutletStocksdetails.order_status_id === 7"><label>Pickup Reported By</label></th>
+            <th class="text-dark font-medium fs-4"><label>Match</label></th>
+            <th class="text-dark font-medium fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 7 || requestOutletStocksdetails.order_status_id === 6"><label>Accepted Quantity</label></th>
+            <th class="text-dark font-medium fs-4"><label>Approx Price On Approved Without Tax</label></th>
+            <ng-container *ngIf="requestOutletStocksdetails.order_status_id === 6">
+              <th class="text-dark font-medium fs-4"><label>Wastage Quantity</label></th>
+              <th class="text-dark font-medium fs-4"><label>Wastage Reported On</label></th>
+              <th class="text-dark font-medium fs-4"><label>Wastage Reported By</label></th>
+              <th class="text-dark font-medium fs-4"><label>Credit Wastage</label></th>
+              <th class="text-dark font-medium fs-4"><label>Credit Wastage Reported On</label></th>
+              <th class="text-dark font-medium fs-4"><label>Credit Wastage Reported By</label></th>
+            </ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of requestOutletStocksdetails.request_outlet_details; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{stock.created_at | date: 'dd-MM-yyyy hh:mm a'}}</td>
+            <td class="fs-4">{{stock.product ? stock.product.category.name : stock.receipe.category.name}}</td>
+            <td class="fs-4">{{stock.product ? (stock.product.name + ' ('+ stock.product.brand.name + ')') : stock.receipe.name}}</td>
+            <td class="fs-4">{{stock.product ? stock.unit_size : 1}}</td>
+            <td class="fs-4">{{stock.product ? stock.product.unit.name : stock.receipe.unit.name}}</td>
+            <td class="fs-4">{{stock.requested_quantity}}</td>
+            <td class="fs-4"><span *ngIf="stock.approved_quantity">{{stock.approved_quantity}}</span><span *ngIf="!stock.approved_quantity">-</span></td>
+            <td class="fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 6 || requestOutletStocksdetails.order_status_id === 7">{{stock.pickup_quantity}}</td>
+            <td class="fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 6 || requestOutletStocksdetails.order_status_id === 7">{{stock.pickup_user?.name}}</td>
+            <td class="fs-4">{{(stock.approved_quantity != stock.requested_quantity) ? 'No' : 'Yes'}}</td>
+            <td class="fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 7"><input type="text" *ngIf="stock.approved_quantity" (change)="checkQuantity(stock)" (blur)="clearQuantity(stock, true)" (focus)="clearQuantity(stock, false)"  [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="stock.accepted_quantity"></td>
+            <td class="fs-4" *ngIf="requestOutletStocksdetails.order_status_id === 6">{{stock.accepted_quantity}}</td>
+            <td>{{stock.total | number:'1.2-2'}}</td>
+            <ng-container *ngIf="requestOutletStocksdetails.order_status_id === 6">
+              <td class="fs-4" >{{stock.wastage_quantity}}</td>
+              <td class="fs-4">{{stock.wastage_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+              <td class="fs-4">{{stock.wastage_reported_user?.name}}</td>
+              <td class="fs-4"><span *ngIf="+stock.wastage_credit > 0">{{stock.wastage_credit}}</span><span *ngIf="+stock.wastage_credit === +stock.wastage_quantity">Accepted</span></td>
+              <td class="fs-4">{{stock.wastage_credit_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+              <td class="fs-4">{{stock.wastage_credit_user?.name}}</td>
+            </ng-container>
+          </tr>
+        </tbody>
+      </table>
+      <div>
+        <button type="button" class="btn btn-rounded btn-default" (click)="cancelStocksDetails()">Cancel</button>
+        <button type="button" *ngIf="requestOutletStocksdetails.order_status_id === 7" class="btn btn-rounded btn-primary" (click)="acceptRequestOutletStock()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #mymodal let-modal>
+  <ng-container *ngIf="isPreview">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Preview</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();cancelPop()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-12 col-lg-12 pad-left-0">
+              <div class="col-12 mobile-full-width table-responsive">
+                <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-dark font-medium fs-4"><label>#</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Title</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Brand</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Category</label></th>
+                      <th class="text-dark font-medium fs-4"><label>HSN Code</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Pack Size</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Request Quantity</label></th>
+                      <th class="text-dark font-medium fs-4"><label>Price</label></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngFor="let stock of stocks; let i = index;">
+                      <tr *ngIf="stock.requested_quantity && +stock.requested_quantity > 0">
+                        <td class="preview-count"></td>
+                        <td>{{stock.name}}</td>
+                        <td>{{stock.brand?.name}}</td>
+                        <td>{{stock.category.name}}</td>
+                        <td>{{stock.hsn_code}}</td>
+                        <td>{{stock.unit_size}}</td>
+                        <td>{{stock.requested_quantity}}</td>
+                        <td>{{+stock.total_price | number:'1.2-2'}}</td>
+                      </tr>
+                    </ng-container>
+                  </tbody>
+                  <tfoot>
+                    <th>Requested Stocks Approximate Total : </th>
+                    <th colspan="8">{{approximate_total_price  | currency:'INR':'symbol-narrow':'1.2-2'}}</th>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col-sm-6 text-left">
+          <button type="button" class="btn btn-rounded btn-default"
+            (click)="modal.dismiss();cancelPop()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>

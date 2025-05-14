@@ -1,0 +1,123 @@
+<div class="card" style="position: relative;">
+  <div class="card-body">
+    <h4 class="card-title">Outlet Inventory</h4>
+    <div class="row" *ngIf="isShowLocation">
+      <div class="col-2 mobile-full-width">
+        <label>Location*</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false"
+          (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <button type="button" class="btn btn-rounded btn-primary"
+          [disabled]="!location_id || (isCloseStocks && !choose_date)"
+          (click)="getRecords()">Submit</button>&nbsp;&nbsp;
+        <button type="button" *ngIf="stocks && stocks.length > 0" style="margin-left: 20px;"
+          class="btn btn-rounded btn-primary text-right" (click)="exportTable()">Export</button>
+        <button type="button" *ngIf="stocks && stocks.length > 0" class="btn btn-rounded btn-primary text-right"
+          (click)="getRecords()">Refresh</button>
+      </div>
+    </div>
+    <br>
+    <div class="table-responsive" *ngIf="stocks && stocks.length > 0">
+      <h3>Total Price : {{(price ? price : 0) | currency:'INR':'symbol-narrow':'1.2-2'}} <ng-container
+          *ngIf="price && price > 0 ">({{price | amountToWord}})</ng-container></h3><br>
+      <table datatable id="stocksInHand" [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">Name</th>
+            <th class="text-dark font-medium fs-4">Brand</th>
+            <th class="text-dark font-medium fs-4">Category</th>
+            <th class="text-dark font-medium fs-4">Pack Size</th>
+            <th class="text-dark font-medium fs-4">UOM</th>
+            <th class="text-dark font-medium fs-4">Avg Rate</th>
+            <th class="text-dark font-medium fs-4">Stocks Position</th>
+            <th class="text-dark font-medium fs-4">Total Cost</th>
+            <th class="text-dark font-medium fs-4">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let stock of stocks; let i = index;">
+            <tr [ngClass]="{'text-red': stock.isRed}">
+              <td class="fs-4">{{stock.sNo}}</td>
+              <td class="fs-4">{{stock.name}}<span *ngIf="!isExport && stock.product_id"></span>
+              </td>
+              <td class="fs-4">{{stock.brand_name}}</td>
+              <td class="fs-4">{{stock.category_name}}</td>
+              <td class="fs-4">{{stock.unit_size}}</td>
+              <td class="fs-4">{{stock.unit_name}}</td>
+              <td class="fs-4">{{((+stock.totalCost > 0) ? ((+stock.totalCost/+stock.quantity)) : 0) | number :
+                '1.2-2'}}</td>
+              <td class="fs-4">{{(stock.quantity) | number : '1.2-2'}}</td>
+              <td class="fs-4">{{(+stock.totalCost ? stock.totalCost: 0) | number : '1.2-2'}}</td>
+              <td class="fs-4">{{stock.isRed ? 'InActive' : 'Active'}}</td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<ng-template #mymodal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Details</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();cancelPop()">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive" *ngIf="detailProduct">
+          <h3>Total Price : {{(detailProductsTotal ? detailProductsTotal : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}
+            <ng-container *ngIf="detailProductsTotal && +detailProductsTotal > 0 ">({{detailProductsTotal |
+              amountToWord}})</ng-container>
+          </h3><br>
+          <table class="table align-middle mb-0" style="border: 1px solid black;">
+            <thead>
+              <tr>
+                <th class="text-dark font-medium fs-4">Name</th>
+                <th class="text-dark font-medium fs-4">Brand</th>
+                <th class="text-dark font-medium fs-4">Category</th>
+                <th class="text-dark font-medium fs-4">Pack Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr [ngClass]="{'text-red': detailProduct.isRed}">
+                <td class="fs-4">{{detailProduct.name}}</td>
+                <td class="fs-4">{{detailProduct.brand_name}}</td>
+                <td class="fs-4">{{detailProduct.category_name}}</td>
+                <td class="fs-4">{{detailProduct.unit_size}}&nbsp;({{detailProduct.unit_name}})</td>
+              </tr>
+            </tbody>
+          </table>
+          <br><br>
+          <table datatable id="stocksInHandChild" [dtOptions]="recipeService.dtOptionsSmall"
+            class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="text-dark font-medium fs-4">SR. No</th>
+                <th class="text-dark font-medium fs-4">Stocks Position</th>
+                <th class="text-dark font-medium fs-4">Rate</th>
+                <th class="text-dark font-medium fs-4">Approved Qty For</th>
+                <th class="text-dark font-medium fs-4">Total Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr [ngClass]="{'text-red': detailProduct.isRed}" *ngFor="let product of detailProduct.details">
+                <td class="fs-4 product-detail">{{product.sNo}}</td>
+                <td class="fs-4">{{product.quantity | number : '1.2-2'}}</td>
+                <td class="fs-4">{{(product.price) | number : '1.2-2'}}</td>
+                <td class="fs-4">{{product?.location_name}}</td>
+                <td class="fs-4">{{(product.totalCost ? product.totalCost: 0) | number : '1.2-2'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

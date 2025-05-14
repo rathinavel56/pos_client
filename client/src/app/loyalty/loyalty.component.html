@@ -1,0 +1,207 @@
+<div class="card" style="position: relative;">
+  <div class="card-body">
+    <h4 class="card-title">{{title}}</h4>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>Location</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <ngx-select-dropdown [config]="config" [options]="locations" [(ngModel)]="locationId" [multiple]="false"
+          (change)="locationSelectionChanged($event)">
+        </ngx-select-dropdown>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>From Date</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="date" class="form-control" [(ngModel)]="from">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-2 mobile-full-width">
+        <label>To Date</label>
+      </div>
+      <div class="col-4 mobile-full-width">
+        <input type="date" class="form-control" [(ngModel)]="to">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="offset-md-3 col-12 mobile-full-width">
+        <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Reset</button>
+        <button type="button" class="btn btn-rounded btn-info" (click)="getRecords()">Search</button>
+      </div>
+    </div>
+    <div class="table-responsive" *ngIf="repeatPurchases && repeatPurchases.length > 0">
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">Customer</th>
+            <th class="text-dark font-medium fs-4">Net Sales</th>
+            <th class="text-dark font-medium fs-4">Points Redeemed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let repeatPurchase of repeatPurchases; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{repeatPurchase.customer.customer_name}}<ng-container
+                *ngIf="repeatPurchase.customer.customer_mobile">({{repeatPurchase.customer.customer_mobile}})</ng-container>
+            </td>
+            <td>
+              <h5 class="mb-0 fw-normal">{{(repeatPurchase.total-(repeatPurchase.discount_amount +
+                repeatPurchase.SGST_amount + repeatPurchase.IGST_amount + repeatPurchase.CGST_amount +
+                repeatPurchase.cess_amount + repeatPurchase.roundoff)) | number:'1.2-2'}}</h5>
+            </td>
+            <td class="fs-4">{{(repeatPurchase.discount_amount > 0 ? (repeatPurchase.discount_amount) : 0) |
+              number:'1.2-2'}}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th style="text-align:right">Total:</th>
+            <th></th>
+            <th></th>
+            <th>{{total | number:'1.2-2'}}</th>
+          </tr>
+        </tfoot>
+      </table>
+      <br>
+    </div>
+    <div class="table-responsive" *ngIf="members && members.length > 0">
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">Location</th>
+            <th class="text-dark font-medium fs-4">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let member of members; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{member.name}}</td>
+            <td (click)="openModal(member, mymodal)"><a style="color: blue;">{{member.count}}</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    </div>
+    <div class="table-responsive" *ngIf="earnBurns && earnBurns.length > 0">
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">Customer</th>
+            <th class="text-dark font-medium fs-4">Net Sales</th>
+            <th class="text-dark font-medium fs-4">Points Gained</th>
+            <th class="text-dark font-medium fs-4">Points Redeemed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let earnBurn of earnBurns; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td class="fs-4">{{earnBurn.customer.customer_name}}<ng-container *ngIf="earnBurn.customer.customer_mobile">({{earnBurn.customer.customer_mobile}})</ng-container></td>
+            <td>
+              <h5 class="mb-0 fw-normal">{{earnBurn.net_sale | number:'1.2-2'}}</h5>
+            </td>
+            <td class="fs-4">{{(earnBurn.gain_point > 0 ? (earnBurn.gain_point) : 0) | number:'1.2-2'}}</td>
+            <td class="fs-4">{{(earnBurn.discount_amount > 0 ? (earnBurn.discount_amount) : 0) | number:'1.2-2'}}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th style="text-align:right">Total:</th>
+            <th></th>
+            <th>{{totalPurchaseAmount | number:'1.2-2'}}</th>
+            <th>{{gainPoints | number:'1.2-2'}}</th>
+            <th>{{totalPoints | number:'1.2-2'}}</th>
+          </tr>
+        </tfoot>
+      </table>
+      <br>
+     </div>
+     <div class="table-responsive" *ngIf="categoryWiseSales && categoryWiseSales.length > 0">
+      <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="text-dark font-medium fs-4">SR. No</th>
+            <th class="text-dark font-medium fs-4">Name</th>
+            <th class="text-dark font-medium fs-4">Points Gained</th>
+            <th class="text-dark font-medium fs-4">Points Redeemed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let categoryWiseSale of categoryWiseSales; let i = index;">
+            <td class="fs-4">{{(i+1)}}</td>
+            <td>
+              <h5 class="mb-0 fw-normal">{{categoryWiseSale.name}}</h5>
+            </td>
+            <td class="fs-4">{{(categoryWiseSale.gain_point > 0 ? (categoryWiseSale.gain_point) : 0) | number:'1.2-2'}}</td>
+            <td class="fs-4">{{(categoryWiseSale.discount_amount > 0 ? (categoryWiseSale.discount_amount) : 0) | number:'1.2-2'}}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th style="text-align:right">Total:</th>
+            <th></th>
+            <th>{{gainPoints | number:'1.2-2'}}</th>
+            <th>{{totalPoints | number:'1.2-2'}}</th>
+          </tr>
+        </tfoot>
+      </table>
+      <br>
+     </div>
+  </div>
+</div>
+
+<ng-template #mymodal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Details</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();cancelPop()">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive" *ngIf="currentMember && currentMember.data.length > 0">
+          <table datatable id="stocksInHandChild" [dtOptions]="recipeService.dtOptionsSmall"
+            class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="text-dark font-medium fs-4">SR. No</th>
+                <th class="text-dark font-medium fs-4">Name</th>
+                <th class="text-dark font-medium fs-4">Mobile</th>
+                <th class="text-dark font-medium fs-4">Purchase Amount</th>
+                <th class="text-dark font-medium fs-4">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let data of currentMember.data; let i = index;">
+                <td class="fs-4">{{(i+1)}}</td>
+                <td class="fs-4">{{data.name}}</td>
+                <td class="fs-4">{{data.mobile}}</td>
+                <td class="fs-4">{{data.purchase_amount}}</td>
+                <td class="fs-4">{{data.points}}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th></th>
+                <th></th>
+                <th style="text-align:right">Total:</th>
+                <th>{{totalPurchaseAmount | number:'1.2-2'}}</th>
+                <th>{{totalPoints | number:'1.2-2'}}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,112 @@
+<div class="card" style="position: relative;" >
+  <div class="card-body">
+    <h4 class="card-title">Credit Wastage Stocks</h4>
+    <ng-container>
+      <div class="row">
+        <div class="col-2 mobile-full-width">
+          <label>From Locations</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <ngx-select-dropdown [config]="config" [(ngModel)]="selectedLocation" [options]="locations" [multiple]="false" (change)="locationSelectionChanged($event)">
+          </ngx-select-dropdown>
+        </div>
+        <div class="col-2 mobile-full-width">
+          <label>To Locations</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <ngx-select-dropdown [config]="config" [(ngModel)]="toSelectedLocation" [options]="locations" [multiple]="false" (change)="toLocationSelectionChanged($event)">
+          </ngx-select-dropdown>
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-2 mobile-full-width">
+          <label>Reported From Date</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <input type="date" class="form-control" [(ngModel)]="from" (change)="fillDate()">
+        </div>
+        <div class="col-2 mobile-full-width">
+          <label>Reported To Date</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <input type="date" class="form-control" [(ngModel)]="to" (change)="fillDate()">
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-2 mobile-full-width">
+          <label>Delivery From</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <input type="date" class="form-control" [(ngModel)]="d_from" (change)="d_fillDate()">
+        </div>
+        <div class="col-2 mobile-full-width">
+          <label>Delivery To</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <input type="date" class="form-control" [(ngModel)]="d_to" (change)="d_fillDate()">
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="offset-md-3 col-12 mobile-full-width">
+            <button type="button" class="btn btn-rounded btn-default" (click)="getRecords(true)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="getRecords(false)">Search</button>
+          </div>
+        </div>
+      <br>
+      <div class="table-responsive" *ngIf="stocks">
+          <table datatable [dtOptions]="recipeService.dtOptionsSmallSmall" class="table align-middle mb-0">
+            <thead>
+                <tr>
+                  <th class="text-dark font-medium fs-4">SR. No</th>
+                  <th class="text-dark font-medium fs-4">Source</th>
+                  <th class="text-dark font-medium fs-4">Reported Destination</th>
+                  <th class="text-dark font-medium fs-4">Name</th>
+                  <th class="text-dark font-medium fs-4">UOM</th>
+                  <th class="text-dark font-medium fs-4">Requested Qty</th>
+                  <th class="text-dark font-medium fs-4">Pickup Qty</th>
+                  <th class="text-dark font-medium fs-4">Accepted Qty</th>
+                  <th class="text-dark font-medium fs-4">Qty Miss Match Reported</th>
+                  <th class="text-dark font-medium fs-4">Delivery Date</th>
+                  <th class="text-dark font-medium fs-4">Miss Match Qty Reported on</th>
+                  <th class="text-dark font-medium fs-4">Credit To Source</th>
+                  <th class="text-dark font-medium fs-4">Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let stock of stocks; let i = index;">
+                  <td class="fs-4">{{(i+1)}}</td>
+                  <td class="fs-4">{{stock.request_outlet?.from_location?.name}}</td>
+                  <td class="fs-4">{{stock.request_outlet?.location?.name}}</td>
+                  <td class="fs-4">{{stock.product ? stock.product.name : stock.receipe.name}}</td>
+                  <td class="fs-4">{{stock.product ? stock.product.unit.name : stock.receipe.unit.name}}</td>
+                  <td class="fs-4">{{stock.requested_quantity}}</td>
+                  <td class="fs-4">{{stock.pickup_quantity}}</td>
+                  <td class="fs-4">{{stock.accepted_quantity}}</td>
+                  <td class="fs-4">{{stock.wastage_quantity}}</td>
+                  <td class="fs-4">{{stock.wastage_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                  <td class="fs-4">{{stock.wastage_reported | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                  <td class="fs-4"><input type="text" [appTwoDigitDecimaNumber]="true" class="form-control"  [(ngModel)]="stock.wastage_quantity_update" (change)="checkQty(stock)"></td>
+                  <td class="fs-4">{{stock.request_outlet?.accepted_notes ? stock.request_outlet?.accepted_notes?.notes : ''}}</td>
+                </tr>
+            </tbody>
+            <tfoot *ngIf="stocks && stocks.length > 0">
+              <td colspan="12"><button style="color: #fff;background-color: #28a745; border-color: #28a745;" type="button" class="btn btn-rounded btn-primary text-right" (click)="submit()">Submit</button></td>
+            </tfoot>
+            <tfoot *ngIf="stocks && stocks.length === 0">
+              <td colspan="12">No Records</td>
+            </tfoot>
+          </table>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="!locations || locations.length === 0">
+      <div class="row">
+        <div class="col-3 mobile-full-width" *ngIf="isShowLocation">
+          <label>No Records Found</label>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

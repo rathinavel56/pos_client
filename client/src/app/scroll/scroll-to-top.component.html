@@ -1,0 +1,8 @@
+<div class="scroll-to-top">
+  <button type="button" [ngClass]="{'hide-scroll': windowFromTopScrolled}" class="btn active remove-shadow up-arrow-turn" data-toggle="button" aria-pressed="true" (click)="scrollToTop()">
+    <i class="fa fa-3x fa-arrow-circle-up bg-red"></i>
+  </button>
+  <button type="button" [ngClass]="{'hide-scroll': windowFromBottomScrolled}" class="btn active remove-shadow down-arrow-turn" data-toggle="button" aria-pressed="true" (click)="scrollToBottom()">
+    <i class="fa fa-3x fa-arrow-circle-up bg-red"></i>
+  </button>
+</div>

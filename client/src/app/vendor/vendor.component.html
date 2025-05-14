@@ -1,0 +1,417 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br>
+        <button type="button" class="btn btn-rounded btn-primary" *ngIf="!isPayment && !router.url.includes('/vendor-dashboard')" (click)="add()"
+          style="float: right;">Add
+          Vendor</button>
+        <button type="button" class="btn btn-rounded btn-primary" *ngIf="isPayment" (click)="backTo()"
+          style="float: right;">Back</button>
+      </div>
+      <div class="card-body">
+        <ng-container *ngIf="!isPayment">
+          <ng-container *ngIf="!router.url.includes('/vendor-dashboard')">
+            <h1 *ngIf="isSearch">Vendor Search</h1>
+            <h1 *ngIf="isAdd">Add New Vendor</h1>
+            <h1 *ngIf="isEdit">Edit Vendor</h1>
+          </ng-container>
+          <ng-container *ngIf="router.url.includes('/vendor-dashboard')">
+            <h1>{{userDetail.session_detail.vendor.name}}</h1>
+          </ng-container>
+          <br>
+          <div class="row" *ngIf="!router.url.includes('/vendor-dashboard')">
+            <div class="mobile-full-width" [ngClass]="{'col-1': (!isAdd && !isEdit), 'col-2': !(!isAdd && !isEdit)}">
+              <label>Name <span *ngIf="isAdd || isEdit">*</span></label>
+            </div>
+            <div class="mobile-full-width" [ngClass]="{'col-4': (isAdd || isEdit), 'col-3': !(isAdd || isEdit)}">
+              <input type="text" class="form-control" [(ngModel)]="name" (keydown.enter)="onKeyDownEvent($event)">
+            </div>
+            <div class="col-8 mobile-full-width" *ngIf="!isAdd && !isEdit">
+              <div class="row">
+                <div class="col-xl-3 col-md-8 mb-4">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-3">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        Total Invoice Amount</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{(totalAmount ? totalAmount : 0) |
+                        currency:'INR':'symbol-narrow':'1.2-2'}}</div>
+                    </div>
+                    <div class="col mr-3">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        Total Amount Paid</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{(totalAmount ? (totalAmount - (pendingAmount ? pendingAmount : 0)) : 0) |
+                        currency:'INR':'symbol-narrow':'1.2-2'}}</div>
+                    </div>
+                    <div class="col mr-3">
+                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                        Pending Amount</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{(pendingAmount ? pendingAmount : 0 ) |
+                        currency:'INR':'symbol-narrow':'1.2-2'}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngIf="!(isAdd || isEdit) || router.url.includes('/vendor-dashboard')">
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Pending Amount</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle" [(ngModel)]="isPendingAmount">
+                  <span for="toggle" class="toggle-slider toggle-round"></span>
+                </label>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!router.url.includes('/vendor-dashboard') && (isAdd || isEdit)">
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Address</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="address">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Pincode</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="pincode">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>GSTIN</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="gstin">
+              </div>
+            </div>
+            <br>
+            <div class="row" *ngIf="isAdd || isEdit">
+              <div class="col-2 mobile-full-width">
+                <label>Credit Days</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="credit_days">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Contact Name</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="contact_name">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Contact Mobile</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="contact_mobile">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-2 mobile-full-width">
+                <label>Contact Email</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="contact_email">
+              </div>
+            </div>
+            <br>
+            <div class="row" *ngIf="isAdd || isEdit">
+              <div class="col-2 mobile-full-width">
+                <label>Contact Website</label>
+              </div>
+              <div class="col-4 mobile-full-width">
+                <input type="text" class="form-control" [(ngModel)]="contact_website">
+              </div>
+            </div>
+          </ng-container>
+          <br>
+          <div class="row">
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+              <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+              <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+            </div>
+            <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+              <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+              <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' :
+                'Update'}}</button>
+            </div>
+          </div>
+          <div class="table-responsive" *ngIf="!router.url.includes('/vendor-dashboard') && !isAdd && !isEdit">
+            <table class="datatable table v-middle nowrap">
+              <thead>
+                <tr>
+                  <th class="border-top-0">#</th>
+                  <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                  <th class="border-top-0" (click)="sorting('name')"
+                    [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">
+                    NAME</th>
+                  <th class="border-top-0" (click)="sorting('address')"
+                    [ngClass]="{'sorting': sortBy !== 'address', 'sorting_asc': (sortBy === 'address' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'address' && sortOrder === 'DESC')}">
+                    ADDRESS</th>
+                  <th class="border-top-0" (click)="sorting('gstin')"
+                    [ngClass]="{'sorting': sortBy !== 'gstin', 'sorting_asc': (sortBy === 'gstin' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'gstin' && sortOrder === 'DESC')}">
+                    GSTIN</th>
+                  <th class="border-top-0" (click)="sorting('credit_days')"
+                    [ngClass]="{'sorting': sortBy !== 'credit_days', 'sorting_asc': (sortBy === 'credit_days' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'credit_days' && sortOrder === 'DESC')}">
+                    CREDIT DAYS</th>
+                  <th class="border-top-0" (click)="sorting('contact_name')"
+                    [ngClass]="{'sorting': sortBy !== 'contact_name', 'sorting_asc': (sortBy === 'contact_name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'contact_name' && sortOrder === 'DESC')}">
+                    CONTACT NAME</th>
+                  <th class="border-top-0" (click)="sorting('contact_mobile')"
+                    [ngClass]="{'sorting': sortBy !== 'contact_mobile', 'sorting_asc': (sortBy === 'contact_mobile' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'contact_mobile' && sortOrder === 'DESC')}">
+                    CONTACT MOBILE</th>
+                  <th class="border-top-0" (click)="sorting('contact_email')"
+                    [ngClass]="{'sorting': sortBy !== 'contact_email', 'sorting_asc': (sortBy === 'contact_email' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'contact_email' && sortOrder === 'DESC')}">
+                    CONTACT EMAIL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let vendor of vendors; let i = index;">
+                  <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                  <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" style="width: 120px;">
+                    <button type="button" (click)="edit(vendor)"><img src="assets/images/Icon-edit.png"
+                        width="16"></button>
+                    <button type="button" (click)="submit(vendor.id)"><img src="assets/images/Icon-delete.png"
+                        width="16"></button>
+                    <button type="button" (click)="getIncomingStocksPayments(vendor)"><img src="assets/images/rupee.png"
+                        width="16"></button>
+                  </td>
+                  <td>{{vendor.name}}</td>
+                  <td>{{vendor.address}} {{vendor.pincode}}</td>
+                  <td>{{vendor.gstin}}</td>
+                  <td>{{vendor.credit_days}}</td>
+                  <td>{{vendor.contact_name}}</td>
+                  <td>{{vendor.contact_mobile}}</td>
+                  <td>{{vendor.contact_email}}</td>
+                </tr>
+                <tr *ngIf="vendors.length === 0">
+                  <td>No Records</td>
+                </tr>
+              </tbody>
+            </table>
+            <app-pagination [(lastPage)]="lastPage" [(page)]="page"
+              (pageChangeEvent)="setPagination($event)"></app-pagination>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="isPayment">
+          <h1>{{vendor.name}}</h1>
+          <table class="datatable table v-middle nowrap" *ngIf="isBillView">
+            <tbody>
+              <tr>
+                <th class="border-top-0">Location</th>
+                <td>{{currentPayment.location.name}}</td>
+                <th class="border-top-0">Invoice Date</th>
+                <td>{{currentPayment.invoice_date | date:'dd-MM-yyyy'}}</td>
+                <th class="border-top-0">Receipt Date</th>
+                <td>{{currentPayment.receipt_date | date:'dd-MM-yyyy'}}</td>
+              </tr>
+              <tr>
+                <th class="border-top-0">Invoice Number</th>
+                <td>{{currentPayment.invoice_number}}</td>
+                <th class="border-top-0">Total</th>
+                <td>{{currentPayment.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <th class="border-top-0">Pending Amount</th>
+                <td>{{(currentPayment.pending_amount ? currentPayment.pending_amount : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <div class="table-responsive" *ngIf="!isBillView">
+            <table class="datatable table v-middle nowrap">
+              <thead>
+                <tr>
+                  <th class="border-top-0">#</th>
+                  <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                  <th class="border-top-0">Location</th>
+                  <th class="border-top-0" (click)="sortingPay('invoice_date')"
+                    [ngClass]="{'sorting': sortByPay !== 'invoice_date', 'sorting_asc': (sortByPay === 'invoice_date' && sortOrder === 'ASC'), 'sorting_desc': (sortByPay === 'invoice_date' && sortOrder === 'DESC')}">
+                    Invoice Date</th>
+                  <th class="border-top-0" (click)="sortingPay('receipt_date')"
+                    [ngClass]="{'sorting': sortByPay !== 'receipt_date', 'sorting_asc': (sortByPay === 'receipt_date' && sortOrder === 'ASC'), 'sorting_desc': (sortByPay === 'receipt_date' && sortOrder === 'DESC')}">
+                    Receipt Date</th>
+                  <th class="border-top-0">Invoice Number</th>
+                  <th class="border-top-0">
+                    total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let paymentDetail of paymentDetails; let j = index;">
+                  <td>{{(j+1) + ((currentPagePay-1) * 20)}}</td>
+                  <td class="ingredientbutton" style="width: 120px;">
+                    <button type="button" (click)="billDetails(paymentDetail)"><img src="assets/images/Icon-edit.png"
+                        width="16"></button>
+                  </td>
+                  <td>{{paymentDetail.location.name}}</td>
+                  <td>{{paymentDetail.invoice_date | date:'dd-MM-yyyy'}}</td>
+                  <td>{{paymentDetail.receipt_date | date:'dd-MM-yyyy'}}</td>
+                  <td>{{paymentDetail.invoice_number}}</td>
+                  <td>{{paymentDetail.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                </tr>
+                <tr *ngIf="paymentDetails.length === 0">
+                  <td>No Records</td>
+                </tr>
+              </tbody>
+            </table>
+            <app-pagination *ngIf="!isBillView" [(lastPage)]="lastPagePay" [(page)]="pagePay"
+              (pageChangeEvent)="setPaginationPay($event)"></app-pagination>
+          </div>
+          <ng-container *ngIf="isAddPayments">
+            <h3 *ngIf="!router.url.includes('/vendor-dashboard')">Add Payment<button type="button" class="btn btn-rounded btn-primary" (click)="addMorePayments()"
+                style="float: right;margin-right: 10px;">Add</button></h3>
+            <div class="row" *ngFor="let payment of payments;let indexOfelement=index;">
+              <div class="col-8 mobile-full-width">
+                <div class="card" style="border: 1px solid;">
+                  <div class="card-body">
+                    <h4 class="card-title">#{{indexOfelement+1}}<span class="pull-right ingredientbutton"
+                        *ngIf="indexOfelement != 0">
+                        <button type="button"><img src="assets/images/Icon-delete.png" width="16"
+                            (click)="removePayment(indexOfelement)"></button></span></h4>
+                            <br>
+                    <div class="row">
+                      <div class="col-3 mobile-full-width">
+                        <label>Payment Mode*</label>
+                      </div>
+                      <div class="col-4 mobile-full-width">
+                        <ngx-select-dropdown [config]="config" [options]="paymentModes" [(ngModel)]="payment.payment_mode_type" [multiple]="false" (change)="paymentModeChange($event, payment)"></ngx-select-dropdown>
+                      </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                      <div class="col-3 mobile-full-width">
+                        <label>Amount*</label>
+                      </div>
+                      <div class="col-4 mobile-full-width">
+                        <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true" [(ngModel)]="payment.amount" (keyup)="calculateAmount()" (change)="calculateAmount()">
+                      </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                      <div class="col-3 mobile-full-width">
+                        <label>Payment Date*</label>
+                      </div>
+                      <div class="col-4 mobile-full-width">
+                        <input type="date" class="form-control" (change)="checkDate(payment)" [(ngModel)]="payment.payment_date">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                      Total Amount Paid</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{(totalPayedAmount ? totalPayedAmount : 0) |
+                      currency:'INR':'symbol-narrow':'1.2-2'}}</div>
+                  </div>
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                      Pending Amount</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{(totalPendingAmount ? totalPendingAmount : 0 ) |
+                      currency:'INR':'symbol-narrow':'1.2-2'}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="offset-md-3 col-12 mobile-full-width">
+                <button type="button" class="btn btn-rounded btn-primary" (click)="backTo()"
+                  style="margin-right: 10px;">Cancel</button>
+                <button type="button" class="btn btn-rounded btn-info" [disabled]="totalPendingAmount < 0" (click)="saveIncomingStocksPaymentDetail()">Submit</button>
+              </div>
+            </div>
+          </ng-container>
+          <div class="row">
+            <div class="col-6 mobile-full-width">
+              <div class="table-responsive" *ngIf="isBillView && !isAddPayments">
+                <h3>Payments <button type="button" class="btn btn-rounded btn-primary"
+                    *ngIf="isPayment && isBillView && !isAddPayments  && !router.url.includes('/vendor-dashboard')" (click)="addPayments()"
+                    style="float: right;margin-right: 10px;">Add Payments</button></h3>
+                <table class="datatable table v-middle nowrap">
+                  <thead>
+                    <tr>
+                      <th class="border-top-0">#</th>
+                      <th class="border-top-0" *ngIf="!router.url.includes('/vendor-dashboard')">ACTIONS</th>
+                      <th class="border-top-0">Created</th>
+                      <th class="border-top-0">Pay Mode</th>
+                      <th class="border-top-0">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let bill of bills; let k = index;">
+                      <td>{{(k+1)}}</td>
+                      <td class="ingredientbutton" style="width: 120px;" *ngIf="!router.url.includes('/vendor-dashboard')">
+                        <button type="button" (click)="deletePayment(bill)"><img src="assets/images/Icon-delete.png"
+                            width="16"></button>
+                      </td>
+                      <td>{{bill.created_at | date:'dd-MM-yyyy'}}</td>
+                      <td>{{bill.payment_mode_type.name}}</td>
+                      <td>{{bill.amount | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                    </tr>
+                    <tr *ngIf="bills.length === 0">
+                      <td>No Records</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-1 mobile-full-width"></div>
+            <div class="col-5 mobile-full-width">
+              <ng-container *ngIf="isBillView && !isAddPayments">
+                <h3>Attachments <button type="button" class="btn btn-rounded btn-primary"
+                    *ngIf="isPayment && isBillView && !isAddPayments && !router.url.includes('/vendor-dashboard')" (click)="file.click()"
+                    style="float: right;margin-right: 10px;">Add Attachment</button>
+                  <input type="file" (change)="uploadFile($event)" class="hide" #file>
+                </h3>
+                <table class="datatable table v-middle nowrap">
+                  <thead>
+                    <tr>
+                      <th class="border-top-0">#</th>
+                      <th class="border-top-0" *ngIf="!router.url.includes('/vendor-dashboard')">ACTIONS</th>
+                      <th class="border-top-0">NAME</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let attachment of currentPayment.attachments; let i = index;">
+                      <td>{{(i+1)}}</td>
+                      <td *ngIf="!router.url.includes('/vendor-dashboard')" class="ingredientbutton" style="width: 120px;">
+                        <button type="button" (click)="deleteAttachment(attachment)"><img src="assets/images/Icon-delete.png"
+                            width="16"></button>
+                      </td>
+                      <td><a style="color:blue;cursor: grab;" (click)="downloadFile(attachment)">{{attachment.file_name}}</a></td>
+                    </tr>
+                    <tr *ngIf="currentPayment.attachments.length === 0">
+                      <td>No Records</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

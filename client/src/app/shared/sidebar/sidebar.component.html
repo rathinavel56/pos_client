@@ -1,0 +1,50 @@
+<nav class="sidebar-nav pt-3">
+  <ul id="sidebarnav">
+    <!-- First level menu -->
+    <li class="sidebar-item" [class.active]="showMenu === sidebarnavItem.title"
+      *ngFor="let sidebarnavItem of sidebarnavItems"
+      [routerLinkActive]="sidebarnavItem.submenu && sidebarnavItem.submenu.length != 0 ? '' : 'active'">
+
+      <div class="" *ngIf="sidebarnavItem.extralink === true">{{sidebarnavItem.title}}</div>
+
+      <a class="sidebar-link waves-effect waves-dark"
+        [routerLink]="sidebarnavItem.class === '' ? [sidebarnavItem.path] : null"
+        [ngClass]="sidebarnavItem.class ?  sidebarnavItem.class : null" *ngIf="!sidebarnavItem.extralink;"
+        (click)="addExpandClass(sidebarnavItem)"
+        [routerLinkActive]="sidebarnavItem.submenu && sidebarnavItem.submenu.length != 0 ? '' : 'active'"
+        style="display: block;">
+        <img *ngIf="sidebarnavItem.icon" src="/assets/images/{{sidebarnavItem.icon}}" width="20" height="20">
+        <span class="text-menu-pad">{{sidebarnavItem.title}}</span>
+        <i *ngIf="sidebarnavItem.submenu && sidebarnavItem.submenu.length > 0" style="float: right;" class="fa"
+          [ngClass]="(sidebarnavItem.open && sidebarnavItem.open !== '') ? 'fa-angle-down' : 'fa-angle-right'"
+          aria-hidden="true"></i>
+      </a>
+      <!-- Second level menu -->
+      <ul aria-expanded="false" class="collapse first-level"
+        [ngClass]="{'in': (sidebarnavItem.open && sidebarnavItem.open !== '')}"
+        *ngIf="sidebarnavItem.submenu && sidebarnavItem.submenu.length > 0">
+        <li class="sidebar-item" style="padding-left: 20px;" (click)="setMenus(submenu)"
+          [class.active]="showMenu === sidebarnavItem.title" *ngFor="let submenu of sidebarnavItem.submenu">
+          <a class="sidebar-link" [routerLink]="[submenu.path]">
+            <img *ngIf="submenu.icon" src="/assets/images/{{submenu.icon}}" width="20" height="20">&nbsp;&nbsp;
+            <span *ngIf="submenu.id !== 33">{{submenu.title}}</span><span *ngIf="submenu.id === 33">Request <span
+                id="menu-{{submenu.id}}"></span><br> / Accept <span id="menu-33.1"></span> Stocks</span><span
+              *ngIf="submenu.id !== 33" id="menu-{{submenu.id}}"><span
+                *ngIf="submenu.count && submenu.count > 0">&nbsp;({{submenu.count}})</span></span>
+          </a>
+      </ul>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link waves-effect waves-dark" [routerLink]="['change-password']">
+        <i class="fa fa-key m-r-5 m-l-5"></i>
+        <span class="text-menu-pad">Change Password</span>
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link waves-effect waves-dark" (click)="logout()">
+        <img src="/assets/images/logout.png" width="20" height="20">
+        <span class="text-menu-pad">Logout</span>
+      </a>
+    </li>
+  </ul>
+</nav>

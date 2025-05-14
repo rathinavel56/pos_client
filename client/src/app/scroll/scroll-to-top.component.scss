@@ -1,0 +1,27 @@
+.scroll-to-top {
+  position: fixed;
+  bottom: 15px;
+  right: -12px;
+  transition: all .2s ease-in-out;
+}
+.show-scrollTop {
+  opacity: 1;
+  transition: all .2s ease-in-out;
+}
+.hide-scroll {
+  opacity: 0;
+}
+.remove-shadow {
+  box-shadow: none !important;
+  border: none;
+}
+.bg-red {
+  color: #d93d33 !important;
+}
+.up-arrow-turn {
+  margin-top: -80px;
+  margin-right: -58px;
+}
+.down-arrow-turn {
+  transform: rotate(180deg);
+}

@@ -1,0 +1,286 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-title" style="padding-right: 20px;" *ngIf="isSearch && !recipeService.isReadOnly">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="add()"  style="float: right;">Add Location</button>
+      </div>
+      <div class="card-body">
+        <h1 *ngIf="isSearch">Location Search</h1>
+        <h1 *ngIf="isAdd">Add New Location</h1>
+        <h1 *ngIf="isEdit">Edit Location</h1>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Name<span *ngIf="isAdd || isEdit">*</span> </label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="name" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Code<span *ngIf="isAdd || isEdit">*</span></label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="code" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Bill Location Name</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="billing_name" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Address</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="address" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Phone Number</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="phone_no" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>GSTIN</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="gstin" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>FSSAI Number</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="fssai_no" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Billing Thank You Message</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="message" (keydown.enter)="onKeyDownEvent($event)">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Table Count</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="table_count">
+          </div>
+        </div>
+        <br>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Cental Store</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="is_central_stores">
+              <span class="toggle-slider toggle-round" (click)="toggleCheck()"></span>
+            </label>
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Kitchen</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="is_kitchen">
+              <span class="toggle-slider toggle-round" (click)="toggleCheck()"></span>
+            </label>
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Approve Greater Stocks</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="is_approve_greater_stocks">
+              <span class="toggle-slider toggle-round" (click)="toggleCheck()"></span>
+            </label>
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="!isAdd && !isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Cental Store</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <select class="form-control" [(ngModel)]="central_store">
+              <option *ngFor="let central of centrals;" [value]="central.value" [selected]="central.value === central_store">
+                {{central.name}}</option>
+            </select>
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>Enable Edit</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="enable_edit">
+              <span class="toggle-slider toggle-round"></span>
+            </label>
+          </div>
+        </div>
+        <span *ngIf="((isAdd || isEdit) && (is_kitchen || is_central_stores))"><br></span>
+        <div class="row" *ngIf="((isAdd || isEdit) && (is_kitchen || is_central_stores))">
+          <div class="col-2 mobile-full-width">
+            <label>Order Cutt Off Days</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}" onpaste="let pasteData = event.clipboardData.getData('text'); if(pasteData){pasteData.replace(/[^0-9]*/g,'');} " class="form-control" [(ngModel)]="order_cutt_off_days">
+          </div>
+        </div>
+        <span *ngIf="((isAdd || isEdit) && (is_kitchen || is_central_stores))"><br></span>
+        <div class="row" *ngIf="((isAdd || isEdit) && (is_kitchen || is_central_stores))">
+          <div class="col-2 mobile-full-width">
+            <label>Order Cutt Off Time</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="time" class="form-control" [(ngModel)]="order_cutt_off_time">
+          </div>
+        </div>
+        <span *ngIf="isAdd || isEdit"><br></span>
+        <div class="row" *ngIf="isAdd || isEdit">
+          <div class="col-2 mobile-full-width">
+            <label>DotePe Enabled</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="is_dotepe">
+              <span class="toggle-slider toggle-round"></span>
+            </label>
+          </div>
+        </div>
+        <div class="row" *ngIf="is_dotepe">
+          <div class="col-6 mobile-full-width location-table">
+            <h3>Dotepe Modes</h3>
+            <table class="datatable table v-middle nowrap">
+              <thead>
+                <tr>
+                  <th class="border-top-0">#</th>
+                  <th class="border-top-0">NAME</th>
+                  <th class="border-top-0">START</th>
+                  <th class="border-top-0">END</th>
+                  <th class="border-top-0">EXECUTION TIME</th>
+                  <th class="border-top-0">REQUEST ID</th>
+                  <th class="border-top-0">REQUEST STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let paymentMode of paymentModes; let i = index;">
+                  <td><input type="checkbox" [(ngModel)]="paymentMode.checked"></td>
+                  <td>{{paymentMode.name}}</td>
+                  <td>{{paymentMode.start_time}}</td>
+                  <td>{{paymentMode.end_time}}</td>
+                  <td>{{paymentMode.execution_time}}</td>
+                  <td>{{paymentMode.request_id}}</td>
+                  <td>{{paymentMode.request_status}}</td>
+                </tr>
+                <tr *ngIf="paymentModes.length === 0">
+                  <td>No Records</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <br>
+        <span *ngIf="(isAdd || isEdit)"><br></span>
+        <div class="row" *ngIf="(isAdd || isEdit)">
+          <div class="col-6 mobile-full-width location-table">
+            <h3>Location Where Request Stocks Can Be Placed</h3>
+            <table class="datatable table v-middle nowrap">
+              <thead>
+                <tr>
+                  <th class="border-top-0">#</th>
+                  <th class="border-top-0">NAME</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let location of locations; let i = index;">
+                  <td><input type="checkbox" [(ngModel)]="location.checked"></td>
+                  <td>{{location.name}}</td>
+                </tr>
+                <tr *ngIf="locations.length === 0">
+                  <td>No Records</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isSearch">
+            <button type="button" class="btn btn-rounded btn-default" (click)="search(true)">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="search(false)">Search</button>
+          </div>
+          <div class="offset-md-3 col-12 mobile-full-width" *ngIf="isAdd || isEdit">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+            <button type="button" class="btn btn-rounded btn-primary" (click)="submit(null)">{{isAdd ? 'Submit' : 'Update'}}</button>
+          </div>
+        </div>
+        <div class="table-responsive" *ngIf="isSearch">
+          <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" (click)="sorting('name')" [ngClass]="{'sorting': sortBy !== 'name', 'sorting_asc': (sortBy === 'name' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'name' && sortOrder === 'DESC')}">NAME</th>
+                <th class="border-top-0 sorting" (click)="sorting('code')" [ngClass]="{'sorting': sortBy !== 'code', 'sorting_asc': (sortBy === 'code' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'code' && sortOrder === 'DESC')}">CODE</th>
+                <th class="border-top-0" (click)="sorting('is_central_stores')" [ngClass]="{'sorting': sortBy !== 'is_central_stores', 'sorting_asc': (sortBy === 'is_central_stores' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'is_central_stores' && sortOrder === 'DESC')}">CENTRAL STORE</th>
+                <th class="border-top-0" (click)="sorting('is_kitchen')" [ngClass]="{'sorting': sortBy !== 'is_kitchen', 'sorting_asc': (sortBy === 'is_kitchen' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'is_kitchen' && sortOrder === 'DESC')}">KITCHEN</th>
+                <th class="border-top-0" (click)="sorting('is_dotepe')" [ngClass]="{'sorting': sortBy !== 'is_dotepe', 'sorting_asc': (sortBy === 'is_dotepe' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'is_dotepe' && sortOrder === 'DESC')}">DotePe Enabled</th>
+                <th class="border-top-0">DotePe Sync</th>
+                <th class="border-top-0">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let location of locations; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td>{{location.name}}</td>
+                <td>{{location.code}}</td>
+                <td>{{location.is_central_stores ? 'Yes' : 'No'}}</td>
+                <td>{{location.is_kitchen ? 'Yes' : 'No'}}</td>
+                <td>{{location.is_dotepe ? 'Yes' : 'No'}}</td>
+                <td><button *ngIf="location.is_dotepe" type="button" class="btn btn-rounded btn-primary" (click)="dotepeSync(location)">Sync</button></td>
+                <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
+                  <button type="button" (click)="requestLocations(location)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" (click)="submit(location.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                </td>
+              </tr>
+              <tr *ngIf="locations.length === 0">
+                <td>No Records</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

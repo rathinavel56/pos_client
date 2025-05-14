@@ -1,0 +1,22 @@
+#AuthType Basic
+#AuthName "Password Required"
+#AuthUserFile /var/www/html/.htpasswd
+#Require valid-user
+DirectoryIndex index.html
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+	#RewriteCond %{http} off 
+	#RewriteRule ^(.*)$ http://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+	RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
+	
+	RewriteCond %{REQUEST_FILENAME} -s [OR]
+    RewriteCond %{REQUEST_FILENAME} -l [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^.*$ - [NC,L]
+    RewriteRule ^(.*) index.html [NC,L]
+</IfModule>
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
+</IfModule>

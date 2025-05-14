@@ -1,0 +1,554 @@
+<ng-container *ngIf="isStart && !intialForm">
+  <div class="row" *ngIf="isShowLocation">
+    <div class="col-12 col-md-2">
+      <label>Location*</label>
+    </div>
+    <div class="col-12 col-md-4">
+      <ngx-select-dropdown [ngClass]="{'error-dropdown': intialForm && !selectedLocation}" [config]="config"
+        [options]="locations" [multiple]="false" [(ngModel)]="selectedLocation"
+        (change)="locationSelectionChanged($event)">
+      </ngx-select-dropdown>
+    </div>
+  </div>
+  <br>
+</ng-container>
+<ng-container *ngIf="bill_id.id !== 4 && isLogin">
+  <span *ngIf="(!isShowLocation || (this.locations && this.locations.length === 0))"><br></span>
+  <div class="row bill-top"
+    *ngIf="!isShowLocation || (selectedLocation && selectedLocation.id) || (this.locations && this.locations.length === 0)">
+    <div class="col-sm-12 col-md-12 col-lg-12 pad-right-0 pad-left-0"
+      *ngIf="(categories.length === 0 && ((!isShowLocation || (this.locations && this.locations.length === 0))|| intialForm))">
+      <br>
+      <div class="alert alert-info">
+        <strong>No Stocks</strong>
+        <i style="position: absolute; top: 18px; right: 2px;" class="fa fa-refresh fa-2 reset-billing"
+          (click)="reset(1)" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-6 pad-right-0 pad-left-0" *ngIf="categories && categories.length > 0">
+      <div class="card min-height-450">
+        <div class="card-body">
+          <div class="row">
+            <ng-container *ngFor="let paymentMode of paymentModesOg">
+              <div class="col-md-6 col-lg-2 pad-left-0" *ngIf="paymentMode.is_bill === 1">
+                <div class="card br-grey pos-sale-card" (click)="changePaymentModes(paymentMode)"
+                  [ngClass]="(paymentMode.selected) ? 'br-red' : ''">
+                  <div class="card-body pos-sale">
+                    <div><img src="assets/images/payment/{{paymentMode.icon}}"
+                        width="{{(paymentMode.is_online === 0) ? '20' : '40'}}"><span class="font13"
+                        *ngIf="paymentMode.is_online === 0"><br>{{paymentMode.name}}</span><span class="font13 text-red"
+                        *ngIf="paymentMode.is_online !== 0 && paymentMode.orders && paymentMode.orders.length"><br>({{paymentMode.orders.length}})</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+          <div class="row">
+            <div class="col-md-11 col-lg-11">
+              <input type="text" class="form-control" placeholder="Enter Key words...." [(ngModel)]="selcat">
+            </div>
+            <div class="col-md-1 col-lg-1">
+              <button type="button" class="btn btn-rounded btn-default float-right"
+                (click)="clearSelcat()">Clear</button>
+            </div>
+          </div>
+          <div class="card items-card">
+            <div class="card-body pos-card">
+              <div class="row">
+                <div class="col-md-3 col-lg-3 pad-left-0">
+                  <div class="card bg-white">
+                    <div class="card-header bill-cat height-20">
+                      Categories
+                    </div>
+                    <ul class="list-group list-group-flush bg-white">
+                      <li class="list-group-item bg-white" *ngFor="let category of categories"
+                        (click)="changeCategory(category)">{{category.name}}&nbsp;&nbsp;({{category.count}})</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-9 col-lg-9 pad-left-0">
+                  <div class="row">
+                    <div class="col-md-4 col-lg-3 pad-left-0"
+                      *ngFor="let stock of currentCategories.stocks | filter: selcat: 'name'">
+                      <div class="card br-grey pos-cat-card" (click)="addOnCheck(addonModal, stock)">
+                        <div class="card-body pos-card">
+                          <div class="d-flex">
+                            <div>
+                              <div style="font-size: 12px !important;">{{stock.name}} <span
+                                  *ngIf="userDetail.session_detail.settings.pos_quantity_show === '1'">({{stock.quantity}})</span>
+                              </div>
+                              <div><small class="text-muted fs-3 font12">{{stock.display_price |
+                                  currency:'INR':'symbol-narrow':'1.2-2'}}</small></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-6" *ngIf="categories && categories.length > 0">
+      <div class="card min-height-450">
+        <div class="card-body customer">
+          <div>
+            <span style="position: absolute; top: -1px; right: -1px;" (click)="openCart(mymodal)"><img width="20"
+                height="20" src="assets/images/arrow-up-right-square-fill.svg"></span>
+            <span style="position: absolute; top: -1px; right: 40px;" (click)="mainMenu()"><img width="30" height="30"
+                src="assets/images/back_arrow.png"></span>
+            <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
+              (click)="reset(false, false)">Reload Billing Screen</button>
+            <span class="pull-left table-bill" *ngIf="(selected_payment_mode.id === 1) && tables.length > 0">
+              <select class="form-control" [(ngModel)]="table_id" (change)="table_change()">
+                <option *ngFor="let table of tables;" [value]="table.value">{{table.name}}</option>
+              </select>
+            </span>
+            <span class="pull-right"
+              *ngIf="selected_payment_mode.is_online === 0 && selected_payment_mode.name !== 'NCB'">
+              <label>Customer Mobile No:</label>
+              <span>
+                <input type="text" placeholder="Maximum 10 Digits Only" [appTwoDigitDecimaNumber]="true" maxlength="10"
+                  class="form-control" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
+                  (keydown.enter)="getCustomer(mymodal)"
+                  [ngStyle]="{'border': (customer.length < 10) ? '1px solid red !important;' : '1px solid black !important;'}">
+              </span>
+            </span>
+            <span class="pull-right"
+              *ngIf="selected_payment_mode.is_online !== 0 || selected_payment_mode.name === 'NCB'">
+              <label *ngIf="selected_payment_mode.name !== 'Credit Pay'">Reference No:</label>
+              <label *ngIf="selected_payment_mode.name === 'Credit Pay'">Customer Name:</label>
+              <span>
+                <input type="text" class="form-control" [disabled]="bill_id.id === 2"
+                  [ngClass]="(submitted && !reference_no) ? 'required-text' : ''" [(ngModel)]="reference_no">
+              </span>
+            </span>
+          </div>
+          <br>
+          <div class="pos-table" id="pos-table">
+            <div class="flex-container bill-particular">
+              <label>Particulars</label>
+              <label class="float-right margin-right-50">Qty</label>
+            </div>
+            <ng-container *ngFor="let cart of carts">
+              <div class="card card-border {{cart.uniq}}" [ngClass]="(cart.isAddon == true) ? 'margin-l-10' : ''">
+                <div class="card-body card-pos-body">
+                  <div>
+                    <label class="card-title-text remove-bold">{{cart.name}}</label>
+                    <span class="float-right">
+                      <table style="width: 100%">
+                        <tr>
+                          <td>
+                            <div class="minus-icon pointer-cursor text-selection-disabled" style="margin-left: -30px;"
+                              (click)="decreaseQuantity(cart)">
+                              -
+                            </div>
+                          </td>
+                          <td>
+                            <span style="margin-top: 1px;">
+                              <input type="text" [appTwoDigitDecimaNumber]="true" class="qty-{{cart.uniq}}"
+                                (keyup)="qtyChanged(cart, $event.target.value, true)"
+                                (change)="qtyChanged(cart, $event.target.value, false)" class="form-control width75" />
+                            </span>
+                          </td>
+                          <td>
+                            <div class="plus-icon pointer-cursor text-selection-disabled" style="margin-left: 10px;"
+                              (click)="increaseQuantity(cart)">+
+                            </div>
+                          </td>
+                          <td>&nbsp;{{cart.unit}}</td>
+                        </tr>
+                      </table>
+                    </span>
+                  </div>
+                  <div>
+                    <table style="width: 100%;">
+                      <tr>
+                        <th class="remove-bold">UNIT PRICE</th>
+                        <th class="remove-bold">NET PRICE</th>
+                        <th class="remove-bold">SGST</th>
+                        <th class="remove-bold">CGST</th>
+                        <th class="remove-bold">IGST</th>
+                        <th class="remove-bold">CESS</th>
+                        <th>TOTAL</th>
+                      </tr>
+                      <tr>
+                        <td>{{(cart.price) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(cart.net_price * cart.added_quantity) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{cart.SGST | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{cart.CGST | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{cart.IGST | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{cart.cess | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(+cart.total_net_price + +cart.SGST + +cart.CGST + +cart.IGST + +cart.cess) |
+                          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+          <table style="width: 100%;">
+            <tr *ngIf="(selected_payment_mode && selected_payment_mode.id !== 1)">
+              <td colspan="6">
+                <table style="width: 100%;">
+                  <tr>
+                    <td class="font-b">Parcel Charges</td>
+                    <td class="float-right font-b"><input type="text" [appTwoDigitDecimaNumber]="true"
+                        class="form-control" (focus)="onFocusParcelCharge()"
+                        (keyup)="onChangeParcelCharge($event.target.value, true)"
+                        (change)="onChangeParcelCharge($event.target.value, false)" [(ngModel)]="parcel_charge"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-center text-center">Total Qty</td>
+              <td class="mobile-center text-center">Sub Total</td>
+              <td class="mobile-center text-center">SGST</td>
+              <td class="mobile-center text-center">CGST</td>
+              <td class="mobile-center text-center">IGST</td>
+              <td class="mobile-center text-center">CESS</td>
+            </tr>
+            <tr>
+              <td class="text-center">{{totalQty | number:'1.2-2'}}</td>
+              <td class="text-center">{{(ogBillTotal ? ogBillTotal - (SGST_amount + CGST_amount + IGST_amount +
+                cess_amount) : 0) |
+                currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+              <td class="text-center">{{(SGST_amount ? SGST_amount : 0) |
+                currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+              <td class="text-center">{{(CGST_amount ? CGST_amount : 0) |
+                currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+              <td class="text-center">{{(IGST_amount? IGST_amount: 0) |
+                currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+              <td class="text-center">{{(cess_amount? cess_amount: 0) |
+                currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+            </tr>
+            <td colspan="6">
+              <table style="width: 100%;">
+                <tbody>
+                  <tr>
+                    <td *ngIf="+selected_payment_mode.max_discount_percentage > 0" class="font-b mobile-center"
+                      style="text-align: center;">DISCOUNT %</td>
+                    <td class="font-b mobile-center" style="text-align: center;">DISCOUNT AMT</td>
+                    <td class="font-b mobile-center" style="text-align: center;" *ngIf="discount_points > 0">TOTAL PTS
+                    </td>
+                    <td class="font-b mobile-center" *ngIf="discount_points > 0" style="text-align: center;">REEDEM PTS
+                    </td>
+                    <td *ngIf="+billAdvanceAmt > 0" class="font-b mobile-center" style="text-align: center;">ADVANCE AMT
+                    </td>
+                    <td class="font-b mobile-center" style="text-align: center;">TOTAL</td>
+                  </tr>
+                  <tr>
+                    <td *ngIf="+selected_payment_mode.max_discount_percentage > 0" class="font-b">
+                      <ng-container *ngIf="!selected_payment_mode.virtual_discount_percentage">
+                        <input [disabled]="((discount_mloyal_amount > 0) || total === 0)"
+                          style="width: 80px;margin-left: auto;margin-right: auto;" type="text"
+                          [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="discount_percentage"
+                          (focus)="onFocusDiscountPercentage()"
+                          (change)="validateDiscountPercentage($event.target.value, true)"
+                          (keyup)="validateDiscountPercentage($event.target.value, true)">
+                      </ng-container>
+                      <ng-container *ngIf="selected_payment_mode.virtual_discount_percentage">
+                        <input disabled style="width: 80px;margin-left: auto;margin-right: auto;" type="text"
+                          [appTwoDigitDecimaNumber]="true" class="form-control"
+                          [(ngModel)]="virtual_discount_percentage" (focus)="onFocusVirtualDiscountPercentage()"
+                          (change)="validateVirtualDiscountPercentage($event.target.value, true)"
+                          (keyup)="validateVirtualDiscountPercentage($event.target.value, true)">
+                      </ng-container>
+                    </td>
+                    <td class="text-center">{{(discount_amount ? discount_amount: 0) |
+                      currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                    <!-- <td colspan="1" class="font-b"><input [disabled]="total === 0" style="width: 80px;margin-left: auto;margin-right: auto;" type="text" [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="discount_amount" (focus)="onFocusDiscount()" (change)="validateDiscountAmount()"></td> -->
+                    <td class="text-center" *ngIf="discount_points > 0">{{(discount_points ? discount_points: 0) |
+                      currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                    <td *ngIf="discount_points > 0" class="font-b"><input [disabled]="total === 0"
+                        style="width: 80px;margin-left: auto;margin-right: auto;" type="text"
+                        [appTwoDigitDecimaNumber]="true" class="form-control" [(ngModel)]="discount_mloyal_amount"
+                        (focus)="onFocusDiscountPoint()" (change)="validatePoints()"></td>
+                    <td *ngIf="+billAdvanceAmt > 0" class="font-b text-center">&nbsp;&nbsp;&nbsp;{{(billAdvanceAmt ?
+                      billAdvanceAmt : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}
+                    </td>
+                    <td class="font-b text-center">&nbsp;&nbsp;&nbsp;{{(billTotaldue ? (billTotaldue - billAdvanceAmt) :
+                      0) | currency:'INR':'symbol-narrow':'1.2-2'}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+            <tr>
+              <!-- <button type="button" [disabled]="!total || total < 0"
+                  class="btn btn-rounded btn-default" (click)="openNotes(mymodal)">Note</button> -->
+              <!-- <td colspan="5">
+                <button [disabled]="!total || total < 0" type="button" class="btn btn-rounded btn-default"
+                  (click)="draft()">Hold</button>
+              </td> -->
+              <td colspan="5"><button [disabled]="(carts && carts.length === 0) || submitted" type="button"
+                  class="btn btn-rounded btn-primary float-right" (click)="openPaymentMode(mymodal)">Finish
+                  Order</button>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="print_invoice" class="hide" *ngIf="carts && carts.length > 0">
+    <table style="width: 85%; margin-left: 30px;">
+      <thead>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            {{userDetail.session_detail.settings['bill_address']}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            {{userDetail.session_detail.settings['bill_gstin']}}</th>
+        </tr>
+        <tr>
+          <th colspan="4"><br></th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.name}}
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.address}}.
+            Ph: {{selectedLocation.phone_no}}
+          </th>
+        </tr>
+        <tr *ngIf="selectedLocation.gstin">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            GSTIN:{{selectedLocation.gstin}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Order Type:
+            {{selected_payment_mode.name}}</th>
+        </tr>
+        <tr *ngIf="reference_no">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Reference No:{{reference_no}}
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Invoice:{{invoice_no}}</th>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Invoice Date & Time:
+            {{invoice_date | date: 'dd-MM-yyyy hh:mm a'}}</th>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <th style="font-size: 10px !important;">Item</th>
+          <th style="font-size: 10px !important;">Rate</th>
+          <th style="font-size: 10px !important;">Qty</th>
+          <th style="font-size: 10px !important;">Amt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;"
+          *ngFor="let cart of carts">
+          <td>
+            <table>
+              <tr>
+                <td style="font-size: 10px !important;">{{cart.name}}</td>
+              <tr>
+              <tr *ngIf="cart.hsn_code">
+                <td style="font-size: 10px !important;">HSN: {{cart.hsn_code}}</td>
+              </tr>
+            </table>
+          </td>
+          <td style="font-size: 10px !important;">{{cart.price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+          <td style="font-size: 10px !important;">{{cart.added_quantity}} </td>
+          <!-- ({{cart.unit}}) -->
+          <td style="font-size: 10px !important;">{{cart.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="border-top: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Total Qty</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{totalQty}}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Sub-Total</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{total |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <tr *ngIf="discount_amount">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Discount</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{ discount_amount |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Discount By Rewards Points Used</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{ discount_mloyal_amount |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Sub-Total After Discount</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{ (total - discount_amount) |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <!-- <tr *ngIf="+billAdvanceAmt > 0">
+          <td colspan="3" class="font-b">ADVANCE AMOUNT</td>
+          <td class="float-right font-b">&nbsp;&nbsp;&nbsp;{{(billAdvanceAmt ? billAdvanceAmt : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr> -->
+        <!-- *ngIf="(selected_payment_mode && selected_payment_mode.id !== 1)" -->
+        <tr style="border-top: 1px solid grey;border-bottom: 1px solid grey;" *ngIf="+parcel_charge > 0">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Packaging Charge</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{parcel_charge |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <ng-container *ngIf="taxs && taxs.length > 0">
+          <tr *ngFor="let tax of taxs">
+            <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{tax.name}} @{{tax.percentage}}%</td>
+            <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{tax.amount |
+              currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+          </tr>
+        </ng-container>
+        <tr style="border-top: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Bill Total</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(billTotal ? billTotal : 0) |
+            currency:'INR':'symbol-narrow':'1.2-2'}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Round Off</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(billTotalRound ? billTotalRound : 0)
+            |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <!-- <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Amount Due</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(billTotaldue ? (billTotaldue - +billAdvanceAmt) : 0) |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr> -->
+        <tr *ngIf="customer" style="border-top: 1px solid grey;">
+          <td colspan="4" style="font-size: 10px !important;text-align: center;font-weight: bold;">Customer Information
+          </td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Name</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{customer ? customer.customer_name :
+            ''}}</td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Mobile</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(customer ? customer.customer_mobile :
+            '') | phoneMask}}</td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Retail POS Rewards Points Balance</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(discount_points ? (discount_points -
+            discount_mloyal_amount) : 0)}}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Pay Mode</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{payment_mode_name}}</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <img style="display: block;margin: 0 auto;width: 60px;height: 60px;margin-top: 0px;"
+              src="{{hostName}}/assets/images/fssai.png">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="font-size: 10px !important;text-align: center !important">FSSAI
+            NO:{{selectedLocation.fssai_no}}</td>
+        </tr>
+        <tr>
+          <td colspan="4"><br></td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div style="text-align: center;"><span style="font-size: 10px !important;text-align: justify;">I/We hereby
+                certily that food foods mentioned in this invoice is/are warranted to be of nature & quality which
+                it/these purport/purported to be.</span></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div style="text-align: center;"><span
+                style="font-size: 10px !important;">www.{{hostName}}.co.in</span><br><span
+                style="font-size: 10px !important;">
+                www.{{hostName}}rewards.com</span></div>
+          </td>
+        </tr>
+        <tr class="print-message" *ngIf="selectedLocation.message">
+          <th colspan="4" style="font-size: 10px !important;text-align: center;">{{selectedLocation.message}}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</ng-container>
+<div id="print_kitchen_order" class="hide" *ngIf="kitchenPrintData && kitchenPrintData.data.length > 0">
+  <table style="width: 85%; margin-left: 30px;">
+    <thead>
+      <tr>
+        <th colspan="2" style="font-size: 10px !important;text-align: center !important">Table{{kitchenPrintData.name}}
+        </th>
+      </tr>
+      <tr>
+        <th style="font-size: 10px !important;text-align: center !important">
+          Item
+        </th>
+        <th style="font-size: 10px !important;text-align: center !important">
+          Status
+        </th>
+        <th style="font-size: 10px !important;text-align: center !important">
+          Quantity
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;"
+        *ngFor="let cart of kitchenPrintData.data">
+        <td style="font-size: 10px !important;">{{cart.name}}</td>
+        <td style="font-size: 10px !important;">{{cart.status}}</td>
+        <td style="font-size: 10px !important;">{{cart.quantity}} </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<ng-container *ngIf="intialForm && !isLogin">
+  <div class="jumbotron center-screen">
+    <a class="btn btn-primary btn-lg display-4" (click)="startBilling()" role="button">Start Billing</a>
+    <br>
+  </div>
+</ng-container>
+<div id="sound"></div>
+<ng-template #addonModal let-modal>
+  <ng-container>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Add On</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-12">
+              <ngx-select-dropdown [config]="config" [options]="addons" [multiple]="true"
+                [(ngModel)]="addonDetails" (change)="addonDetailsChanged($event)"></ngx-select-dropdown>
+                {{addonDetailData.toString()}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-rounded btn-default" (click)="modal.dismiss()">Cancel</button>
+      <button type="button" class="btn btn-primary"
+        (click)="modal.dismiss();addOnCheckProcess(mymodal)">Submit</button>
+    </div>
+  </ng-container>
+</ng-template>

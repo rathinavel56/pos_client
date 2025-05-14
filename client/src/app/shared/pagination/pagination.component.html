@@ -1,0 +1,4 @@
+<ng-container *ngIf="lastPage && +lastPage !== 1">
+  <br>
+  <ngb-pagination class="d-flex justify-content-center" [(collectionSize)]="lastPage" [pageSize]="20" [(page)]="page" [boundaryLinks]="true" [maxSize]="7" (pageChange)="pageChange();"></ngb-pagination>
+</ng-container>

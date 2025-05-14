@@ -1,0 +1,19 @@
+<div class="clsFlex" *ngIf="screenLoad" style="background: linear-gradient(270deg, #c84a3c 0%, #5489c4 100%);background-image: url('/assets/images/{{hostName}}.home.jpg');" >
+  <div [ngClass]="{'offset-md-1': isOtherWeb}">
+    <form class="form-signin">
+        <div class="clearfix">
+            <div class="h3 mb-3"><img style="width: 320px;height: 170px;" src="/assets/images/{{hostName}}.logo-icon.png" /></div>
+            <h1 class="h3 mb-3 font-weight-normal login-white" [ngClass]="isOtherWeb ? 'color-b' : 'color-w'">Please sign in</h1>
+            <div class="form-group">
+                <label for="inputEmail" class="sr-only">Username</label>
+                <input type="text" id="inputUsername" class="form-control" [(ngModel)]="username" [ngModelOptions]="{standalone: true}" placeholder="Username" (keydown.enter)="onSubmit()" autofocus>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input type="password" id="inputPassword" [(ngModel)]="password" [ngModelOptions]="{standalone: true}" class="form-control" placeholder="Password" (keydown.enter)="onSubmit()">
+            </div>
+            <button class="btn btn-lg btn-danger btn-block" (click)="onSubmit()" type="button" style="background-color: #ac2925; border-color: #761c19; color: #f7f7f7;">Sign in</button>
+        </div>
+    </form>
+  </div>
+</div>

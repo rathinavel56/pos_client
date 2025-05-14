@@ -1,0 +1,83 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h1>Settings
+          <button type="button" class="btn btn-rounded btn-primary pull-right" (click)="getRecords()" style="margin-top: -5px;">Refresh</button>
+        </h1>
+        <br>
+        <ng-container *ngFor="let settingDetail of settings; let j = index;">
+          <div class="alert alert-info" role="alert" style="height: 60px;">
+            {{settingDetail.description}}
+            <button *ngIf="settingDetail.is_range" type="button" class="btn btn-rounded btn-primary pull-right" style="margin-top: -5px;" (click)="addRange(settingDetail)">Add</button>
+          </div>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
+              <label class="word-break">{{settingDetail.key}}</label>
+            </div>
+            <ng-container *ngIf="settingDetail.type === 'label'">
+              <div class="col-4 mobile-full-width">
+                <p class="multi_lines_text" [innerHTML]="settingDetail.details"></p>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="settingDetail.type !== 'label'">
+              <div class="col-4 mobile-full-width" *ngIf="!settingDetail.is_range">
+                <input type="text" *ngIf="!settingDetail.description.includes('Categories') && !settingDetail.key.includes('address') && !settingDetail.key.includes('image')" class="form-control" [(ngModel)]="settingDetail.value">
+                <input type="file" *ngIf="settingDetail.key.includes('image')" class="form-control" [(ngModel)]="settingDetail.value">
+                <textarea *ngIf="settingDetail.key.includes('address')" class="form-control" [(ngModel)]="settingDetail.value"></textarea>
+                <ngx-select-dropdown *ngIf="settingDetail.description.includes('Categories')" [config]="config" [options]="categories" [multiple]="true" [(ngModel)]="settingDetail.categories" (change)="categoriesSelectionChanged(settingDetail, $event)"></ngx-select-dropdown>
+              </div>
+              <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                <label>From</label><input type="text" (change)="clearZero(settingDetail, 'value', settingDetail)" class="form-control" placeholder="From" [(ngModel)]="settingDetail.value">
+              </div>
+              <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                <label *ngIf="!settingDetail.childrens || settingDetail.childrens.length === 0">To (Leave It Blank For Nth Number)</label><label *ngIf="!(!settingDetail.childrens || settingDetail.childrens.length === 0)"></label><input type="text" (change)="clearZero(settingDetail, 'value1', settingDetail)" class="form-control" placeholder="To" [(ngModel)]="settingDetail.value1">
+              </div>
+              <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                <label>Percentage</label><input type="text" class="form-control" (change)="clearZero(settingDetail, 'value2', settingDetail)" placeholder="Percentage" [(ngModel)]="settingDetail.value2">
+              </div>
+            </ng-container>
+          </div>
+          <br>
+          <ng-container *ngFor="let setting of settingDetail.childrens; let i = index;">
+            <div class="row" *ngIf="(setting.is_active === 1)">
+              <div class="col-2 mobile-full-width">
+                <label class="word-break">{{setting.key}}</label>
+              </div>
+              <ng-container *ngIf="setting.type === 'label'">
+                <div class="col-4 mobile-full-width">
+                  <p class="multi_lines_text" [innerHTML]="setting.details"></p>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="setting.type !== 'label'">
+                <div class="col-4 mobile-full-width" *ngIf="!settingDetail.is_range">
+                  <input type="text" *ngIf="!settingDetail.description.includes('Categories') && !setting.key.includes('address')" class="form-control" [(ngModel)]="setting.value">
+                  <textarea *ngIf="setting.key.includes('address')" class="form-control" [(ngModel)]="setting.value"></textarea>
+                  <ngx-select-dropdown *ngIf="settingDetail.description.includes('Categories')" [config]="config" [options]="categories" [multiple]="true" [(ngModel)]="setting.categories" (change)="categoriesSelectionChanged(setting, $event)"></ngx-select-dropdown>
+                </div>
+                <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                  <label>From</label><input type="text" (change)="clearZero(setting, 'value', settingDetail)" class="form-control" placeholder="From" [(ngModel)]="setting.value">
+                </div>
+                <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                  <label *ngIf="(settingDetail.childrens.length-1) === i">To (Leave It Blank For Nth Number)</label><label *ngIf="!((settingDetail.childrens.length-1) === i)"></label><input type="text" (change)="clearZero(setting, 'value1', settingDetail)" class="form-control" placeholder="To" [(ngModel)]="setting.value1">
+                </div>
+                <div class="col-3 mobile-full-width" *ngIf="settingDetail.is_range">
+                  <label>Percentage</label><input type="text" (change)="clearZero(setting, 'value2', settingDetail)" class="form-control"  placeholder="Percentage" [(ngModel)]="setting.value2">
+                </div>
+              </ng-container>
+              <div class="col-1 mobile-full-width">
+                <button type="button" [ngStyle]="{'margin-top': (settingDetail.is_range === 1) ? '25px' : '5px'}" (click)="deleteSetting(setting, settingDetail)"><img src="assets/images/Icon-delete.png" width="16"></button>
+              </div>
+            </div>
+            <br>
+          </ng-container>
+        </ng-container>
+        <div class="row">
+          <div class="offset-md-5 col-12 mobile-full-width">
+            <button type="button" class="btn btn-rounded btn-primary" (click)="submit()">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

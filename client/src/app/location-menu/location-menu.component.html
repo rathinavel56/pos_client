@@ -1,0 +1,73 @@
+<div class="card" style="position: relative;">
+    <div class="card-body">
+       <h4 class="card-title">{{location_name}} Menu</h4>
+       <div class="row" *ngIf="isShowLocation">
+        <div class="col-2 mobile-full-width">
+          <label>Location*</label>
+        </div>
+        <div class="col-4 mobile-full-width">
+          <ngx-select-dropdown [config]="config" [options]="locations" [(ngModel)]="locationId" [multiple]="false" (change)="locationSelectionChanged($event)">
+          </ngx-select-dropdown>
+        </div>
+      </div>
+      <span *ngIf="isShowLocation"><br></span>
+      <div class="row" *ngIf="!isSearch">
+        <div class="offset-md-3 col-12 mobile-full-width">
+          <button type="button" class="btn btn-rounded btn-default" (click)="chooseMenu()">Choose Menu</button>
+        </div>
+      </div>
+      <div class="row" *ngIf="isSearch">
+        <div class="offset-md-3 col-12 mobile-full-width">
+          <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Cancel</button>
+          <button type="button" class="btn btn-rounded btn-info" (click)="getRecords(true)">Search</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+          <br>
+          <ng-container *ngIf="isSearch || searched || menu_id">
+            <div class="row" *ngIf="menuId || searched">
+                <div class="col-2 mobile-full-width">
+                <label>Menus*</label>
+                </div>
+                <div class="col-4 mobile-full-width">
+                    <ngx-select-dropdown [config]="config" [options]="dailyMenus" [(ngModel)]="menuId" [multiple]="false" (change)="menuSelectionChanged($event)">
+                    </ngx-select-dropdown>
+                </div>
+                <div class="col-2 mobile-full-width">
+                  <label>Link*</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                      <a href="{{menuUrl}}{{location_name}}" target="_blank">{{location_name}}</a>
+                  </div>
+            </div>
+            <br>
+        </ng-container>
+        <table *ngIf="menu_id" datatable [dtOptions]="recipeService.dtOptionsSmall" class="table v-middle nowrap dataTable">
+             <thead>
+                <tr>
+                   <th class="text-dark font-medium fs-4">SR. No</th>
+                   <th class="text-dark font-medium fs-4">Name</th>
+                   <th class="text-dark font-medium fs-4">Price</th>
+                   <th class="text-dark font-medium fs-4">Action</th>
+                </tr>
+             </thead>
+             <tbody>
+                <ng-container *ngIf="dailyMenu && dailyMenu.name">
+                    <tr *ngFor="let dailyMen of hotelMenuDetails; let i = index;">
+                        <td>{{(i+1)}}</td>
+                        <td>{{dailyMen.menuName}}</td>
+                        <td>{{dailyMen.price}}</td>
+                        <td><div class="custom-control custom-switch"><input type="checkbox" [(ngModel)]="dailyMen.is_active" class="custom-control-input" id="autoRefresh{{i}}"><label class="custom-control-label" for="autoRefresh{{i}}">{{dailyMen.is_active ? 'Active' : 'Inactive'}}</label></div></td>
+                    </tr>
+                </ng-container>
+                <tr *ngIf="!dailyMenu || !dailyMenu.name"><td colspan="4">No Records</td></tr>
+             </tbody>
+             <tfoot *ngIf="menu_id">
+                 <tr>
+                    <td colspan="4"><button type="button" class="btn btn-rounded btn-info" (click)="saveDetails()">Save</button></td>
+                </tr>
+            </tfoot>
+          </table>
+       </div>
+    </div>
+  </div>

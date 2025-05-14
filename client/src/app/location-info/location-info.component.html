@@ -1,0 +1,101 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h1>Search</h1>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Name </label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="name">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>Code</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="text" class="form-control" [(ngModel)]="code">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>From Date*</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="date" class="form-control" [(ngModel)]="from">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-2 mobile-full-width">
+            <label>To Date*</label>
+          </div>
+          <div class="col-4 mobile-full-width">
+            <input type="date" class="form-control" [(ngModel)]="to">
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="offset-md-3 col-12 mobile-full-width">
+            <button type="button" class="btn btn-rounded btn-default" (click)="cancel()">Reset</button>
+            <button type="button" class="btn btn-rounded btn-info" (click)="getRecords()">Search</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="datatable table v-middle nowrap">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0">NAME</th>
+                <th class="border-top-0">CODE</th>
+                <th class="border-top-0">LOGIN USER</th>
+                <th class="border-top-0">LOGIN TIME</th>
+                <th class="border-top-0">LOGIN IP</th>
+                <th class="border-top-0">FIRST BILL TIME</th>
+                <th class="border-top-0">LAST BILL TIME</th>
+                <th class="border-top-0">CLOSING USER</th>
+                <th class="border-top-0">CLOSING TIME</th>
+                <th class="border-top-0">CLOSING IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let location of locations; let i = index;">
+                <td [ngClass]="{'text-red': (!location.detail) }">{{(i+1)}}</td>
+                <td [ngClass]="{'text-red': (!location.detail) }">{{location.name}}</td>
+                <td [ngClass]="{'text-red': (!location.detail) }">{{location.code}}</td>
+                <ng-container *ngIf="location.detail">
+                  <td>{{location.detail.login_user?.name}}</td>
+                  <td [ngClass]="{'color-orange': location.detail.afterMorning}">{{location.detail.login_time | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+                  <td>{{location.detail.login_ip}}</td>
+                  <td>{{location.detail.first_bill_time | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+                  <td>{{location.detail.last_bill_time | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+                  <td>{{location.detail.closing_user?.name}}</td>
+                  <td>{{location.detail.closing_time | date: 'dd-MMM-yyyy hh:mm a'}}</td>
+                  <td>{{location.detail.closing_ip}}</td>
+                </ng-container>
+                <ng-container *ngIf="!location.detail">
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </ng-container>
+              </tr>
+              <tr *ngIf="locations.length === 0">
+                <td colspan="11">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

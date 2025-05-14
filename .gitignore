@@ -1,0 +1,10 @@
+logs
+/client/package-lock.json
+upload
+.angular
+init/*
+New folder/*
+old/*
+*.sql
+node_modules
+root_contain

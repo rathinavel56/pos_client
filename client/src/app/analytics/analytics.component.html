@@ -1,0 +1,81 @@
+<div class="alert alert-dark" role="alert">
+  <div class="row">
+    <div class="col-sm-12 col-md-3 col-lg-4" *ngIf="!router.url.includes('/sold-out-timing') && title">
+      <h5 class="font-medium mb-0">{{title}}</h5>
+    </div>
+  </div>
+    <div class="row">
+    <div class="col-sm-12 col-md-5 col-lg-5" *ngIf="router.url.includes('/sold-out-timing') && isLoaded">
+      <ngx-select-dropdown [config]="config" [options]="items" [multiple]="true" [(ngModel)]="selectedItems" (change)="itemChanged($event)">
+      </ngx-select-dropdown>
+    </div>
+    <div class="col-sm-12 col-md-3 col-lg-2">
+      <input type="date" [(ngModel)]="chooseDateFrom" class="form-control">&nbsp;&nbsp;
+    </div>
+    <div class="col-sm-12 col-md-5 col-lg-5">
+      <button type="button" class="btn btn-rounded btn-primary" [disabled]="!chooseDateFrom" (click)="getRecords()">Submit</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="sales && sales.length > 0">
+  <ng-container *ngFor="let sale of sales; let i = index;">
+    <div class="alert alert-dark" role="alert" *ngIf="sale.title">
+      <label>{{sale.title}}</label>
+      <ng-container *ngIf="sale.titles">
+        <div class="d-flex align-items-center mb-1" *ngFor="let title of sale.titles;">
+          <span class="text-muted">{{title.subTitle}} : </span>&nbsp;&nbsp;
+          <div class="ml-auto">
+              <h5 class="font-medium mb-0" *ngIf="!router.url.includes('/sold-out-timing')">{{title.date}}</h5>
+              <h5 class="font-medium mb-0" *ngIf="router.url.includes('/sold-out-timing')">{{title.date | date: 'hh:mm a'}}</h5>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+    <div class="row">
+      <div class="col-lg-3 grab" *ngFor="let detail of sale.details;" style="cursor: pointer;">
+        <div class="card min-height-125" style="position: relative;min-height: 150px;">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12">
+                <h4 class="font-medium font-14 text-uppercase">{{detail.title}}</h4>
+                  <div class="d-flex align-items-center mb-1" *ngIf="detail.date && !detail.titles">
+                    <span class="text-muted" *ngIf="router.url.includes('/sold-out-timing') || router.url.includes('/sale-analytics')">Date : </span><span class="text-muted" *ngIf="!router.url.includes('/sold-out-timing') && !router.url.includes('/sale-analytics')">Time : </span>&nbsp;&nbsp;
+                    <div class="ml-auto">
+                        <h5 class="font-medium mb-0" *ngIf="!router.url.includes('/sold-out-timing')">{{detail.date}}</h5>
+                        <h5 class="font-medium mb-0" *ngIf="router.url.includes('/sold-out-timing')">{{detail.date | date: 'hh:mm a'}}</h5>
+                    </div>
+                  </div>
+                <div class="d-flex align-items-center mb-1" *ngIf="!detail.data">
+                  <span class="text-muted">{{detail.subTitle ? detail.subTitle : sale.subTitle}} : </span>&nbsp;&nbsp;
+                  <div class="ml-auto">
+                      <h5 class="font-medium mb-0" *ngIf="!detail.percentage && !detail.count && !detail.datetime">{{(detail.amount ? detail.amount : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}</h5>
+                      <h5 class="font-medium mb-0" *ngIf="detail.percentage">{{(detail.percentage ? detail.percentage : 0) | number:'1.2-2'}}%</h5>
+                      <h5 class="font-medium mb-0" *ngIf="detail.count">{{detail.count | number:'1.2-2'}}</h5>
+                      <h5 class="font-medium mb-0" *ngIf="detail.datetime && !router.url.includes('/sold-out-timing')">{{detail.datetime | date: 'dd-MM-yyyy hh:mm a'}}</h5>
+                      <h5 class="font-medium mb-0" *ngIf="detail.datetime && router.url.includes('/sold-out-timing')">{{detail.datetime | date: 'hh:mm a'}}</h5>
+                      <h5 class="font-medium mb-0" *ngIf="detail.date && !detail.amount">{{detail.date | date: 'dd-MM-yyyy'}}</h5>
+                  </div>
+                </div>
+                <ng-container *ngIf="detail.data">
+                  <div class="d-flex align-items-center mb-1" *ngFor="let data of detail.data">
+                    <span class="text-muted">{{data.subTitle}} : </span>&nbsp;&nbsp;
+                    <div class="ml-auto">
+                        <h5 class="font-medium mb-0" [ngClass]="{'text-green': data.isGreen, 'text-red': data.isRed}" *ngIf="!data.percentage && !data.count && !data.datetime">{{(data.amount ? data.amount : 0) | currency:'INR':'symbol-narrow':'1.2-2'}}</h5>
+                        <h5 class="font-medium mb-0" *ngIf="data.count">{{data.count | number:'1.2-2'}}</h5>
+                        <h5 class="font-medium mb-0" *ngIf="data.datetime && !router.url.includes('/sold-out-timing')">{{data.datetime | date: 'dd-MM-yyyy hh:mm a'}}</h5>
+                        <h5 class="font-medium mb-0 text-blue" [ngClass]="{'text-red': (data.text === 'm'), 'text-blue': (data.text === 'a'), 'text-green': (data.text === 'e')}" *ngIf="data.datetime && router.url.includes('/sold-out-timing')">{{data.datetime | date: 'hh:mm a'}}</h5>
+                        <h5 class="font-medium mb-0" *ngIf="data.date && !data.amount">{{data.date | date: 'dd-MM-yyyy'}}</h5>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+<div class="alert alert-info" role="alert" *ngIf="isSubmitted && sales && sales.length === 0">
+  No Records found
+</div>

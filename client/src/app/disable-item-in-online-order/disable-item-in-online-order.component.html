@@ -1,0 +1,43 @@
+<div class="row">
+  <div class="col-12 col-md-12" *ngIf="items && items.length > 0">
+    <div class="card" style="position: relative;">
+      <div class="card-title" style="padding-right: 20px;">
+        <br><button type="button" class="btn btn-rounded btn-primary" (click)="saveDisableOnlineRecipes()" style="float: right;">Save</button>
+      </div>
+      <div class="card-body">
+        <h1>Items To Be Disable For Online Orders*</h1>
+        <div class="table-responsive">
+          <table datatable [dtOptions]="recipeService.dtOptionsSmall" class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="text-dark font-medium fs-4">SR. No</th>
+                <th class="text-dark font-medium fs-4">Item</th>
+                <th class="text-dark font-medium fs-4">Disabled Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let table of items; let i = index;">
+                <td class="fs-4">{{(i+1)}}</td>
+                <td class="fs-4">{{table.name}}</td>
+                <td class="fs-4"><label class="toggle-switch">
+                    <input type="checkbox" [(ngModel)]="table.checked">
+                    <span class="toggle-slider toggle-round"></span>
+                  </label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-12" *ngIf="items.length === 0">
+    <div class="card" style="position: relative;">
+      <div class="card-body">
+        <h1>Items To Be Disable In Online Order*</h1>
+        <div class="alert alert-info" role="alert">
+          No Records found
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
