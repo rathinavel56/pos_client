@@ -9,13 +9,17 @@ import { DataTablesModule } from "angular-datatables";
 import { SelectDropDownModule } from 'ngx-select-dropdown';
 import { FilterPipe } from '../shared/util/filter.pipe';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { BillingNewComponent } from '../billing-new/billing-new.component';
 const routes: Routes = [
   {
     path: '',
     component: BillingComponent
+  },
+  {
+    path: 'new',
+    component: BillingNewComponent
   }
 ];
-
 @NgModule({
   imports: [
     FormsModule,
@@ -25,11 +29,12 @@ const routes: Routes = [
     SweetAlert2Module.forChild(),
     DataTablesModule,
     SelectDropDownModule,
-    NgbModule
+    NgbModule,
   ],
   declarations: [
     FilterPipe,
-    BillingComponent
+    BillingComponent,
+    BillingNewComponent
   ]
 })
 export class BillingModule {
