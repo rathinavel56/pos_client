@@ -150,7 +150,7 @@ export class OutletStocksComponent extends BaseComponent implements OnInit {
                   brand_name: element.product.brand.name,
                   category_name: element.product.category.name,
                   unit_size: element.unit_size,
-                  unit_name: element.product.unit.name,
+                  unit_name: element.product.unit ? element.product.unit.name : '',
                   quantity: element.quantity,
                   isRed: (element.product.is_active === 0),
                   totalCost: (totalCost && totalCost > 0) ? totalCost : (element.quantity * element.product.purchase_price),

@@ -50,20 +50,6 @@
           <br>
           <div class="row">
             <div class="col-2 mobile-full-width">
-              <label>Unit of Measure(UOM)<span *ngIf="isAdd || isEdit">*</span></label>
-            </div>
-            <div class="col-4 mobile-full-width">
-              <select class="form-control" [(ngModel)]="productInfo.unit_id">
-                <option value="0" *ngIf="!isAdd && !isEdit">Any</option>
-                <option *ngFor="let option of units;" [value]="option.id"
-                  [selected]="option.id === productInfo.unit_id">
-                  {{option.name}}</option>
-              </select>
-            </div>
-          </div>
-          <br>
-          <div class="row">
-            <div class="col-2 mobile-full-width">
               <label>HSN Code</label>
             </div>
             <div class="col-4 mobile-full-width">
@@ -208,6 +194,25 @@
             </div>
           </ng-container>
           <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
+            <div *ngFor="let unit of unit_mapping; let i = index;" class="card" style="border: 1px solid;">
+              <div class="card-body">
+                <h4 class="card-title">#{{i + 1}}</h4>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Name<span>*</span></label>
+                  </div>
+                  <div class="col-2 mobile-full-width">
+                    <span>{{unit.name}}</span>
+                  </div>
+                  <div class="col-2 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true" [(ngModel)]="unit.no"/>
+                  </div>
+                </div>
+                <br>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
             <br>
             <div *ngFor="let price of prices; let i = index;" class="card" style="border: 1px solid;">
               <div class="card-body">
@@ -323,9 +328,6 @@
                 <th class="border-top-0" (click)="sorting('brand')"
                   [ngClass]="{'sorting': sortBy !== 'brand', 'sorting_asc': (sortBy === 'brand' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'brand' && sortOrder === 'DESC')}">
                   BRAND</th>
-                <th class="border-top-0" (click)="sorting('unit')"
-                  [ngClass]="{'sorting': sortBy !== 'unit', 'sorting_asc': (sortBy === 'unit' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'unit' && sortOrder === 'DESC')}">
-                  UNIT</th>
                 <th class="border-top-0" (click)="sorting('purchase_price')"
                   [ngClass]="{'sorting': sortBy !== 'purchase_price', 'sorting_asc': (sortBy === 'purchase_price' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'purchase_price' && sortOrder === 'DESC')}">
                   PURCHASE PRICE</th>
@@ -353,7 +355,6 @@
                 <td>{{product.name}}</td>
                 <td>{{product.category.name}}</td>
                 <td>{{product.brand.name}}</td>
-                <td>{{product.unit.name}}</td>
                 <td>{{product.purchase_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
                 <td>{{product.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
                 <td>{{(product.is_show_in_pos === 1) ? 'Yes' : 'No'}}</td>

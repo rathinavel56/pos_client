@@ -61,6 +61,8 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   config: any;
   dayConfig: any;
   paymentModes: any = [];
+  unit_mapping: any = [];
+
   constructor(public recipeService: RecipeService,public router: Router) {
     super(recipeService, router);
   }
@@ -142,10 +144,17 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.currentPage = 1;
     this.getRecords();
   }
-  
+
+  clearUnitMapping() {
+    this.unit_mapping = [];
+    this.units.forEach((element: any) => {
+      this.unit_mapping.push({unit_id: element.id, name: element.name, no: ''});
+    });
+  }
   add() {
     this.isAdd = true;
     this.isSearch = false;
+    this.clearUnitMapping();
     this.productInfo = {
       id: '',
       name: '',
@@ -219,6 +228,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.isAdd = false;
     this.isEdit = true;
     this.isSearch = false;
+    this.clearUnitMapping();
     this.productInfo = {
       id: product.id,
       name: product.name,
@@ -240,6 +250,14 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       pos_return: product.pos_return,
       food_type: product.food_type
     };
+    if (product.unit_mapping && product.unit_mapping.length > 0) {
+      product.unit_mapping.forEach((element: any) => {
+        let indexNumber = this.unit_mapping.findIndex((a: any) => (a.unit_id === element.unit_id));
+        if (indexNumber > -1) {
+          this.unit_mapping[indexNumber].no = element.no;
+        }
+      });
+    }
     this.posDetails = (product.ingredient_details.length > 0) ? product.ingredient_details : [{
       id: null,
       name: '',
@@ -461,6 +479,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     }
     this.showLoading();
     request.eod_days = (request.eod_days && request.eod_days.length > 0) ? request.eod_days.toString() : null;
+    request.unit_mapping = this.unit_mapping.filter((v: any) => (v.no != ''));
     this.recipeService.saveProduct(request)
         .subscribe(() => {
           this.clearLoading();
@@ -485,9 +504,13 @@ export class ProductsComponent extends BaseComponent implements OnInit {
        });
   }
   getUnits()  {
+    this.unit_mapping = [];
     this.recipeService.getUnits()
       .subscribe((response: any) => {
           if (response.data && response.data.length > 0) {
+            response.data.forEach((element: any) => {
+              this.unit_mapping.push({unit_id: element.id, name: element.name, no: ''});
+            });
             this.units = response.data;
             this.productInfo.unit_id = 0;
           }

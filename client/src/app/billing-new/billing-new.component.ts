@@ -58,6 +58,7 @@ spreadsheetInstance: any;
                   item.quantity = item.quantity;
                   item.selling_price = price.selling_price;
                   item.purchase_price = item.product_pos.purchase_price;
+                  item.units_name = item.product_pos.unit_mapping ? item.product_pos.unit_mapping.map((item: any) => item.unit.name) : ['Any'];
                   this.products.push(item);
                   this.productsname.push(item.product_pos.name);
                 }
@@ -73,6 +74,7 @@ spreadsheetInstance: any;
   createSpreadsheet() {
     if (this.spreadsheet) {
       // Create the spreadsheet
+      const products = this.products;
     jspreadsheet(this.spreadsheet.nativeElement, {
       worksheets: [
         {
@@ -87,7 +89,17 @@ spreadsheetInstance: any;
               source: this.productsname
             },
             { type: 'text', title: 'Tamil name', width: 200},
-            { type: 'dropdown', title: 'Unit', width: 100, source: ['box', 'dozen', 'pcs'] },
+            { type: 'dropdown', title: 'Unit', width: 100,
+              source: (instance: any, search: any) => {
+                const row = instance.getRowData(instance.getRow());
+                const product = products.find((item: any) => item.product_pos.name === row[0]);
+                if (product && product.product_pos.unit_mapping) {
+                  return product.product_pos.unit_mapping.map((item: any) => item.unit.name);
+                }
+                console.log('product', product);
+                return [];
+              }
+             },
             { type: 'text', title: 'Quantity', width: 100 },
             { type: 'text', title: 'MRP', width: 100 },
             { type: 'text', title: 'Net amount', width: 100 },
@@ -102,7 +114,8 @@ spreadsheetInstance: any;
           if (product) {
             instance.setValueFromCoords(1, y, '');
             instance.setValueFromCoords(2, y, '');
-            instance.setValueFromCoords(3, y, '1');
+            //instance.setValueFromCoords(3, y, '1');
+           instance.setSourceFromCoords(3, y, product.units_name);
             instance.setValueFromCoords(4, y, product.selling_price);
             instance.setValueFromCoords(5, y, product.purchase_price);
             instance.setValueFromCoords(6, y, product.quantity);

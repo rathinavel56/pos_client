@@ -108,13 +108,6 @@
                     (change)="selectionChanged($event, indexOfelement)">
                   </ngx-select-dropdown>
                 </div>
-                <div class="col-2 mobile-full-width" *ngIf="detail.product_id">
-                  <label>Unit Size<span *ngIf="!detail.unit_name">*</span> <span *ngIf="detail.unit_name"> In ({{detail.unit_name}})*</span></label>
-                </div>
-                <div class="col-4 mobile-full-width" *ngIf="detail.product_id">
-                  <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
-                    [ngClass]="{'error-field': isSubmitted && !detail.unit_size}" [(ngModel)]="detail.unit_size">
-                </div>
               </div>
               <span *ngIf="detail.product_id"><br></span>
               <div class="row" *ngIf="detail.product_id">
@@ -125,14 +118,6 @@
                   <input type="text" class="form-control" [appTwoDigitDecimaNumber]="true"
                     [ngClass]="{'error-field': isSubmitted && !detail.number_of_units}"
                     [(ngModel)]="detail.number_of_units">
-                </div>
-                <div class="col-2 mobile-full-width">
-                  <label>Total Quantity* </label>
-                </div>
-                <div class="col-4 mobile-full-width">
-                  <span
-                    *ngIf="detail.unit_size && detail.number_of_units">{{(detail.unit_size * detail.number_of_units) | number:'1.2-2'}}&nbsp;{{detail.unit_name}}</span>
-                  <span *ngIf="!(detail.unit_size && detail.number_of_units)">0</span>
                 </div>
               </div>
               <span *ngIf="detail.product_id"><br></span>

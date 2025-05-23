@@ -822,7 +822,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
                 name: ele.product_pos.name,
                 receipe_id: null,
                 product_id: ele.product_id,
-                unit: ele.product_pos.unit.name,
+                unit: ele.product_pos.unit ? ele.product_pos.unit.name : '',
                 quantity: ele.quantity,
                 added_quantity: 1,
                 category_id: ele.product_pos.category.id,
