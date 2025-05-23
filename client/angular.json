@@ -35,6 +35,7 @@
               "src/styles.scss",
               "node_modules/datatables.net-dt/css/jquery.dataTables.css",
               "node_modules/dragula/dist/dragula.css",
+              "node_modules/jsuites/dist/jsuites.css",
               "node_modules/jspreadsheet-ce/dist/jspreadsheet.css"
             ],
             "scripts": [
