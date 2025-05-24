@@ -194,58 +194,50 @@
             </div>
           </ng-container>
           <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
-            <div *ngFor="let unit of unit_mapping; let i = index;" class="card" style="border: 1px solid;">
-              <div class="card-body">
-                <h4 class="card-title">#{{i + 1}}</h4>
-                <div class="row">
-                  <div class="col-2 mobile-full-width">
-                    <label>Name<span>*</span></label>
-                  </div>
-                  <div class="col-2 mobile-full-width">
-                    <span>{{unit.name}}</span>
-                  </div>
-                  <div class="col-2 mobile-full-width">
-                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true" [(ngModel)]="unit.no"/>
-                  </div>
-                </div>
-                <br>
-              </div>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
             <br>
             <div *ngFor="let price of prices; let i = index;" class="card" style="border: 1px solid;">
               <div class="card-body">
-                <h4 class="card-title">#{{i + 1}}</h4>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <h4 class="card-title">#{{i + 1}}</h4>
+                  </div>
+                  <div class="col-2 mobile-full-width" *ngIf="i >= units.length">
+                    <button type="button"><img src="assets/images/Icon-delete.png" width="16" (click)="removePrice(i)"></button>
+                  </div>
+                </div>
                 <div class="row">
                   <div class="col-2 mobile-full-width">
                     <label>Location<span>*</span></label>
                   </div>
                   <div class="col-4 mobile-full-width">
-                    <span *ngIf="i < paymentModes.length">Any</span>
-                    <span *ngIf="i >= paymentModes.length">
+                    <span *ngIf="i < units.length">Any</span>
+                    <span *ngIf="i >= units.length">
                       <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false"
                         [(ngModel)]="price.location"
                         (change)="locationSelectionChanged(price, $event)"></ngx-select-dropdown>
                     </span>
                   </div>
-                  <div class="col-2 mobile-full-width" *ngIf="i >= paymentModes.length">
-                    <button type="button"><img src="assets/images/Icon-delete.png" width="16"
-                        (click)="removePrice(i)"></button>
-                  </div>
-                </div>
-                <br>
-                <div class="row">
                   <div class="col-2 mobile-full-width">
                     <label>Types</label>
                   </div>
                   <div class="col-4 mobile-full-width">
-                    <span *ngIf="i < paymentModes.length">{{price.payment_mode.name}}</span>
-                    <span *ngIf="i >= paymentModes.length">
-                      <ngx-select-dropdown [config]="config" [options]="paymentModes" [multiple]="false"
-                        [(ngModel)]="price.payment_mode"
-                        (change)="paymentModeSelectionChanged(price, $event)"></ngx-select-dropdown>
+                    <span *ngIf="i < units.length">{{price.unit_mapping_mode.name}}</span>
+                    <span *ngIf="i >= units.length">
+                      <ngx-select-dropdown [config]="config" [options]="unit_mapping" [multiple]="false"
+                        [(ngModel)]="price.unit_mapping_mode"
+                        (change)="unitMappingSelectionChanged(price, $event)"></ngx-select-dropdown>
                     </span>
+                  </div>
+
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>Unit Quantity</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
+                      [(ngModel)]="price.unit_quantity" />
                   </div>
                   <div class="col-2 mobile-full-width">
                     <label>Net Selling Price (Rs.)</label>

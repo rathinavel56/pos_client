@@ -60,8 +60,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   sortOrder: any = 'ASC';
   config: any;
   dayConfig: any;
-  paymentModes: any = [];
-  unit_mapping: any = [];
 
   constructor(public recipeService: RecipeService,public router: Router) {
     super(recipeService, router);
@@ -96,7 +94,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.getBrands();
     this.getCategories();
     this.getLocations();
-    this.getPaymentModes();
   }
   getLocations() {
     this.recipeService
@@ -119,24 +116,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
         }
       );
   }
-  getPaymentModes() {
-    this.recipeService.getPaymentModes().subscribe(
-      (response: any) => {
-        if (response.data && response.data.length > 0) {
-          this.paymentModes = response.data;
-        } else {
-          this.paymentModes = [];
-        }
-      },
-      () => {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Internal Server Error",
-        });
-      }
-    );
-  }
   sorting(sort: any) {
     this.sortOrder = (this.sortBy === sort) ? ((this.sortOrder === 'ASC') ? 'DESC' : 'ASC')  : 'ASC';
     this.sortBy = sort;
@@ -145,16 +124,9 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.getRecords();
   }
 
-  clearUnitMapping() {
-    this.unit_mapping = [];
-    this.units.forEach((element: any) => {
-      this.unit_mapping.push({unit_id: element.id, name: element.name, no: ''});
-    });
-  }
   add() {
     this.isAdd = true;
     this.isSearch = false;
-    this.clearUnitMapping();
     this.productInfo = {
       id: '',
       name: '',
@@ -199,8 +171,9 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       this.prices.push({
         location_id: '',
         location: null,
-        payment_mode: this.paymentModes[0],
-        payment_mode_id: this.paymentModes[0].id,
+        unit_mapping_mode: this.units[0],
+        unit_id: this.units[0].id,
+        unit_quantity: '',
         selling_SGST_percentage: 0,
         selling_CGST_percentage: 0,
         selling_IGST_percentage: 0,
@@ -209,12 +182,13 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       });
     } else {
       this.prices = [];
-      this.paymentModes.forEach((element: any) => {
+      this.units.forEach((element: any) => {
         this.prices.push({
           location_id: 0,
           location: null,
-          payment_mode: element,
-          payment_mode_id: element.id,
+          unit_mapping_mode: element,
+          unit_id: element.id,
+          unit_quantity: '',
           selling_SGST_percentage: 0,
           selling_CGST_percentage: 0,
           selling_IGST_percentage: 0,
@@ -228,7 +202,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.isAdd = false;
     this.isEdit = true;
     this.isSearch = false;
-    this.clearUnitMapping();
     this.productInfo = {
       id: product.id,
       name: product.name,
@@ -250,14 +223,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       pos_return: product.pos_return,
       food_type: product.food_type
     };
-    if (product.unit_mapping && product.unit_mapping.length > 0) {
-      product.unit_mapping.forEach((element: any) => {
-        let indexNumber = this.unit_mapping.findIndex((a: any) => (a.unit_id === element.unit_id));
-        if (indexNumber > -1) {
-          this.unit_mapping[indexNumber].no = element.no;
-        }
-      });
-    }
     this.posDetails = (product.ingredient_details.length > 0) ? product.ingredient_details : [{
       id: null,
       name: '',
@@ -271,8 +236,9 @@ export class ProductsComponent extends BaseComponent implements OnInit {
           this.prices.push({
             location_id: e.location_id,
             location: e.location,
-            payment_mode: e.payment_mode,
-            payment_mode_id: e.payment_mode_id,
+            unit_mapping_mode: e.unit_mapping_mode,
+            unit_id: e.unit_id,
+            unit_quantity: e.unit_quantity,
             selling_SGST_percentage: e.selling_SGST_percentage,
             selling_CGST_percentage: e.selling_CGST_percentage,
             selling_IGST_percentage: e.selling_IGST_percentage,
@@ -444,12 +410,12 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       price.location = null;
     }
   }
-  paymentModeSelectionChanged(price: any, e: any) {
+  unitMappingSelectionChanged(price: any, e: any) {
     if (e && e.value && e.value.id) {
-      price.payment_mode_id = e.value.id;
+      price.unit_id = e.value.id;
     } else {
-      price.payment_mode_id = null;
-      price.payment_mode = null;
+      price.unit_id = null;
+      price.unit_mapping_mode = null;
     }
   }
   onFocusZeroClear(data: any, field: any) {
@@ -479,7 +445,6 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     }
     this.showLoading();
     request.eod_days = (request.eod_days && request.eod_days.length > 0) ? request.eod_days.toString() : null;
-    request.unit_mapping = this.unit_mapping.filter((v: any) => (v.no != ''));
     this.recipeService.saveProduct(request)
         .subscribe(() => {
           this.clearLoading();
@@ -504,13 +469,10 @@ export class ProductsComponent extends BaseComponent implements OnInit {
        });
   }
   getUnits()  {
-    this.unit_mapping = [];
+    this.units = [];
     this.recipeService.getUnits()
       .subscribe((response: any) => {
           if (response.data && response.data.length > 0) {
-            response.data.forEach((element: any) => {
-              this.unit_mapping.push({unit_id: element.id, name: element.name, no: ''});
-            });
             this.units = response.data;
             this.productInfo.unit_id = 0;
           }
