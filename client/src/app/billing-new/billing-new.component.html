@@ -1,5 +1,5 @@
-<ng-container *ngIf="isStart">
-    <div class="row" *ngIf="isShowLocation">
+<ng-container *ngIf="!isStart && isShowLocation">
+    <div class="row">
       <div class="col-12 col-md-2">
         <label>Location*</label>
       </div>
@@ -8,12 +8,12 @@
           [options]="locations" [multiple]="false" [(ngModel)]="selectedLocation"
           (change)="locationSelectionChanged($event)">
         </ngx-select-dropdown>
-        <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
+        <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation" style="float: left;margin-top: 16px;"
         (click)="submit()">Submit</button>
       </div>
     </div>
     <br>
   </ng-container>
-  <button *ngIf="!isStart" type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
-        (click)="reload()">Submit</button>
+  <button *ngIf="isStart" type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
+        (click)="reload()">Reload Screen</button><br><br><br>
 <div #spreadsheet></div>

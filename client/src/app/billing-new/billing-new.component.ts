@@ -30,7 +30,19 @@ isShowLocation: any;
   userDetail: any;
   isStart: any;
   selectedLocation: any;
+  config: any;
   ngOnInit(): void {
+    this.config = {
+      displayKey: "name",
+      search: true,
+      height: "auto",
+      placeholder: "Search",
+      customComparator: () => { },
+      moreText: "more",
+      noResultsFound: "No results found!",
+      searchPlaceholder: "Search",
+      searchOnKey: "name",
+    };
     this.userDetail = sessionStorage.getItem("retail_pos")
       ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
       : null;
@@ -42,7 +54,6 @@ isShowLocation: any;
     } else {
       this.selectedLocation = this.userDetail.session_detail.location;
     }
-    this.locationStock();
   }
   locationSelectionChanged(e: any) {
     if (e && e.value && e.value.id) {
@@ -51,10 +62,15 @@ isShowLocation: any;
   }
   submit() {
     this.isStart = true;
+    this.locationStock();
   }
   reload() {
-    this.isStart = false;
-    this.selectedLocation = null;
+    if (this.isShowLocation) {
+      this.locationStock();
+    } else {
+      this.isStart = false;
+      this.selectedLocation = null;
+    }
   }
   locationStock() {
       this.showLoading();
@@ -63,8 +79,7 @@ isShowLocation: any;
       this.unitNames = [];
       this.recipeService
         .locationStock({
-          location_id: 4,
-          reference_no: "",
+          location_id: this.selectedLocation.id
         })
         .subscribe(
           (response: any) => {
@@ -82,12 +97,17 @@ isShowLocation: any;
                     purchase_price: item.product_pos.purchase_price,
                     prices: item.product_pos.prices
                   });
+                  item.product_pos.prices.forEach((ele: any) => {
+                    this.unitNames.push(ele.unit.name);
+                  });
                   this.productsname.push(item.product_pos.name);
                 }
                });
+               this.unitNames = [...new Set(this.unitNames)];
                this.unitNames.sort((a: any, b:any) => a.localeCompare(b));
             }
             this.createSpreadsheet();
+            this.clearLoading();
           },
           (err: any) => {
             this.networkIssue();
