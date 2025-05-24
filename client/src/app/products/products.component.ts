@@ -171,9 +171,9 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       this.prices.push({
         location_id: '',
         location: null,
-        unit_mapping_mode: this.units[0],
+        unit: this.units[0],
         unit_id: this.units[0].id,
-        unit_quantity: '',
+        unit_quantity: +this.units[0].default_value > 0 ? this.units[0].default_value : '',
         selling_SGST_percentage: 0,
         selling_CGST_percentage: 0,
         selling_IGST_percentage: 0,
@@ -186,9 +186,9 @@ export class ProductsComponent extends BaseComponent implements OnInit {
         this.prices.push({
           location_id: 0,
           location: null,
-          unit_mapping_mode: element,
+          unit: element,
           unit_id: element.id,
-          unit_quantity: '',
+          unit_quantity: +element.default_value > 0 ? element.default_value : '',
           selling_SGST_percentage: 0,
           selling_CGST_percentage: 0,
           selling_IGST_percentage: 0,
@@ -236,7 +236,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
           this.prices.push({
             location_id: e.location_id,
             location: e.location,
-            unit_mapping_mode: e.unit_mapping_mode,
+            unit: e.unit,
             unit_id: e.unit_id,
             unit_quantity: e.unit_quantity,
             selling_SGST_percentage: e.selling_SGST_percentage,
@@ -415,7 +415,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       price.unit_id = e.value.id;
     } else {
       price.unit_id = null;
-      price.unit_mapping_mode = null;
+      price.unit = null;
     }
   }
   onFocusZeroClear(data: any, field: any) {

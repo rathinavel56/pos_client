@@ -221,10 +221,10 @@
                     <label>Types</label>
                   </div>
                   <div class="col-4 mobile-full-width">
-                    <span *ngIf="i < units.length">{{price.unit_mapping_mode.name}}</span>
+                    <span *ngIf="i < units.length">{{price.unit.name}}</span>
                     <span *ngIf="i >= units.length">
                       <ngx-select-dropdown [config]="config" [options]="unit_mapping" [multiple]="false"
-                        [(ngModel)]="price.unit_mapping_mode"
+                        [(ngModel)]="price.unit"
                         (change)="unitMappingSelectionChanged(price, $event)"></ngx-select-dropdown>
                     </span>
                   </div>
