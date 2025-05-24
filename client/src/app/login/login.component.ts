@@ -29,7 +29,7 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
     screenLoad: any = false;
     sessionStorage: any;
   ngOnInit() {
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     this.router.navigate(['/starter']);
     if (!userDetail) {
       this.screenLoad = true;
@@ -76,7 +76,7 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
                 let submenu: any = response.data.menus[0].submenu;
                 this.recipeService.setMenus(response.data.menus);
                 loginData.root_menu = submenu[0].path;
-                sessionStorage.setItem('hotbread', JSON.stringify(loginData));
+                sessionStorage.setItem('retail_pos', JSON.stringify(loginData));
                 this.router.navigate([submenu[0].path]);
               }
           } else {

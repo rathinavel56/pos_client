@@ -78,7 +78,7 @@ export class IncomingStocksComponent extends BaseComponent implements OnInit {
     this.showLoading();
     this.getRecords();
     this.getVendors();
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     if (userDetail) {
       this.isShowLocation = (userDetail.session_detail.location_id== 0);
     }

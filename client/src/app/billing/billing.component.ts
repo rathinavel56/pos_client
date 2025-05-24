@@ -132,8 +132,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
       searchOnKey: "name",
     };
     this.getCategoriesWithDemcialStep();
-    this.userDetail = sessionStorage.getItem("hotbread")
-      ? JSON.parse(sessionStorage.getItem("hotbread") || "{}")
+    this.userDetail = sessionStorage.getItem("retail_pos")
+      ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
       : null;
     if (this.userDetail) {
       this.isShowLocation = this.userDetail.session_detail.location_id == 0;

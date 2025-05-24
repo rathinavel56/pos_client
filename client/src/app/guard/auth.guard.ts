@@ -8,7 +8,7 @@ export class AuthGuard implements CanActivate {
     ) {}
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        if (sessionStorage.getItem('hotbread')) {
+        if (sessionStorage.getItem('retail_pos')) {
             return true;
         }
         this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});

@@ -110,8 +110,8 @@ export class OrderComponent extends BaseComponent implements OnInit {
       window.location.hostname !== "localhost"
         ? "http://" + window.location.hostname
         : "http://vijaypos.info";
-    this.userDetail = sessionStorage.getItem("hotbread")
-      ? JSON.parse(sessionStorage.getItem("hotbread") || "{}")
+    this.userDetail = sessionStorage.getItem("retail_pos")
+      ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
       : null;
     if (this.userDetail) {
       this.isShowLocation = this.userDetail.session_detail.location_id == 0;

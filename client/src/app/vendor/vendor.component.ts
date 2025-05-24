@@ -60,7 +60,7 @@ export class VendorComponent extends BaseComponent implements OnInit {
       this.getRecords();
       this.getPaymentModeTypes();
     } else {
-      this.userDetail = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+      this.userDetail = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
       if (this.userDetail.session_detail && this.userDetail.session_detail.vendor) {
         this.getIncomingStocksPayments(this.userDetail.session_detail.vendor);
       } else {

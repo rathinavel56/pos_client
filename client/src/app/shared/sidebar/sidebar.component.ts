@@ -78,7 +78,7 @@ export class SidebarComponent implements OnInit {
   }
 
   logout() {
-    sessionStorage.removeItem('hotbread');
+    sessionStorage.removeItem('retail_pos');
     sessionStorage.removeItem('refresh');
     this.sessionStorageService.showMobileMenu = false;
     this.router.navigate(['/login']);

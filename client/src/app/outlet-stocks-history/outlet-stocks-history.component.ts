@@ -40,7 +40,7 @@ export class OutletStocksHistoryComponent extends BaseComponent implements OnIni
   ngOnInit() {
     this.from = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
     this.to = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     this.isShowLocation = (userDetail.session_detail.location_id== 0);
     this.config = {
       displayKey: 'name',

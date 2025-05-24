@@ -14,8 +14,8 @@ export class AppComponent extends BaseComponent {
     super(recipeService, router);
     this.recipeService.menus.subscribe((response: any) => {
       if (!response || response.length == 0) {
-        let userDetail: any = sessionStorage.getItem("hotbread")
-          ? JSON.parse(sessionStorage.getItem("hotbread") || "{}")
+        let userDetail: any = sessionStorage.getItem("retail_pos")
+          ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
           : null;
         if (userDetail) {
           this.recipeService.getMenus().subscribe({

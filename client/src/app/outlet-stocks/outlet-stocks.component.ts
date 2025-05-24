@@ -34,7 +34,7 @@ export class OutletStocksComponent extends BaseComponent implements OnInit {
     super(recipeService, router);
   }
   ngOnInit() {
-    this.userDetail = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    this.userDetail = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     if (this.userDetail) {
       this.isShowLocation = (this.userDetail.session_detail.location_id == 0);
       if (!this.isShowLocation) {

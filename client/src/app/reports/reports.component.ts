@@ -119,7 +119,7 @@ export class ReportsComponent extends BaseComponent implements OnInit {
   }
   ngOnInit() {
     this.types.sort((a : any, b : any) => a.name - b.name);
-    this.userDetail = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    this.userDetail = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     this.isShowLocation = (this.userDetail.session_detail.location_id== 0);
     if (!this.isShowLocation) {
       this.types = this.types.filter((e: any)=> (e.admin === false));

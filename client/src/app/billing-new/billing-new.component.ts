@@ -14,6 +14,8 @@ import Swal from 'sweetalert2';
 export class BillingNewComponent extends BaseComponent implements OnInit {
 @ViewChild("spreadsheet", { static: false }) spreadsheet!: ElementRef<any>;
 spreadsheetInstance: any;
+locations: any = [];
+isShowLocation: any;
   constructor(
     public recipeService: RecipeService,
         public router: Router,
@@ -25,8 +27,34 @@ spreadsheetInstance: any;
   public products: any = [];
   public carts: any = [];
   public productsname: any = [];
+  userDetail: any;
+  isStart: any;
+  selectedLocation: any;
   ngOnInit(): void {
+    this.userDetail = sessionStorage.getItem("retail_pos")
+      ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
+      : null;
+    if (this.userDetail) {
+      this.isShowLocation = this.userDetail.session_detail.location_id == 0;
+    }
+    if (this.isShowLocation) {
+      this.getLocations();
+    } else {
+      this.selectedLocation = this.userDetail.session_detail.location;
+    }
     this.locationStock();
+  }
+  locationSelectionChanged(e: any) {
+    if (e && e.value && e.value.id) {
+      this.selectedLocation = e.value;
+    }
+  }
+  submit() {
+    this.isStart = true;
+  }
+  reload() {
+    this.isStart = false;
+    this.selectedLocation = null;
   }
   locationStock() {
       this.showLoading();
@@ -43,28 +71,17 @@ spreadsheetInstance: any;
             if (response.data && response.data.length > 0) {
               response.data.forEach((item: any) => {
                 if (item.product_pos.prices.length > 0) {
-                  let price = item.product_pos.prices.find((price: any) => (price.location_id === 4));
-                  if (!price) {
-                     price = item.product_pos.prices.find((price: any) => (price.location_id === 0));
-                  }
-                  item.product = item.product_pos.name;
-                  item.product_id = item.product_id;
-                  item.brand_id = item.product_pos.brand.id;
-                  item.brand_name = item.product_pos.brand.name;
-                  item.categorty_id = item.product_pos.category.id;
-                  item.categorty_name = item.product_pos.category.name;
-                  item.quantity = item.quantity;
-                  item.selling_price = price.selling_price;
-                  item.purchase_price = item.product_pos.purchase_price;
-                  if (item.product_pos.unit_mapping && item.product_pos.unit_mapping.length > 0) {
-                    this.unitNames = [
-                      ...new Set([
-                        ...item.product_pos.unit_mapping.map((unit: any) => unit.unit.name),
-                        ...this.unitNames
-                      ])
-                    ];
-                  }
-                  this.products.push(item);
+                  this.products.push({
+                    product: item.product_pos.name,
+                    product_id: item.product_pos.id,
+                    brand_id: item.product_pos.brand.id,
+                    brand_name: item.product_pos.brand.name,
+                    category_id: item.product_pos.category.id,
+                    category_name: item.product_pos.category.name,
+                    quantity: item.quantity,
+                    purchase_price: item.product_pos.purchase_price,
+                    prices: item.product_pos.prices
+                  });
                   this.productsname.push(item.product_pos.name);
                 }
                });
@@ -165,7 +182,7 @@ spreadsheetInstance: any;
     let unitMapping = null;
     if (product) {
       const unit = instance.getValueFromCoords(2, row);
-      unitMapping = product.product_pos.unit_mapping.find((item: any) => item.unit.name === unit);
+      unitMapping = product.product_pos.prices.find((item: any) => item.unit.name === unit);
       if (!unitMapping) {
         Swal.fire('Error', 'Unit not found for the selected product', 'error');
         return false;
@@ -175,6 +192,28 @@ spreadsheetInstance: any;
       return false;
     }
     return { product, unitMapping };
+  }
+  getLocations() {
+    this.locations = [];
+    this.recipeService
+      .getLocations(
+        {
+          q: "all",
+        },
+        null
+      )
+      .subscribe(
+        (response: any) => {
+          if (response.data && response.data.length > 0) {
+            this.locations = response.data;
+          } else {
+            this.locations = [];
+          }
+        },
+        (err: any) => {
+          this.networkIssue();
+        }
+      );
   }
 
 }

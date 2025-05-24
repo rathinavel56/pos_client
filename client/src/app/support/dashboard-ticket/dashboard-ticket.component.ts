@@ -65,7 +65,7 @@ export class DashboardTicketComponent extends BaseComponent implements OnInit {
     this.getCategories();
     this.getRecords();
     this.getTicketStatus();
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     if (userDetail) {
       this.isShowLocation = (userDetail.session_detail.location_id == 0);
       this.isEngineer = (userDetail.session_detail.is_engineer == true);

@@ -96,7 +96,7 @@ export class NavigationComponent  extends BaseComponent {
   }
 
   setUserInfo() {
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     if (userDetail) {
       this.userName = userDetail.session_detail.name;
       this.clockHandle = setInterval(()=>{
@@ -140,7 +140,7 @@ export class NavigationComponent  extends BaseComponent {
   }
 
   logout() {
-    sessionStorage.removeItem('hotbread');
+    sessionStorage.removeItem('retail_pos');
     sessionStorage.removeItem('refresh');
     this.sessionStorageService.showMobileMenu = false;
     this.router.navigate(['/login']);

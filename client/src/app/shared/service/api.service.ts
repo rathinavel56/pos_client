@@ -123,7 +123,7 @@ export class ApiService {
       return of(true);
   }
   getTokenUrl(url : any): string {
-    let userDetail: any = sessionStorage.getItem('hotbread') ? JSON.parse(sessionStorage.getItem('hotbread') || '{}') : null;
+    let userDetail: any = sessionStorage.getItem('retail_pos') ? JSON.parse(sessionStorage.getItem('retail_pos') || '{}') : null;
     if (userDetail && url.indexOf('/login') <= -1) {
         return (url.indexOf('?') > -1) ? (url + '&token=' + userDetail.session_detail.token) : (url + '?token=' + userDetail.session_detail.token);
     } else {
