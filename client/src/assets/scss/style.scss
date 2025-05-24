@@ -872,10 +872,10 @@ input:checked+.toggle-slider:before {
 .color-orange {
   color: #FF8C00 !important;
 }
-.multi_lines_text { 
+.multi_lines_text {
   white-space: pre-line;
 }
-.margin-l-10 { 
+.margin-l-10 {
   margin-left: 10px;
 }
 /* Grid Layout for Tables */
@@ -933,4 +933,9 @@ input:checked+.toggle-slider:before {
 }
 .margin-left-10 {
   margin-left: 10px;
+}
+.unit-name {
+  font-weight: bold;
+  color: #ee1008;
+  font-size: 16px;
 }

@@ -41,6 +41,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     selling_IGST_percentage: 0,
     selling_cess_percentage: 0,
     selling_price: 0,
+    mrp_selling_price: 0,
     addon: false,
     hsn_code: null,
     is_show_in_pos: false,
@@ -178,7 +179,8 @@ export class ProductsComponent extends BaseComponent implements OnInit {
         selling_CGST_percentage: 0,
         selling_IGST_percentage: 0,
         selling_cess_percentage: 0,
-        selling_price: 0
+        selling_price: 0,
+        mrp_selling_price: 0
       });
     } else {
       this.prices = [];
@@ -193,7 +195,8 @@ export class ProductsComponent extends BaseComponent implements OnInit {
           selling_CGST_percentage: 0,
           selling_IGST_percentage: 0,
           selling_cess_percentage: 0,
-          selling_price: 0
+          selling_price: 0,
+          mrp_selling_price: 0
         });
       });
     }
@@ -243,7 +246,8 @@ export class ProductsComponent extends BaseComponent implements OnInit {
             selling_CGST_percentage: e.selling_CGST_percentage,
             selling_IGST_percentage: e.selling_IGST_percentage,
             selling_cess_percentage: e.selling_cess_percentage,
-            selling_price: e.selling_price
+            selling_price: e.selling_price,
+            mrp_selling_price: e.mrp_selling_price
           });
         });
       } else {
@@ -428,7 +432,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   }
   saveDetails(id: any, isDelete?: any) {
     let request: any = (isDelete === true) ? {id: id, isDelete: true} : this.productInfo;
-    if (this.productInfo.is_show_in_pos === 1) {
+    if (this.productInfo.is_show_in_pos === 1 || this.productInfo.is_show_in_pos === true) {
       // let priceCheck = this.prices.slice(0, this.paymentModes.length).filter((e: any) => !this.prices[0].selling_price).length;
       let priceCheck = this.prices.filter((e: any) => (+e.selling_price > 0)).length;
       if (priceCheck === 0) {

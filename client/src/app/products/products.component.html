@@ -212,8 +212,7 @@
                   <div class="col-4 mobile-full-width">
                     <span *ngIf="i < units.length">Any</span>
                     <span *ngIf="i >= units.length">
-                      <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false"
-                        [(ngModel)]="price.location"
+                      <ngx-select-dropdown [config]="config" [options]="locations" [multiple]="false" [(ngModel)]="price.location"
                         (change)="locationSelectionChanged(price, $event)"></ngx-select-dropdown>
                     </span>
                   </div>
@@ -221,14 +220,12 @@
                     <label>Types</label>
                   </div>
                   <div class="col-4 mobile-full-width">
-                    <span *ngIf="i < units.length">{{price.unit.name}}</span>
+                    <span class="unit-name" *ngIf="i < units.length">{{price.unit.name}}</span>
                     <span *ngIf="i >= units.length">
-                      <ngx-select-dropdown [config]="config" [options]="unit_mapping" [multiple]="false"
-                        [(ngModel)]="price.unit"
+                      <ngx-select-dropdown [config]="config" [options]="units" [multiple]="false" [(ngModel)]="price.unit"
                         (change)="unitMappingSelectionChanged(price, $event)"></ngx-select-dropdown>
                     </span>
                   </div>
-
                 </div>
                 <br>
                 <div class="row">
@@ -236,8 +233,17 @@
                     <label>Unit Quantity</label>
                   </div>
                   <div class="col-4 mobile-full-width">
-                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true"
-                      [(ngModel)]="price.unit_quantity" />
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true" [(ngModel)]="price.unit_quantity" />
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-2 mobile-full-width">
+                    <label>MRP Price</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true" [(ngModel)]="price.mrp_selling_price"
+                      (focus)="onFocusZeroClear(price, 'selling_price')" />
                   </div>
                   <div class="col-2 mobile-full-width">
                     <label>Net Selling Price (Rs.)</label>
