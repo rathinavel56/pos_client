@@ -87,7 +87,7 @@ isShowLocation: any;
               response.data.forEach((item: any) => {
                 if (item.product_pos.prices.length > 0) {
                   this.products.push({
-                    product: item.product_pos.name,
+                    name: item.product_pos.name,
                     product_id: item.product_pos.id,
                     brand_id: item.product_pos.brand.id,
                     brand_name: item.product_pos.brand.name,
@@ -122,7 +122,7 @@ isShowLocation: any;
         worksheets: [
           {
             data: [],
-            minDimensions: [7, 1],
+            minDimensions: [9, 1],
             columns: [
               {
                 type: 'dropdown',
@@ -132,14 +132,16 @@ isShowLocation: any;
                 source: self.productsname
               },
               { type: 'text', title: 'Tamil name', width: 200 },
+              { type: 'text', title: 'Stock', width: 100 },
               {
                 type: 'dropdown', title: 'Unit', width: 100,
                 source: self.unitNames
               },
               { type: 'text', title: 'Quantity', width: 100 },
               { type: 'text', title: 'MRP', width: 100 },
-              { type: 'text', title: 'Net amount', width: 100 },
-              { type: 'text', title: 'Stock', width: 100 }
+              { type: 'text', title: 'Net', width: 100 },
+              { type: 'text', title: 'Tax', width: 100 },
+              { type: 'text', title: 'Total Net', width: 100 }
             ]
           }
         ],
@@ -148,11 +150,11 @@ isShowLocation: any;
             case '0': // Product column
               self.addProduct(instance, cell, col, row, value);
             break;
-            case '2': // unit name column
+            case '3': // unit name column
               self.chooseUnit(instance, cell, col, row, value);
             break;
-            case '3': // Quantity column
-            self.chooseQuantity(instance, cell, col, row, value);
+            case '4': // Quantity column
+              self.chooseQuantity(instance, cell, col, row, value);
             break;
           }
         }
@@ -161,14 +163,16 @@ isShowLocation: any;
 
   }
   addProduct(instance: any, cell: any, col: any, row: any, value: any) {
-    const product = this.products.find((item: any) => item.product_pos.name === value);
+    const product = this.products.find((item: any) => item.name === value);
     if (product) {
       instance.setValueFromCoords(1, row, '');
-      instance.setValueFromCoords(2, row, '');
+      instance.setValueFromCoords(2, row, product.quantity);
       instance.setValueFromCoords(3, row, '');
-      instance.setValueFromCoords(4, row, product.selling_price);
-      instance.setValueFromCoords(5, row, product.purchase_price);
-      instance.setValueFromCoords(6, row, product.quantity);
+      instance.setValueFromCoords(4, row, '');
+      instance.setValueFromCoords(5, row, '');
+      instance.setValueFromCoords(6, row, '');
+      instance.setValueFromCoords(7, row, '');
+      instance.setValueFromCoords(8, row, '');
     }
   }
   chooseUnit(instance: any, cell: any, col: any, row: any, unit: any) {
@@ -186,24 +190,50 @@ isShowLocation: any;
     const quantity = parseFloat(value);
     if (isNaN(quantity) || quantity <= 0) {
       Swal.fire('Error', 'Invalid quantity', 'error');
-      instance.setValueFromCoords(3, row, '');
+      this.clearAmountFields(instance, row);
       return false;
     } else {
       // Calculate the net amount based on the selling price and quantity
-      const netAmount = quantity * productDetails.product.selling_price;
-      instance.setValueFromCoords(5, row, netAmount.toFixed(2));
+      const netAmount = quantity * productDetails.price.selling_price;
+      instance.setValueFromCoords(6, row, netAmount.toFixed(2));
+      // Calculate the tax amount based on the tax percentage
+      let taxAmount = 0;
+      let tax_percentage = productDetails.price.selling_CGST_percentage + productDetails.price.selling_IGST_percentage + productDetails.price.selling_SGST_percentage +  productDetails.price.selling_cess_percentage;
+      if (tax_percentage > 0) {
+        taxAmount = (netAmount * productDetails.price.tax_percentage) / 100;
+        instance.setValueFromCoords(7, row, taxAmount.toFixed(2));
+      } else {
+        instance.setValueFromCoords(7, row, '0.00');
+      }
+      instance.setValueFromCoords(8, row, netAmount + taxAmount);
+
       return true;
     }
+  }
+  getMrpPrice(instance: any, productDetails: any, row: any) {
+    if (productDetails && productDetails.price) {
+      instance.setValueFromCoords(5, row, productDetails.price.mrp_selling_price);
+    } else {
+      instance.setValueFromCoords(5, row, '');
+    }
+  }
+
+  clearAmountFields(instance: any, row: any) {
+    instance.setValueFromCoords(5, row, ''); // MRP
+    instance.setValueFromCoords(6, row, ''); // Net
+    instance.setValueFromCoords(7, row, ''); // Tax
+    instance.setValueFromCoords(8, row, ''); // Total Net
   }
 
   validateProducts(instance: any, row: any) {
     const productName = instance.getValueFromCoords(0, row);
-    const product = this.products.find((item: any) => item.product_pos.name === productName);
-    let unitMapping = null;
+    const product = this.products.find((item: any) => item.name === productName);
+    let price = null;
+    this.clearAmountFields(instance, row);
     if (product) {
-      const unit = instance.getValueFromCoords(2, row);
-      unitMapping = product.product_pos.prices.find((item: any) => item.unit.name === unit);
-      if (!unitMapping) {
+      const unit = instance.getValueFromCoords(3, row);
+      price = product.prices.find((item: any) => item.unit.name === unit);
+      if (!price) {
         Swal.fire('Error', 'Unit not found for the selected product', 'error');
         return false;
       }
@@ -211,7 +241,9 @@ isShowLocation: any;
       Swal.fire('Error', 'Product not found', 'error');
       return false;
     }
-    return { product, unitMapping };
+    let itemDetails = { product, price };
+    this.getMrpPrice(instance, itemDetails, row);
+    return itemDetails;
   }
   getLocations() {
     this.locations = [];
