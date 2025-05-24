@@ -590,8 +590,7 @@ export class IncomingStocksComponent extends BaseComponent implements OnInit {
   }
   getLocations() {
     this.recipeService.getLocations({
-      q: 'all',
-      isCentral: true
+      q: 'all'
     }, null)
     .subscribe((response: any) => {
         if (response.data && response.data.length > 0) {
