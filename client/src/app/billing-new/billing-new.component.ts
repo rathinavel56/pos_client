@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseComponent } from '../base.component';
 import { RecipeService } from '../shared/service/recipe.service';
-import jspreadsheet from "jspreadsheet-ce";
 import Swal from 'sweetalert2';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 
@@ -364,145 +363,12 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
             this.filteredProducts = JSON.parse(JSON.stringify(this.productsname));
             this.activeOptionIndex.push(-1); // no item selected
           }
-          this.createSpreadsheet();
           this.clearLoading();
         },
         (err: any) => {
           this.networkIssue();
         }
       );
-  }
-  createSpreadsheet() {
-    if (this.spreadsheet) {
-      // Create the spreadsheet
-      const self = this; // Capture 'this' context
-      this.spreadsheetInstance = jspreadsheet(this.spreadsheet.nativeElement, {
-        worksheets: [
-          {
-            data: [],
-            minDimensions: [9, 1],
-            allowInsertColumn: false,
-            columns: [
-              {
-                type: 'dropdown',
-                title: 'Product',
-                autocomplete: true,
-                width: 300,
-                source: self.productsname
-              },
-              { type: 'text', title: 'Tamil name', width: 200 },
-              { type: 'text', title: 'Stock', width: 100 },
-              {
-                type: 'dropdown', title: 'Unit', width: 100,
-                source: self.unitNames
-              },
-              { type: 'text', title: 'Quantity', width: 100 },
-              { type: 'text', title: 'MRP', width: 100, readOnly: true },
-              { type: 'text', title: 'Net', width: 100, readOnly: true },
-              { type: 'text', title: 'Tax', width: 100, readOnly: true },
-              { type: 'text', title: 'Total Net', width: 100, readOnly: true }
-            ]
-          }
-        ],
-        onchange: function (instance: any, cell: any, col: any, row: any, value: any) {
-          switch (col) {
-            case '0': // Product column
-              self.addProduct(instance, cell, col, row, value);
-              break;
-            case '3': // unit name column
-              self.chooseUnit(instance, cell, col, row, value);
-              break;
-            case '4': // Quantity column
-              self.chooseQuantity(instance, cell, col, row, value);
-              break;
-          }
-        }
-      } as any);
-    }
-
-  }
-  addProduct(instance: any, cell: any, col: any, row: any, value: any) {
-    const product = this.products.find((item: any) => item.name === value);
-    if (product) {
-      instance.setValueFromCoords(1, row, '');
-      instance.setValueFromCoords(2, row, product.quantity);
-      instance.setValueFromCoords(3, row, '');
-      instance.setValueFromCoords(4, row, '');
-      instance.setValueFromCoords(5, row, '');
-      instance.setValueFromCoords(6, row, '');
-      instance.setValueFromCoords(7, row, '');
-      instance.setValueFromCoords(8, row, '');
-    }
-  }
-  chooseUnit(instance: any, cell: any, col: any, row: any, unit: any) {
-    const productDetails = this.validateProducts(instance, row);
-    if (!productDetails) {
-      return false;
-    }
-    return true;
-  }
-  chooseQuantity(instance: any, cell: any, col: any, row: any, value: any) {
-    const productDetails = this.validateProducts(instance, row);
-    if (!productDetails) {
-      return false;
-    }
-    const quantity = parseFloat(value);
-    if (isNaN(quantity) || quantity <= 0) {
-      Swal.fire('Error', 'Invalid quantity', 'error');
-      this.clearAmountFields(instance, row);
-      return false;
-    } else {
-      // Calculate the net amount based on the selling price and quantity
-      const netAmount = quantity * productDetails.price.selling_price;
-      instance.setValueFromCoords(6, row, netAmount.toFixed(2));
-      // Calculate the tax amount based on the tax percentage
-      let taxAmount = 0;
-      let tax_percentage = productDetails.price.selling_CGST_percentage + productDetails.price.selling_IGST_percentage + productDetails.price.selling_SGST_percentage + productDetails.price.selling_cess_percentage;
-      if (tax_percentage > 0) {
-        taxAmount = (netAmount * productDetails.price.tax_percentage) / 100;
-        instance.setValueFromCoords(7, row, taxAmount.toFixed(2));
-      } else {
-        instance.setValueFromCoords(7, row, '0.00');
-      }
-      instance.setValueFromCoords(8, row, netAmount + taxAmount);
-
-      return true;
-    }
-  }
-  getMrpPrice(instance: any, productDetails: any, row: any) {
-    if (productDetails && productDetails.price) {
-      instance.setValueFromCoords(5, row, productDetails.price.mrp_selling_price);
-    } else {
-      instance.setValueFromCoords(5, row, '');
-    }
-  }
-
-  clearAmountFields(instance: any, row: any) {
-    instance.setValueFromCoords(5, row, ''); // MRP
-    instance.setValueFromCoords(6, row, ''); // Net
-    instance.setValueFromCoords(7, row, ''); // Tax
-    instance.setValueFromCoords(8, row, ''); // Total Net
-  }
-
-  validateProducts(instance: any, row: any) {
-    const productName = instance.getValueFromCoords(0, row);
-    const product = this.products.find((item: any) => item.name === productName);
-    let price = null;
-    this.clearAmountFields(instance, row);
-    if (product) {
-      const unit = instance.getValueFromCoords(3, row);
-      price = product.prices.find((item: any) => item.unit.name === unit);
-      if (!price) {
-        Swal.fire('Error', 'Unit not found for the selected product', 'error');
-        return false;
-      }
-    } else {
-      Swal.fire('Error', 'Product not found', 'error');
-      return false;
-    }
-    let itemDetails = { product, price };
-    this.getMrpPrice(instance, itemDetails, row);
-    return itemDetails;
   }
   getLocations() {
     this.locations = [];

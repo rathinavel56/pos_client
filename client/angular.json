@@ -34,9 +34,7 @@
               "src/assets/scss/style.scss",
               "src/styles.scss",
               "node_modules/datatables.net-dt/css/jquery.dataTables.css",
-              "node_modules/dragula/dist/dragula.css",
-              "node_modules/jsuites/dist/jsuites.css",
-              "node_modules/jspreadsheet-ce/dist/jspreadsheet.css"
+              "node_modules/dragula/dist/dragula.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
