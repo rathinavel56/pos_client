@@ -5,6 +5,7 @@ import { BaseComponent } from '../base.component';
 import { RecipeService } from '../shared/service/recipe.service';
 import Swal from 'sweetalert2';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-billing-new',
@@ -37,6 +38,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   cess: any;
   invoice_no: any;
   invoice_date: any;
+  formData: any;
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -229,7 +231,6 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     }, 0);
   }
   saveInvoice() {
-    console.log(this.tableForm.value.rows);
     this.showLoading();
     let order = {
         location_id: this.selectedLocation.id,
@@ -283,6 +284,45 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   }
   printInvoice() {
     console.log('Method not implemented.');
+  }
+  orderInvoice(isDraft?: boolean) {
+    this.showLoading();
+    let order = {
+        location_id: this.selectedLocation.id,
+        order_type_id: 1, // Assuming 1 is the order type for retail
+        payment_mode_id: 1, // Assuming 1 is the payment mode for cash
+        details: this.tableForm.value.rows,
+        parcel_charge: null,
+        customer_id: null,
+        reference_no: null,
+        is_take_away: true,
+        SGST_amount: +this.SGST,
+        CGST_amount: +this.CGST,
+        IGST_amount: +this.IGST,
+        cess_amount: +this.cess,
+        discount_mloyal_amount: 0,
+        discount_amount: 0,
+        discount_percentage: 0,
+        roundoff: 0,
+        advance_amount: 0,
+        total: +this.totalBillAmount,
+        is_draft: isDraft,
+        delivery_date: formatDate(new Date(), 'yyyy-MM-dd', 'en-US'),
+      };
+    this.formData = new FormData();
+    this.formData.append('data', JSON.stringify(order));
+    this.recipeService.order(this.formData)
+      .subscribe((response: any) => {
+        this.clearLoading();
+          Swal.fire(
+            'Saved',
+            'Your Order has been saved.',
+            'success'
+          );
+      },
+        (err: any) => {
+          this.networkIssue();
+        });
   }
 
   ngOnInit(): void {

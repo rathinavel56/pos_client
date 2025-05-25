@@ -99,7 +99,9 @@
     </tbody>
   </table>
   <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
-        style="float: left;margin-top: 16px;" (click)="saveInvoice()">Save</button>
+    style="float: left;margin-top: 16px;" (click)="saveInvoice()">Save</button>
+  <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
+    style="float: left;margin-top: 16px; margin-left:20px" (click)="orderInvoice(true)">Draft</button>
 </form>
 </ng-container>
 
