@@ -39,6 +39,13 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   invoice_no: any;
   invoice_date: any;
   formData: any;
+  modalReference: import("@ng-bootstrap/ng-bootstrap").NgbModalRef;
+  customerRes: any;
+  customer: any;
+  order: any;
+  isCustomer: boolean;
+  customerdetail: { customer_name: string; customer_email: string; customer_city: string; customer_dob: string; customer_gender: string; customer_address: string; };
+  mobile: any;
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -236,7 +243,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         location_id: this.selectedLocation.id,
         order_type_id: 1, // Assuming 1 is the order type for retail
         payment_mode_id: 1, // Assuming 1 is the payment mode for cash
-        carts: this.tableForm.value.rows,
+        carts: this.tableForm.value.rows.filter((p: any) => p.product_id !== '' ),
         parcel_charge: null,
         customer_id: null,
         reference_no: null,
@@ -290,8 +297,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     let order = {
         location_id: this.selectedLocation.id,
         order_type_id: 1, // Assuming 1 is the order type for retail
-        payment_mode_id: 1, // Assuming 1 is the payment mode for cash
-        details: this.tableForm.value.rows,
+        payment_mode_id: 1, // Assuming 1 is the payment mode for cash1
+        details: this.tableForm.value.rows.filter((p: any) => p.product_id !== '' ),
         parcel_charge: null,
         customer_id: null,
         reference_no: null,
@@ -324,6 +331,152 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
           this.networkIssue();
         });
   }
+
+  validatePhoneNumber() {
+      const re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
+      return re.test(this.mobile);
+    }
+    getCustomer(content: any, sendCustomer: boolean = false) {
+      this.order = null;
+      this.customerRes = null;
+      if (this.mobile) {
+        if (this.validatePhoneNumber()) {
+          this.showLoading();
+          this.recipeService
+            .getCustomer({
+              mobile: this.mobile,
+              location_id: this.selectedLocation.id,
+              customer_name: sendCustomer
+                ? this.customerdetail.customer_name
+                : undefined,
+              customer_email: sendCustomer
+                ? this.customerdetail.customer_email
+                : undefined,
+              customer_city: sendCustomer
+                ? this.customerdetail.customer_city
+                : undefined,
+              customer_dob: sendCustomer
+                ? this.customerdetail.customer_dob
+                : undefined,
+              customer_gender: sendCustomer
+                ? this.customerdetail.customer_gender
+                : undefined,
+              customer_mobile: sendCustomer
+                ? this.customerdetail.mobile
+                : undefined,
+              customer_address: sendCustomer
+                ? this.customerdetail.customer_address
+                : undefined,
+            })
+            .subscribe(
+              (response: any) => {
+                this.clearLoading();
+                if (response.status === "success") {
+                  this.closePopUp();
+                  if (response.orders && response.orders.length > 0) {
+                    this.orderResponseHandler(content, response);
+                  } else {
+                    this.customerResponseHandler(response);
+                  }
+                } else if (response.status === false) {
+                  this.resetPopup();
+                  this.isCustomer = true;
+                  this.modalReference = this.modalService.open(content);
+                } else if (response.error) {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: response.error,
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Internal Server Error",
+                  });
+                }
+              },
+              (err: any) => {
+                this.networkIssue();
+              }
+            );
+        } else {
+          this.discount_mloyal_amount = 0;
+          this.discount_percentage = 0;
+          this.virtual_discount_percentage = 0;
+          this.discount_amount = 0;
+          this.discount_points = 0;
+          this.cartTotal();
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Invalid Customer mobile",
+          });
+        }
+      } else {
+        this.discount_mloyal_amount = 0;
+        this.discount_amount = 0;
+        this.discount_percentage = 0;
+        this.virtual_discount_percentage = 0;
+        this.discount_points = 0;
+        this.cartTotal();
+      }
+    }
+    orderResponseHandler(content: any, response: any) {
+      Swal.fire({
+        title: "Existing Orders",
+        text: "Do you want to proceed",
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Proceed",
+      }).then((result: any) => {
+        this.carts = [];
+        if (result.isConfirmed) {
+          this.customerRes = response;
+          this.modalReference = this.modalService.open(content);
+          setTimeout(() => {
+            document
+              .getElementsByClassName("modal-dialog")[0]
+              .setAttribute("class", "max-100");
+          }, 0);
+        } else {
+          this.customerResponseHandler(response);
+        }
+      });
+    }
+  customerResponseHandler(response: any) {
+      this.customer = response.data;
+      this.order = response.order;
+      let message = "Customer Name: " + response.data.customer_name + " | Points Balance: " + response.points;
+      this.isCustomer = false;
+      this.customerdetail = {
+        customer_name: "",
+        customer_email: "",
+        customer_city: "",
+        customer_dob: "",
+        customer_gender: "",
+        customer_address: ""
+      };
+      if (+response.points > 0) {
+        Swal.fire({
+          title: "Existing Customer",
+          text: "Customer Name : " + response.data.customer_name + " | Points Balance: " + response.points,
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Proceed",
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+          }
+        });
+      } else {
+        Swal.fire("Saved", message, "success");
+        this.cartTotal();
+      }
+    }
 
   ngOnInit(): void {
     this.config = {

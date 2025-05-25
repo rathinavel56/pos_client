@@ -17,6 +17,15 @@
 <ng-container *ngIf="isStart">
 <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
   (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary" (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button> <br><br>
+  <span class="pull-right">
+              <label>Customer Mobile No:</label>
+              <span>
+                <input type="text" placeholder="Maximum 10 Digits Only" [appTwoDigitDecimaNumber]="true" maxlength="10"
+                  class="form-control" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
+                  (keydown.enter)="getCustomer(mymodal)"
+                  [ngStyle]="{'border': (customer.length < 10) ? '1px solid red !important;' : '1px solid black !important;'}">
+              </span>
+            </span>
 <form [formGroup]="tableForm" >
   <table class="excel-table">
     <thead>
