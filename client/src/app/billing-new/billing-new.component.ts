@@ -123,6 +123,7 @@ isShowLocation: any;
           {
             data: [],
             minDimensions: [9, 1],
+            allowInsertColumn: false,
             columns: [
               {
                 type: 'dropdown',
@@ -138,13 +139,36 @@ isShowLocation: any;
                 source: self.unitNames
               },
               { type: 'text', title: 'Quantity', width: 100 },
-              { type: 'text', title: 'MRP', width: 100 },
-              { type: 'text', title: 'Net', width: 100 },
-              { type: 'text', title: 'Tax', width: 100 },
-              { type: 'text', title: 'Total Net', width: 100 }
+              { type: 'text', title: 'MRP', width: 100, readOnly: true },
+              { type: 'text', title: 'Net', width: 100, readOnly: true },
+              { type: 'text', title: 'Tax', width: 100, readOnly: true },
+              { type: 'text', title: 'Total Net', width: 100, readOnly: true }
             ]
           }
         ],
+        onkeydown: (instance: any, cell: any, e: KeyboardEvent) => {
+          if (e.key === 'Tab' || e.key === 'Enter') {
+            e.preventDefault();
+        
+            const sel = instance.getSelectedCells();
+            if (sel.length > 0) {
+              const [row, col] = sel[0];
+              const lastCol = instance.options.columns.length - 1;
+              const lastRow = instance.getData().length - 1;
+        
+              if (col === lastCol) {
+                if (row < lastRow) {
+                  instance.setSelection([row + 1, 0]);
+                } else {
+                  instance.insertRow();
+                  instance.setSelection([row + 1, 0]);
+                }
+              } else {
+                instance.setSelection([row, col + 1]);
+              }
+            }
+          }
+        },
         onchange: function (instance: any, cell: any, col: any, row: any, value: any) {
           switch (col) {
             case '0': // Product column

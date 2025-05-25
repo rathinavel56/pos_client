@@ -24,6 +24,16 @@
           <br>
           <div class="row">
             <div class="col-2 mobile-full-width">
+              <label>Tamil Name<span *ngIf="isAdd || isEdit">*</span></label>
+            </div>
+            <div class="col-4 mobile-full-width">
+              <input type="text" class="form-control" [(ngModel)]="productInfo.tamil_name"
+                (keydown.enter)="onKeyDownEvent($event)">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-2 mobile-full-width">
               <label>Category<span *ngIf="isAdd || isEdit">*</span> </label>
             </div>
             <div class="col-4 mobile-full-width">
@@ -350,7 +360,7 @@
                     style="color: #fff;background-color: #28a745;border-color: #28a745;"
                     class="btn btn-rounded btn-primary" (click)="showPriceHistory(product)">View Price History</button>
                 </td>
-                <td>{{product.name}}</td>
+                <td>{{product.name}}<ng-container *ngIf="product.tamil_name"> ({{product.tamil_name}})</ng-container></td>
                 <td>{{product.category.name}}</td>
                 <td>{{product.brand.name}}</td>
                 <td>{{product.purchase_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>

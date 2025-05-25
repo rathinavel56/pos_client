@@ -26,6 +26,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   productInfo: any = {
     id: '',
     name: '',
+    tamil_name: '',
     category_id: 0,
     eod_days: '',
     brand_id: '',
@@ -131,6 +132,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.productInfo = {
       id: '',
       name: '',
+      tamil_name: '',
       image_url: '',
       category_id: (this.categories && this.categories.length > 0) ? this.categories[0].id : null,
       eod_days: '',
@@ -208,6 +210,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.productInfo = {
       id: product.id,
       name: product.name,
+      tamil_name: product.tamil_name,
       category_id: (this.categories && this.categories.length > 0) ? product.category_id : null,
       eod_days: (product.eod_days && product.eod_days.length > 0) ? product.eod_days.split(',') : [],
       brand_id: product.brand_id,
@@ -274,6 +277,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.productInfo = {
       id: '',
       name: '',
+      tamil_name: '',
       category_id: 0,
       brand_id: '',
       eod_days: '',
@@ -380,6 +384,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   getRecords() {
     this.recipeService.getProducts({
         isLoadRecipe: false,
+        tamil_name: this.productInfo.tamil_name,
         name: this.productInfo.name,
         category_id: this.productInfo.category_id,
         brand_id: this.productInfo.brand_id,
