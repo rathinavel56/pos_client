@@ -939,3 +939,78 @@ input:checked+.toggle-slider:before {
   color: #ee1008;
   font-size: 16px;
 }
+
+.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.excel-table th,
+.excel-table td {
+  border: 1px solid #ccc;
+  padding: 4px;
+  position: relative;
+}
+
+input, select {
+  width: 100%;
+  padding: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border: 2px solid #1976d2;
+  background-color: #e3f2fd;
+}
+
+.dropdown-list {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 100%;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-list li {
+  padding: 4px;
+  cursor: pointer;
+}
+
+.dropdown-list li:hover,
+.dropdown-list li.active {
+  background-color: #e0e0e0;
+}
+
+.small-col {
+  width: 100px;
+  max-width: 100px;
+  padding: 4px;
+}
+
+.excel-table input,
+.excel-table select,
+.ngx-dropdown-container {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.table-footer td {
+  font-weight: bold;
+  background-color: #f3f3f3;
+  border-top: 2px solid #ccc;
+}
+.readonly-cell {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  color: #555;
+}

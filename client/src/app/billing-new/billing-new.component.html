@@ -1,19 +1,106 @@
 <ng-container *ngIf="!isStart && isShowLocation">
-    <div class="row">
-      <div class="col-12 col-md-2">
-        <label>Location*</label>
-      </div>
-      <div class="col-12 col-md-4">
-        <ngx-select-dropdown [ngClass]="{'error-dropdown': intialForm && !selectedLocation}" [config]="config"
-          [options]="locations" [multiple]="false" [(ngModel)]="selectedLocation"
-          (change)="locationSelectionChanged($event)">
-        </ngx-select-dropdown>
-        <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation" style="float: left;margin-top: 16px;"
-        (click)="submit()">Submit</button>
-      </div>
+  <div class="row">
+    <div class="col-12 col-md-2">
+      <label>Location*</label>
     </div>
-    <br>
-  </ng-container>
-  <button *ngIf="isStart" type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
-        (click)="reload()">Reload Screen</button><br><br>
+    <div class="col-12 col-md-4">
+      <ngx-select-dropdown [ngClass]="{'error-dropdown': intialForm && !selectedLocation}" [config]="config"
+        [options]="locations" [multiple]="false" [(ngModel)]="selectedLocation"
+        (change)="locationSelectionChanged($event)">
+      </ngx-select-dropdown>
+      <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
+        style="float: left;margin-top: 16px;" (click)="submit()">Submit</button>
+    </div>
+  </div>
+  <br>
+</ng-container>
+<ng-container *ngIf="isStart">
+<button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
+  (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary" (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button> <br><br>
 <div #spreadsheet></div>
+<form [formGroup]="tableForm" >
+  <table class="excel-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Tamil Name</th>
+        <th>Stock</th>
+        <th>Unit</th>
+        <th>Quantity</th>
+        <th>MRP</th>
+        <th>Net</th>
+        <th>Tax</th>
+        <th>Total Net</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody formArrayName="rows">
+      <tr *ngFor="let row of rows.controls; let i = index" [formGroupName]="i">
+        <!-- Product Field -->
+        <td>
+          <input #cellInput type="text" formControlName="product_name" (input)="onProductInput(i, $event)"
+            (keydown)="handleKeyDown($event, i)" autocomplete="off" />
+          <ul class="dropdown-list" *ngIf="activeDropdownIndex === i && filteredProducts[i]?.length">
+            <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option)"
+              [class.active]="activeOptionIndex[i] === j">
+              {{ option }}
+            </li>
+          </ul>
+        </td>
+        <!-- Tamil name -->
+        <td>
+          <input #cellInput type="text" formControlName="product_name_tamil" (keydown)="handleKeyDown($event, i)" />
+        </td>
+        <!-- stock -->
+        <td class="small-col">
+          <input #cellInput type="number" formControlName="product_stock" readonly
+            (keydown)="handleKeyDown($event, i)" />
+        </td>
+        <!-- unit -->
+        <td class="small-col">
+          <select #cellInput formControlName="unit_size" (change)="unitSelection(i)">
+            <option *ngFor="let unit of unitNames" [value]="unit.id">{{ unit.name }}</option>
+          </select>
+        </td>
+        <!-- Quantity -->
+        <td class="small-col">
+          <input #cellInput type="number" formControlName="unit_quantity" min="1"
+            (keydown)="handleKeyDown($event, i)" (change)="totalCalculation(i)" />
+        </td>
+        <!-- Price (readonly) -->
+        <td class="small-col">
+          <input #cellInput type="number" class="readonly-cell" formControlName="mrp_selling_price" readonly
+            (keydown)="handleKeyDown($event, i)" />
+        </td>
+        <!-- net -->
+        <td class="small-col">
+          <input #cellInput type="number" class="readonly-cell" formControlName="selling_price" readonly
+            (keydown)="handleKeyDown($event, i)" />
+        </td>
+        <!-- tax -->
+        <td class="small-col">
+          <input #cellInput type="number" class="readonly-cell" formControlName="total_tax" readonly (keydown)="handleKeyDown($event, i)" />
+        </td>
+
+        <!-- totalnet -->
+        <td class="small-col">
+          <input #cellInput type="number" class="readonly-cell" formControlName="total" readonly (keydown)="handleKeyDown($event, i)" />
+        </td>
+        <!-- Delete -->
+        <td>
+          <button type="button"><img src="assets/images/Icon-delete.png" width="16" (click)="removeRow(i)"></button>
+        </td>
+      </tr>
+      <tr class="table-footer">
+        <td colspan="9" style="text-align: right; padding-right: 20px;">
+          <strong style="margin-left: 20px;">Total Tax: {{ (totalBillAmount > 0) ? (SGST + CGST + IGST + cess) : '0' }}</strong>
+          <strong>Total: {{ totalBillAmount }}</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
+        style="float: left;margin-top: 16px;" (click)="saveInvoice()">Save</button>
+</form>
+</ng-container>
+
