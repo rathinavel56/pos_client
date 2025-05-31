@@ -1014,3 +1014,17 @@ input:focus, select:focus {
   border: 1px solid #ccc;
   color: #555;
 }
+.product-table {
+  margin-top: 25px;
+}
+.header-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.search-panel {
+  display: flex;
+  align-items: center;
+  gap:10px
+}

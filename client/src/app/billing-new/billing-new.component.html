@@ -15,18 +15,45 @@
   <br>
 </ng-container>
 <ng-container *ngIf="isStart">
-<button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
-  (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary" (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button> <br><br>
-  <span class="pull-right">
-              <label>Customer Mobile No:</label>
-              <span>
-                <input type="text" placeholder="Maximum 10 Digits Only" [appTwoDigitDecimaNumber]="true" maxlength="10"
-                  class="form-control" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
-                  (keydown.enter)="getCustomer(mymodal)"
-                  [ngStyle]="{'border': (customer.length < 10) ? '1px solid red !important;' : '1px solid black !important;'}">
-              </span>
-            </span>
-<form [formGroup]="tableForm" >
+  <div class="header-filter">
+    <div>
+      <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
+        (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary"
+        (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button>
+    </div>
+    <div class="search-panel">
+      <span>
+        <label>Search</label>
+        <span>
+          <input type="text" (input)="onProductInput(i, $event)" placeholder="Search Product" class="form-control" autocomplete="off" />
+          <ul class="dropdown-list" *ngIf="activeDropdownIndex === i && filteredProducts[i]?.length">
+            <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option.name)"
+              [class.active]="activeOptionIndex[i] === j">
+              {{ option.name }} ({{option.tamil_name}}) ({{option.quantity}}) ({{option.purchase_price}})
+            </li>
+          </ul>
+        </span>
+      </span>
+      <span>
+        <label>Mobile No:</label>
+        <span>
+          <input type="text" placeholder="Maximum 10 Digits Only" class="form-control" [appTwoDigitDecimaNumber]="true"
+            maxlength="10"></span>
+      </span>
+      <span (click)="mainMenu()"><img width="30" height="30"
+                src="assets/images/back_arrow.png"></span>
+    </div>
+    <!-- <span class="pull-right">
+                <label>Customer Mobile No:</label>
+                <span>
+                  <input type="text" placeholder="Maximum 10 Digits Only" [appTwoDigitDecimaNumber]="true" maxlength="10"
+                    class="form-control" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
+                    (keydown.enter)="getCustomer(mymodal)"
+                    [ngStyle]="{'border': (customer.length < 10) ? '1px solid red !important;' : '1px solid black !important;'}">
+                </span>
+              </span> -->
+  </div>
+<form [formGroup]="tableForm" class="product-table" >
   <table class="excel-table">
     <thead>
       <tr>
@@ -49,9 +76,9 @@
           <input #cellInput type="text" formControlName="product_name" (input)="onProductInput(i, $event)"
             (keydown)="handleKeyDown($event, i)" autocomplete="off" />
           <ul class="dropdown-list" *ngIf="activeDropdownIndex === i && filteredProducts[i]?.length">
-            <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option)"
+            <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option.name)"
               [class.active]="activeOptionIndex[i] === j">
-              {{ option }}
+              {{ option.name }} ({{option.tamil_name}}) ({{option.quantity}}) ({{option.purchase_price}})
             </li>
           </ul>
         </td>

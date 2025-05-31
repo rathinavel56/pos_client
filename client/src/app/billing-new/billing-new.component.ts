@@ -39,12 +39,12 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   invoice_no: any;
   invoice_date: any;
   formData: any;
-  modalReference: import("@ng-bootstrap/ng-bootstrap").NgbModalRef;
+ // modalReference: import("@ng-bootstrap/ng-bootstrap").NgbModalRef;
   customerRes: any;
   customer: any;
   order: any;
-  isCustomer: boolean;
-  customerdetail: { customer_name: string; customer_email: string; customer_city: string; customer_dob: string; customer_gender: string; customer_address: string; };
+ // isCustomer: boolean;
+ // customerdetail: { customer_name: string; customer_email: string; customer_city: string; customer_dob: string; customer_gender: string; customer_address: string; };
   mobile: any;
   constructor(
     public recipeService: RecipeService,
@@ -102,8 +102,9 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   onProductInput(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.toLowerCase();
     const filtered = this.productsname;
-    this.filteredProducts[index] = this.productsname
-      .filter((p: any) => p.toLowerCase().includes(value));
+    this.filteredProducts[index] = this.products
+      .filter((p: any) => p.name.toLowerCase().includes(value));
+      //.filter((p: any) => p.toLowerCase().includes(value));
     this.activeDropdownIndex = index;
     this.activeOptionIndex[index] = filtered.length ? 0 : -1;
   }
@@ -142,9 +143,9 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       }
       if (event.key === 'Enter') {
         event.preventDefault();
-        const selected = options[this.activeOptionIndex[index]];
+        const selected: any = options[this.activeOptionIndex[index]];
         if (selected) {
-          this.selectProduct(index, selected);
+          this.selectProduct(index, selected.name);
         }
         return;
       }
@@ -270,6 +271,15 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
                   this.invoice_no = response.invoice_no;
                   this.invoice_date = response.invoice_datetime;
                   this.printInvoice();
+                  Swal.fire(
+                    'Saved',
+                    'Your Order has been saved.',
+                    'success'
+                  );
+                  this.tableForm = this.fb.group({
+                    rows: this.fb.array([])
+                  });
+                  this.addRow(); // initialize with one row
                 } else if (response.error) {
                   Swal.fire({
                     icon: "error",
@@ -336,92 +346,92 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       const re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
       return re.test(this.mobile);
     }
-    getCustomer(content: any, sendCustomer: boolean = false) {
-      this.order = null;
-      this.customerRes = null;
-      if (this.mobile) {
-        if (this.validatePhoneNumber()) {
-          this.showLoading();
-          this.recipeService
-            .getCustomer({
-              mobile: this.mobile,
-              location_id: this.selectedLocation.id,
-              customer_name: sendCustomer
-                ? this.customerdetail.customer_name
-                : undefined,
-              customer_email: sendCustomer
-                ? this.customerdetail.customer_email
-                : undefined,
-              customer_city: sendCustomer
-                ? this.customerdetail.customer_city
-                : undefined,
-              customer_dob: sendCustomer
-                ? this.customerdetail.customer_dob
-                : undefined,
-              customer_gender: sendCustomer
-                ? this.customerdetail.customer_gender
-                : undefined,
-              customer_mobile: sendCustomer
-                ? this.customerdetail.mobile
-                : undefined,
-              customer_address: sendCustomer
-                ? this.customerdetail.customer_address
-                : undefined,
-            })
-            .subscribe(
-              (response: any) => {
-                this.clearLoading();
-                if (response.status === "success") {
-                  this.closePopUp();
-                  if (response.orders && response.orders.length > 0) {
-                    this.orderResponseHandler(content, response);
-                  } else {
-                    this.customerResponseHandler(response);
-                  }
-                } else if (response.status === false) {
-                  this.resetPopup();
-                  this.isCustomer = true;
-                  this.modalReference = this.modalService.open(content);
-                } else if (response.error) {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: response.error,
-                  });
-                } else {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Internal Server Error",
-                  });
-                }
-              },
-              (err: any) => {
-                this.networkIssue();
-              }
-            );
-        } else {
-          this.discount_mloyal_amount = 0;
-          this.discount_percentage = 0;
-          this.virtual_discount_percentage = 0;
-          this.discount_amount = 0;
-          this.discount_points = 0;
-          this.cartTotal();
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Invalid Customer mobile",
-          });
-        }
-      } else {
-        this.discount_mloyal_amount = 0;
-        this.discount_amount = 0;
-        this.discount_percentage = 0;
-        this.virtual_discount_percentage = 0;
-        this.discount_points = 0;
-        this.cartTotal();
-      }
-    }
+    // getCustomer(content: any, sendCustomer: boolean = false) {
+    //   this.order = null;
+    //   this.customerRes = null;
+    //   if (this.mobile) {
+    //     if (this.validatePhoneNumber()) {
+    //       this.showLoading();
+    //       this.recipeService
+    //         .getCustomer({
+    //           mobile: this.mobile,
+    //           location_id: this.selectedLocation.id,
+    //           customer_name: sendCustomer
+    //             ? this.customerdetail.customer_name
+    //             : undefined,
+    //           customer_email: sendCustomer
+    //             ? this.customerdetail.customer_email
+    //             : undefined,
+    //           customer_city: sendCustomer
+    //             ? this.customerdetail.customer_city
+    //             : undefined,
+    //           customer_dob: sendCustomer
+    //             ? this.customerdetail.customer_dob
+    //             : undefined,
+    //           customer_gender: sendCustomer
+    //             ? this.customerdetail.customer_gender
+    //             : undefined,
+    //           customer_mobile: sendCustomer
+    //             ? this.customerdetail.mobile
+    //             : undefined,
+    //           customer_address: sendCustomer
+    //             ? this.customerdetail.customer_address
+    //             : undefined,
+    //         })
+    //         .subscribe(
+    //           (response: any) => {
+    //             this.clearLoading();
+    //             if (response.status === "success") {
+    //               this.closePopUp();
+    //               if (response.orders && response.orders.length > 0) {
+    //                 this.orderResponseHandler(content, response);
+    //               } else {
+    //                 this.customerResponseHandler(response);
+    //               }
+    //             } else if (response.status === false) {
+    //               this.resetPopup();
+    //               this.isCustomer = true;
+    //               this.modalReference = this.modalService.open(content);
+    //             } else if (response.error) {
+    //               Swal.fire({
+    //                 icon: "error",
+    //                 title: "Oops...",
+    //                 text: response.error,
+    //               });
+    //             } else {
+    //               Swal.fire({
+    //                 icon: "error",
+    //                 title: "Oops...",
+    //                 text: "Internal Server Error",
+    //               });
+    //             }
+    //           },
+    //           (err: any) => {
+    //             this.networkIssue();
+    //           }
+    //         );
+    //     } else {
+    //       this.discount_mloyal_amount = 0;
+    //       this.discount_percentage = 0;
+    //       this.virtual_discount_percentage = 0;
+    //       this.discount_amount = 0;
+    //       this.discount_points = 0;
+    //       this.cartTotal();
+    //       Swal.fire({
+    //         icon: "error",
+    //         title: "Oops...",
+    //         text: "Invalid Customer mobile",
+    //       });
+    //     }
+    //   } else {
+    //     this.discount_mloyal_amount = 0;
+    //     this.discount_amount = 0;
+    //     this.discount_percentage = 0;
+    //     this.virtual_discount_percentage = 0;
+    //     this.discount_points = 0;
+    //     this.cartTotal();
+    //   }
+    // }
     orderResponseHandler(content: any, response: any) {
       Swal.fire({
         title: "Existing Orders",
@@ -435,7 +445,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         this.carts = [];
         if (result.isConfirmed) {
           this.customerRes = response;
-          this.modalReference = this.modalService.open(content);
+         // this.modalReference = this.modalService.open(content);
           setTimeout(() => {
             document
               .getElementsByClassName("modal-dialog")[0]
@@ -450,15 +460,15 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       this.customer = response.data;
       this.order = response.order;
       let message = "Customer Name: " + response.data.customer_name + " | Points Balance: " + response.points;
-      this.isCustomer = false;
-      this.customerdetail = {
-        customer_name: "",
-        customer_email: "",
-        customer_city: "",
-        customer_dob: "",
-        customer_gender: "",
-        customer_address: ""
-      };
+     // this.isCustomer = false;
+      // this.customerdetail = {
+      //   customer_name: "",
+      //   customer_email: "",
+      //   customer_city: "",
+      //   customer_dob: "",
+      //   customer_gender: "",
+      //   customer_address: ""
+      // };
       if (+response.points > 0) {
         Swal.fire({
           title: "Existing Customer",
@@ -474,7 +484,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         });
       } else {
         Swal.fire("Saved", message, "success");
-        this.cartTotal();
+       // this.cartTotal();
       }
     }
 
@@ -553,7 +563,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
             });
             this.unitNames = [...new Set(this.unitNames)];
             this.unitNames.sort((a: any, b: any) => a.name.localeCompare(b.name));
-            this.filteredProducts = JSON.parse(JSON.stringify(this.productsname));
+            this.filteredProducts = JSON.parse(JSON.stringify(this.products));
             this.activeOptionIndex.push(-1); // no item selected
           }
           this.clearLoading();
@@ -584,6 +594,10 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
           this.networkIssue();
         }
       );
+  }
+
+  mainMenu() {
+    document.getElementById('main_menu')?.click();
   }
 
 }
