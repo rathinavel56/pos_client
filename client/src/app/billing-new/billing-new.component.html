@@ -20,6 +20,10 @@
       <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
         (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary"
         (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button>
+        <button type="button" class="btn btn-rounded btn-primary"
+        (click)="getOrders(false)" style="float: left;margin-top: 16px; margin-left: 20px;">Orders</button>
+        <button type="button" class="btn btn-rounded btn-primary"
+        (click)="getOrders(true)" style="float: left;margin-top: 16px; margin-left: 20px;">Draft orders</button>
     </div>
     <div class="search-panel">
       <span>
@@ -140,4 +144,64 @@
     style="float: left;margin-top: 16px; margin-left:20px" (click)="orderInvoice(true)">Draft</button>
 </form>
 </ng-container>
+
+<ng-template #addonModal let-modal>
+  <ng-container>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Orders</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-12">
+              <table class="table v-middle nowrap dataTable">
+            <thead>
+              <tr>
+                <th class="border-top-0">#</th>
+                <th class="border-top-0" *ngIf="!recipeService.isReadOnly">ACTIONS</th>
+                <th class="border-top-0" (click)="sorting('id')" [ngClass]="{'sorting': sortBy !== 'id', 'sorting_asc': (sortBy === 'id' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'id' && sortOrder === 'DESC')}">Order No</th>
+                <th class="border-top-0">Name</th>
+                <th class="border-top-0">Mobile</th>
+                <th class="border-top-0" (click)="sorting('delivery_date')" [ngClass]="{'sorting': sortBy !== 'delivery_date', 'sorting_asc': (sortBy === 'delivery_date' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'delivery_date' && sortOrder === 'DESC')}">Delivery Date</th>
+                <th class="border-top-0">Advance Amount</th>
+                <th class="border-top-0" (click)="sorting('status')" [ngClass]="{'sorting': sortBy !== 'status', 'sorting_asc': (sortBy === 'status' && sortOrder === 'ASC'), 'sorting_desc': (sortBy === 'status' && sortOrder === 'DESC')}">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders; let i = index;">
+                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
+                  <button type="button" (click)="view(order)"><i class="fa fa-eye"
+                    aria-hidden="true"></i></button>
+                  <button type="button" *ngIf="isShowLocation && (order.is_active == 1)" (click)="edit(order)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" *ngIf="isShowLocation && (order.is_active == 1)" (click)="submit(order.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                </td>
+                <td>{{order.order_no}}</td>
+                <td>{{order.customer?.customer_name}}</td>
+                <td>{{order.customer?.customer_mobile}}</td>
+                <td>{{order.delivery_date | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                <td>{{order.advance_amount | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{(order.status === 1 || order.is_active === 0) ? ((order.is_active === 0) ? 'Cancelled' : 'Closed') : 'Inprogress'}}</td>
+              </tr>
+              <tr *ngIf="orders.length === 0">
+                <td colspan="8">No Records</td>
+              </tr>
+            </tbody>
+          </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-rounded btn-default" (click)="modal.dismiss()">Cancel</button>
+      <button type="button" class="btn btn-primary"
+        (click)="modal.dismiss();addOnCheckProcess(mymodal)">Submit</button>
+    </div>
+  </ng-container>
+</ng-template>
 

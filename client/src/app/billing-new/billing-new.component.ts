@@ -276,10 +276,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
                     'Your Order has been saved.',
                     'success'
                   );
-                  this.tableForm = this.fb.group({
-                    rows: this.fb.array([])
-                  });
-                  this.addRow(); // initialize with one row
+                  this.formReload();
                 } else if (response.error) {
                   Swal.fire({
                     icon: "error",
@@ -336,10 +333,66 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
             'Your Order has been saved.',
             'success'
           );
+        this.formReload();
       },
         (err: any) => {
           this.networkIssue();
         });
+  }
+  formReload() {
+    this.tableForm = this.fb.group({
+      rows: this.fb.array([])
+    });
+    this.addRow(); // initialize with one row
+  }
+
+  getOrders(isDraft: boolean = false) {
+    if (this.selectedLocation && this.selectedLocation.id) {
+      this.showLoading();
+      this.recipeService
+        .orders({
+          location_id: this.selectedLocation.id,
+          is_draft: isDraft
+        }, null)
+        .subscribe(
+          (response: any) => {
+            this.clearLoading();
+            if (response.status === "success") {
+              if (response.data && response.data.length > 0) {
+                this.carts = response.data;
+              } else {
+                Swal.fire({
+                  icon: "info",
+                  title: "No Orders Found",
+                  text: "There are no orders available.",
+                });
+              }
+            } else if (response.error) {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: response.error,
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Internal Server Error",
+              });
+            }
+          },
+          (err: any) => {
+            this.networkIssue();
+          }
+        );
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Select Location",
+        text: "Please select a location to view orders.",
+      });
+    }
+
   }
 
   validatePhoneNumber() {
