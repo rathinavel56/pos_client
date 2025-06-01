@@ -13,11 +13,11 @@ import { BillingNewComponent } from '../billing-new/billing-new.component';
 const routes: Routes = [
   {
     path: '',
-    component: BillingComponent
+    component: BillingNewComponent
   },
   {
     path: 'new',
-    component: BillingNewComponent
+    component: BillingComponent
   }
 ];
 @NgModule({

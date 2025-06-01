@@ -630,7 +630,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
                 this.productsname.push(item.product_pos.name);
               }
             });
-            this.unitNames = [...new Set(this.unitNames)];
+            this.unitNames = this.removeDuplicatesUnits(this.unitNames);
             this.unitNames.sort((a: any, b: any) => a.name.localeCompare(b.name));
             this.filteredProducts = JSON.parse(JSON.stringify(this.products));
             this.activeOptionIndex.push(-1); // no item selected
@@ -642,6 +642,16 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         }
       );
   }
+  removeDuplicatesUnits(arrValue: any[]) {
+  const seen = new Map();
+  return arrValue.filter(item => {
+    if (!seen.has(item.name)) {
+      seen.set(item.name, true);
+      return true;
+    }
+    return false;
+  });
+}
   getLocations() {
     this.locations = [];
     this.recipeService

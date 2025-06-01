@@ -8,3 +8,4 @@ old/*
 *.sql
 node_modules
 root_contain
+package-lock.json
