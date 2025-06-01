@@ -17,9 +17,6 @@
 <ng-container *ngIf="isStart">
   <div class="header-filter">
     <div>
-      <button type="button" class="btn btn-rounded btn-primary" style="float: left;margin-top: 16px;"
-        (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary"
-        (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button>
         <button type="button" class="btn btn-rounded btn-primary"
         (click)="getOrders(false)" style="float: left;margin-top: 16px; margin-left: 20px;">Orders</button>
         <button type="button" class="btn btn-rounded btn-primary"
@@ -42,7 +39,8 @@
         <label>Mobile No:</label>
         <span>
           <input type="text" placeholder="Maximum 10 Digits Only" class="form-control" [appTwoDigitDecimaNumber]="true"
-            maxlength="10"></span>
+            maxlength="10" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
+            (keydown.enter)="getCustomer(mymodal)"></span>
       </span>
       <span (click)="mainMenu()"><img width="30" height="30"
                 src="assets/images/back_arrow.png"></span>
@@ -57,7 +55,7 @@
                 </span>
               </span> -->
   </div>
-<form [formGroup]="tableForm" class="product-table" >
+<form [formGroup]="tableForm" class="product-table" *ngIf="selectedLocation">
   <table class="excel-table">
     <thead>
       <tr>
@@ -138,10 +136,12 @@
       </tr>
     </tbody>
   </table>
-  <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
+  <button type="button" class="btn btn-rounded btn-default"
+    style="float: left;margin-top: 16px; margin-left:20px" (click)="resetBilling()">Cancel</button>
+      <button type="button" style="float: left;margin-top: 16px; margin-left:20px"  class="btn btn-rounded btn-warning" (click)="orderInvoice(true)">Hold</button>
+      <button type="button" class="btn btn-rounded btn-primary"
     style="float: left;margin-top: 16px;" (click)="saveInvoice()">Save</button>
-  <button type="button" class="btn btn-rounded btn-primary" [disabled]="!selectedLocation"
-    style="float: left;margin-top: 16px; margin-left:20px" (click)="orderInvoice(true)">Draft</button>
+  
 </form>
 </ng-container>
 
@@ -205,3 +205,241 @@
   </ng-container>
 </ng-template>
 
+<ng-template #mymodal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">New Customer</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss();paymentModeCancel()">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-12 pad-left-0">
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="control-label col-sm-2" for="email">Name *:</label>
+                <div class="col-sm-10">
+                  <input type="text" [(ngModel)]="customerdetail.customer_name" class="form-control">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2">Email:</label>
+                <div class="col-sm-10">
+                  <input type="email" class="form-control" [(ngModel)]="customerdetail.customer_email">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2">City:</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" [(ngModel)]="customerdetail.customer_city">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2">Address:</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" [(ngModel)]="customerdetail.customer_address">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2">Dob:</label>
+                <div class="col-sm-10">
+                  <input type="date" class="form-control" [(ngModel)]="customerdetail.customer_dob">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2">Gender:</label>
+                <div class="col-sm-10">
+                  <select class="form-control" [(ngModel)]="customerdetail.customer_gender">
+                    <option value="Male">Male</option>
+                    <option value="Male">Female</option>
+                    <option value="Male">Transgender</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col-sm-6 text-left">
+        <button type="button" class="btn btn-rounded btn-default"
+          (click)="modal.dismiss();">Cancel</button>
+      </div>
+      <div class="col-sm-6 text-right">
+        <button type="button" class="btn btn-primary" [disabled]="!customerdetail.customer_name"
+          (click)="saveCustomer()">Submit</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<div id="print_invoice" class="hide" *ngIf="printData && printData.order_no && printData.location && printData.details && printData.details.length > 0 && printData.customer">
+  <ng-container *ngFor="let copy of copies;">
+    <table style="width: 85%; margin-left: 30px;" >
+      <thead>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{userDetail.session_detail.settings['bill_address']}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{userDetail.session_detail.settings['bill_gstin']}}</th>
+        </tr>
+        <tr>
+          <th colspan="4"><br></th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{printData.location.name}}
+          </th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{printData.location.address}}.
+            Ph: {{printData.location.phone_no}}
+          </th>
+        </tr>
+        <tr *ngIf="printData.location.gstin">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">
+            GSTIN:{{printData.location.gstin}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Order Type:
+            {{printData.location.name}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Order No:{{printData.order_no}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Customer Name:
+            {{printData.customer.customer_name}} ({{printData.customer.customer_mobile}})</th>
+        </tr>
+        <tr *ngIf="printData.customer.customer_address">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Customer Address:
+            {{printData.customer.customer_address}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Order Taken By:
+            {{printData.user ? printData.user.name : userDetail.session_detail.name}}</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Invoice Date & Time:
+            {{printData.created_at | date: 'dd-MM-yyyy hh:mm a'}}</th>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <th colspan="4" style="font-size: 10px !important;text-align: center !important">Delivery Date:
+            {{printData.delivery_date | date: 'dd-MM-yyyy hh:mm a'}}</th>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <th style="font-size: 10px !important;">Item</th>
+          <th style="font-size: 10px !important;">Shape</th>
+          <th style="font-size: 10px !important;">Rate</th>
+          <th style="font-size: 10px !important;">Qty</th>
+          <th style="font-size: 10px !important;">Amt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;" *ngFor="let detail of printData.details">
+          <td>
+            <table>
+              <tr>
+                <td style="font-size: 10px !important;font-weight: bold;">{{detail.product ? detail.product.name : detail.receipe.name}}</td>
+              <tr>
+              <tr *ngIf="(detail.product && detail.product.hsn_code) || (detail.receipe && detail.receipe.hsn_code)">
+                <td style="font-size: 10px !important;">HSN: {{detail.product ? detail.product.hsn_code : detail.receipe.hsn_code}}</td>
+              </tr>
+            </table>
+          </td>
+          <td style="font-size: 10px !important;">{{detail.shape?.name}}</td>
+          <td style="font-size: 10px !important;">{{detail.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+          <td style="font-size: 10px !important;font-weight: bold;">{{detail.quantity}} {{detail.product ? detail.product.unit.name : detail.receipe.unit.name}}</td>
+          <td style="font-size: 10px !important;">{{detail.total_net_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="border-top: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Total Qty</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{totalQty}}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Advance Amount</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{+printData.advance_amount |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <tr style="border-top: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Bill Total</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(printData.total ? printData.total : 0) |
+            currency:'INR':'symbol-narrow':'1.2-2'}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Amount Due</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(printData.total ? (+printData.total - +printData.advance_amount) : 0) |
+            currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        </tr>
+        <tr *ngIf="customer" style="border-top: 1px solid grey;">
+          <td colspan="4" style="font-size: 10px !important;text-align: center;font-weight: bold;">Customer Information
+          </td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Name</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{printData.customer ? printData.customer.customer_name : ''}}</td>
+        </tr>
+        <tr *ngIf="customer">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Mobile</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(printData.customer ? printData.customer.customer_mobile : '') | phoneMask}}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Pay Mode</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{printData.payment_mode?.name}}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;" *ngIf="printData.message">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Message</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{printData.message}}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid grey;" *ngIf="printData.notes">
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Notes</td>
+          <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{printData.notes}}</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <img style="display: block;margin: 0 auto;width: 60px;height: 60px;margin-top: 0px;"
+              src="{{hostName}}/assets/images/fssai.png">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="font-size: 10px !important;text-align: center !important">FSSAI
+            NO:{{printData.location.fssai_no}}</td>
+        </tr>
+        <tr>
+          <td colspan="4"><br></td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div style="text-align: center;"><span style="font-size: 10px !important;text-align: justify;">I/We
+                certily that food foods mentioned in this invoice is/are warranted to be of nature & quality  which it/these purport/purported to be.</span></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div style="text-align: center;"><span
+                style="font-size: 10px !important;">www.{{hostName}}.co.in</span><br><span
+                style="font-size: 10px !important;">
+                www.{{hostName}}rewards.com</span></div>
+          </td>
+        </tr>
+        <tr class="print-message" *ngIf="printData.location.message">
+          <th colspan="4" style="font-size: 10px !important;text-align: center;">{{printData.location.message}}</th>
+        </tr>
+      </tfoot>
+    </table>
+    <br>
+    <br>
+  </ng-container>
+</div>
