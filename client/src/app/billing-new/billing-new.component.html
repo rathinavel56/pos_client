@@ -136,8 +136,8 @@
     </tbody>
   </table>
   <button type="button" class="btn btn-rounded btn-default button-space" (click)="resetBilling()">Cancel</button>
-  <button type="button" class="btn btn-rounded btn-warning button-space" (click)="orderInvoice(true)">Hold</button>
-  <button type="button" class="btn btn-rounded btn-primary button-space" (click)="saveInvoice()">Save</button>
+  <button type="button" class="btn btn-rounded btn-warning button-space" [disabled]="!totalBillAmount" (click)="orderInvoice(true)">Hold</button>
+  <button type="button" class="btn btn-rounded btn-primary button-space" [disabled]="!totalBillAmount" (click)="saveInvoice()">Save</button>
 
 </form>
 </ng-container>
@@ -170,12 +170,10 @@
             </thead>
             <tbody>
               <tr *ngFor="let cart of carts; let i = index;">
-                <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
+                <td>{{(i+1)}}</td>
                 <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
-                  <button type="button" (click)="view(cart)"><i class="fa fa-eye"
-                    aria-hidden="true"></i></button>
                   <button type="button" *ngIf="isShowLocation && (cart.is_active == 1)" (click)="editCart(cart)"><img src="assets/images/Icon-edit.png" width="16"></button>
-                  <button type="button" *ngIf="isShowLocation && (cart.is_active == 1)" (click)="submit(cart.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                  <button type="button" *ngIf="isShowLocation && (cart.is_active == 1)" (click)="deleteCart(cart.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
                 </td>
                 <td>{{cart.order_no}}</td>
                 <td>{{cart.customer?.customer_name}}</td>

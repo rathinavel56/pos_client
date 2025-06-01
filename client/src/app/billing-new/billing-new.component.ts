@@ -274,7 +274,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         payment_mode_id: 1, // Assuming 1 is the payment mode for cash
         carts: this.tableForm.value.rows.filter((p: any) => p.product_id !== '' ),
         parcel_charge: null,
-        customer_id: null,
+        customer_id: this.customer ? this.customer.id : null,
         reference_no: null,
         is_take_away: true,
         SGST_amount: +this.SGST,
@@ -286,7 +286,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         discount_percentage: 0,
         roundoff: 0,
         advance_amount: 0,
-        total: +this.totalBillAmount
+        total: +this.totalBillAmount,
       };
       this.recipeService
             .saveInvoice({
@@ -325,6 +325,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
             );
   }
   orderInvoice(isDraft?: boolean) {
+
     this.showLoading();
     let order = {
         location_id: this.selectedLocation.id,
@@ -378,7 +379,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         .orders({
           location_id: this.selectedLocation.id,
           is_draft: isDraft,
-          q: 'all'
+          q: 'all',
+          is_active: true
         }, null)
         .subscribe(
           (response: any) => {
@@ -388,6 +390,11 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
                 this.carts = response.data;
                  this.modalReference = this.modalService.open(content);
                  this.modalReference.result.then(() => { });
+                setTimeout(() => {
+                  document
+                    .getElementsByClassName("modal-dialog")[0]
+                    .setAttribute("class", "max-100");
+                }, 0);
               } else {
                 Swal.fire({
                   icon: "info",
@@ -450,6 +457,56 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     if (this.modalReference) {
       this.modalReference.close();
     }
+  }
+  deleteCart(cartId:any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.showLoading();
+        this.formData = new FormData();
+        this.formData.append('data', JSON.stringify({
+          location_id: this.selectedLocation.id,
+          id: cartId,
+          is_active: false,
+          notes: ''
+        }));
+        this.recipeService.order(this.formData)
+          .subscribe((response: any) => {
+            this.clearLoading();
+            if (response.status === "success") {
+              Swal.fire(
+                'Deleted!',
+                'Your cart has been deleted.',
+                'success'
+              );
+              this.closePopUp();
+            } else if (response.error) {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: response.error,
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Internal Server Error",
+              });
+            }
+          },
+          (err: any) => {
+            this.networkIssue();
+          });
+      }
+    });
+
   }
   validatePhoneNumber() {
       const re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
@@ -552,34 +609,16 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   customerResponseHandler(response: any) {
       this.customer = response.data;
       this.order = response.order;
-      let message = "Customer Name: " + response.data.customer_name + " | Points Balance: " + response.points;
-     // this.isCustomer = false;
-      // this.customerdetail = {
-      //   customer_name: "",
-      //   customer_email: "",
-      //   customer_city: "",
-      //   customer_dob: "",
-      //   customer_gender: "",
-      //   customer_address: ""
-      // };
-      if (+response.points > 0) {
-        Swal.fire({
-          title: "Existing Customer",
-          text: "Customer Name : " + response.data.customer_name + " | Points Balance: " + response.points,
-          icon: "success",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Proceed",
-        }).then((result: any) => {
-          if (result.isConfirmed) {
-          }
-        });
-      } else {
-        Swal.fire("Saved", message, "success");
-       // this.cartTotal();
-      }
-    }
+      let message = "Customer Name: " + response.data.customer_name;
+      this.customerdetail = {
+        customer_name: "",
+        customer_email: "",
+        customer_city: "",
+        customer_dob: "",
+        customer_gender: "",
+        customer_address: ""
+      };
+  }
   locationSelectionChanged(e: any) {
     if (e && e.value && e.value.id) {
       this.selectedLocation = e.value;
