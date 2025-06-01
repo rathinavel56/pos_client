@@ -39,7 +39,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   invoice_no: any;
   invoice_date: any;
   formData: any;
- // modalReference: import("@ng-bootstrap/ng-bootstrap").NgbModalRef;
+ modalReference: any;
   customerRes: any;
   customer: any;
   order: any;
@@ -346,7 +346,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     this.addRow(); // initialize with one row
   }
 
-  getOrders(isDraft: boolean = false) {
+  getOrders(isDraft: boolean = false, content: any) {
     if (this.selectedLocation && this.selectedLocation.id) {
       this.showLoading();
       this.recipeService
@@ -358,8 +358,10 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
           (response: any) => {
             this.clearLoading();
             if (response.status === "success") {
-              if (response.data && response.data.length > 0) {
+              if (response.data && response.data.data.length > 0) {
                 this.carts = response.data;
+                 this.modalReference = this.modalService.open(content);
+                 this.modalReference.result.then(() => { });
               } else {
                 Swal.fire({
                   icon: "info",

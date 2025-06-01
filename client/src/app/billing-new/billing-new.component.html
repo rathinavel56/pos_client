@@ -21,9 +21,9 @@
         (click)="reload()">Reload Screen</button> <button type="button" class="btn btn-rounded btn-primary"
         (click)="addRow()" style="float: left;margin-top: 16px; margin-left: 20px;">Add Row</button>
         <button type="button" class="btn btn-rounded btn-primary"
-        (click)="getOrders(false)" style="float: left;margin-top: 16px; margin-left: 20px;">Orders</button>
+        (click)="getOrders(false, orderModal)" style="float: left;margin-top: 16px; margin-left: 20px;">Orders</button>
         <button type="button" class="btn btn-rounded btn-primary"
-        (click)="getOrders(true)" style="float: left;margin-top: 16px; margin-left: 20px;">Draft orders</button>
+        (click)="getOrders(true, orderModal)" style="float: left;margin-top: 16px; margin-left: 20px;">Draft orders</button>
     </div>
     <div class="search-panel">
       <span>
@@ -145,7 +145,7 @@
 </form>
 </ng-container>
 
-<ng-template #addonModal let-modal>
+<ng-template #orderModal let-modal>
   <ng-container>
     <div class="modal-header">
       <h4 class="modal-title" id="modal-basic-title">Orders</h4>
@@ -172,22 +172,22 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let order of orders; let i = index;">
+              <tr *ngFor="let cart of carts.data; let i = index;">
                 <td>{{(i+1) + ((currentPage-1) * 20)}}</td>
                 <td *ngIf="!recipeService.isReadOnly" class="ingredientbutton" >
-                  <button type="button" (click)="view(order)"><i class="fa fa-eye"
+                  <button type="button" (click)="view(cart)"><i class="fa fa-eye"
                     aria-hidden="true"></i></button>
-                  <button type="button" *ngIf="isShowLocation && (order.is_active == 1)" (click)="edit(order)"><img src="assets/images/Icon-edit.png" width="16"></button>
-                  <button type="button" *ngIf="isShowLocation && (order.is_active == 1)" (click)="submit(order.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
+                  <button type="button" *ngIf="isShowLocation && (cart.is_active == 1)" (click)="edit(cart)"><img src="assets/images/Icon-edit.png" width="16"></button>
+                  <button type="button" *ngIf="isShowLocation && (cart.is_active == 1)" (click)="submit(cart.id)"><img src="assets/images/Icon-delete.png"  width="16"></button>
                 </td>
-                <td>{{order.order_no}}</td>
-                <td>{{order.customer?.customer_name}}</td>
-                <td>{{order.customer?.customer_mobile}}</td>
-                <td>{{order.delivery_date | date: 'dd-MM-yyyy hh:mm a'}}</td>
-                <td>{{order.advance_amount | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                <td>{{(order.status === 1 || order.is_active === 0) ? ((order.is_active === 0) ? 'Cancelled' : 'Closed') : 'Inprogress'}}</td>
+                <td>{{cart.order_no}}</td>
+                <td>{{cart.customer?.customer_name}}</td>
+                <td>{{cart.customer?.customer_mobile}}</td>
+                <td>{{cart.delivery_date | date: 'dd-MM-yyyy hh:mm a'}}</td>
+                <td>{{cart.advance_amount | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                <td>{{(cart.status === 1 || cart.is_active === 0) ? ((cart.is_active === 0) ? 'Cancelled' : 'Closed') : 'Inprogress'}}</td>
               </tr>
-              <tr *ngIf="orders.length === 0">
+              <tr *ngIf="carts.length === 0">
                 <td colspan="8">No Records</td>
               </tr>
             </tbody>
