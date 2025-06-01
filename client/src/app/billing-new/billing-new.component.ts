@@ -18,7 +18,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   spreadsheetInstance: any;
   locations: any = [];
   isShowLocation: any;
-  tableForm: FormGroup;
+  tableForm: FormGroup = new FormGroup({});
   // Track filtered options for each row
   filteredProducts: string[][] = [];
   activeDropdownIndex: number | null = null;
@@ -39,13 +39,20 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   invoice_no: any;
   invoice_date: any;
   formData: any;
- modalReference: any;
+  modalReference: any;
+  printData: any;
+  customerdetail: any = {
+    customer_name: "",
+    customer_email: "",
+    customer_city: "",
+    customer_dob: "",
+    customer_gender: "",
+    customer_address: ""
+  };
+  mobile: any = "";
   customerRes: any;
   customer: any;
   order: any;
- // isCustomer: boolean;
- // customerdetail: { customer_name: string; customer_email: string; customer_city: string; customer_dob: string; customer_gender: string; customer_address: string; };
-  mobile: any;
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -53,10 +60,31 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     private fb: FormBuilder
   ) {
     super(recipeService, router);
-    this.tableForm = this.fb.group({
-      rows: this.fb.array([])
-    });
-    this.addRow(); // initialize with one row
+  }
+  ngOnInit(): void {
+    this.config = {
+      displayKey: "name",
+      search: true,
+      height: "auto",
+      placeholder: "Search",
+      customComparator: () => { },
+      moreText: "more",
+      noResultsFound: "No results found!",
+      searchPlaceholder: "Search",
+      searchOnKey: "name",
+    };
+    this.userDetail = sessionStorage.getItem("retail_pos")
+      ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
+      : null;
+    if (this.userDetail) {
+      this.isShowLocation = this.userDetail.session_detail.location_id == 0;
+    }
+    if (this.isShowLocation) {
+      this.getLocations();
+    } else {
+      this.selectedLocation = this.userDetail.session_detail.location;
+      this.resetBilling();
+    }
   }
   get rows() {
     return this.tableForm.get('rows') as FormArray;
@@ -296,9 +324,6 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
               }
             );
   }
-  printInvoice() {
-    console.log('Method not implemented.');
-  }
   orderInvoice(isDraft?: boolean) {
     this.showLoading();
     let order = {
@@ -401,92 +426,76 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       const re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
       return re.test(this.mobile);
     }
-    // getCustomer(content: any, sendCustomer: boolean = false) {
-    //   this.order = null;
-    //   this.customerRes = null;
-    //   if (this.mobile) {
-    //     if (this.validatePhoneNumber()) {
-    //       this.showLoading();
-    //       this.recipeService
-    //         .getCustomer({
-    //           mobile: this.mobile,
-    //           location_id: this.selectedLocation.id,
-    //           customer_name: sendCustomer
-    //             ? this.customerdetail.customer_name
-    //             : undefined,
-    //           customer_email: sendCustomer
-    //             ? this.customerdetail.customer_email
-    //             : undefined,
-    //           customer_city: sendCustomer
-    //             ? this.customerdetail.customer_city
-    //             : undefined,
-    //           customer_dob: sendCustomer
-    //             ? this.customerdetail.customer_dob
-    //             : undefined,
-    //           customer_gender: sendCustomer
-    //             ? this.customerdetail.customer_gender
-    //             : undefined,
-    //           customer_mobile: sendCustomer
-    //             ? this.customerdetail.mobile
-    //             : undefined,
-    //           customer_address: sendCustomer
-    //             ? this.customerdetail.customer_address
-    //             : undefined,
-    //         })
-    //         .subscribe(
-    //           (response: any) => {
-    //             this.clearLoading();
-    //             if (response.status === "success") {
-    //               this.closePopUp();
-    //               if (response.orders && response.orders.length > 0) {
-    //                 this.orderResponseHandler(content, response);
-    //               } else {
-    //                 this.customerResponseHandler(response);
-    //               }
-    //             } else if (response.status === false) {
-    //               this.resetPopup();
-    //               this.isCustomer = true;
-    //               this.modalReference = this.modalService.open(content);
-    //             } else if (response.error) {
-    //               Swal.fire({
-    //                 icon: "error",
-    //                 title: "Oops...",
-    //                 text: response.error,
-    //               });
-    //             } else {
-    //               Swal.fire({
-    //                 icon: "error",
-    //                 title: "Oops...",
-    //                 text: "Internal Server Error",
-    //               });
-    //             }
-    //           },
-    //           (err: any) => {
-    //             this.networkIssue();
-    //           }
-    //         );
-    //     } else {
-    //       this.discount_mloyal_amount = 0;
-    //       this.discount_percentage = 0;
-    //       this.virtual_discount_percentage = 0;
-    //       this.discount_amount = 0;
-    //       this.discount_points = 0;
-    //       this.cartTotal();
-    //       Swal.fire({
-    //         icon: "error",
-    //         title: "Oops...",
-    //         text: "Invalid Customer mobile",
-    //       });
-    //     }
-    //   } else {
-    //     this.discount_mloyal_amount = 0;
-    //     this.discount_amount = 0;
-    //     this.discount_percentage = 0;
-    //     this.virtual_discount_percentage = 0;
-    //     this.discount_points = 0;
-    //     this.cartTotal();
-    //   }
-    // }
+    getCustomer(content: any, sendCustomer: boolean = false) {
+      this.order = null;
+      this.customerRes = null;
+      if (this.mobile) {
+        if (this.validatePhoneNumber()) {
+          this.showLoading();
+          this.recipeService
+            .getCustomer({
+              mobile: this.mobile,
+              location_id: this.selectedLocation.id,
+              customer_name: sendCustomer
+                ? this.customerdetail.customer_name
+                : undefined,
+              customer_email: sendCustomer
+                ? this.customerdetail.customer_email
+                : undefined,
+              customer_city: sendCustomer
+                ? this.customerdetail.customer_city
+                : undefined,
+              customer_dob: sendCustomer
+                ? this.customerdetail.customer_dob
+                : undefined,
+              customer_gender: sendCustomer
+                ? this.customerdetail.customer_gender
+                : undefined,
+              customer_mobile: sendCustomer
+                ? this.customerdetail.mobile
+                : undefined,
+              customer_address: sendCustomer
+                ? this.customerdetail.customer_address
+                : undefined,
+            })
+            .subscribe(
+              (response: any) => {
+                this.clearLoading();
+                if (response.status === "success") {
+                  if (response.orders && response.orders.length > 0) {
+                    this.orderResponseHandler(content, response);
+                  } else {
+                    this.customerResponseHandler(response);
+                  }
+                } else if (response.status === false) {
+                  this.modalReference = this.modalService.open(content);
+                } else if (response.error) {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: response.error,
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Internal Server Error",
+                  });
+                }
+              },
+              (err: any) => {
+                this.networkIssue();
+              }
+            );
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Invalid Customer mobile",
+          });
+        }
+      }
+    }
     orderResponseHandler(content: any, response: any) {
       Swal.fire({
         title: "Existing Orders",
@@ -542,35 +551,11 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
        // this.cartTotal();
       }
     }
-
-  ngOnInit(): void {
-    this.config = {
-      displayKey: "name",
-      search: true,
-      height: "auto",
-      placeholder: "Search",
-      customComparator: () => { },
-      moreText: "more",
-      noResultsFound: "No results found!",
-      searchPlaceholder: "Search",
-      searchOnKey: "name",
-    };
-    this.userDetail = sessionStorage.getItem("retail_pos")
-      ? JSON.parse(sessionStorage.getItem("retail_pos") || "{}")
-      : null;
-    if (this.userDetail) {
-      this.isShowLocation = this.userDetail.session_detail.location_id == 0;
-    }
-    if (this.isShowLocation) {
-      this.getLocations();
-    } else {
-      this.selectedLocation = this.userDetail.session_detail.location;
-    }
-  }
   locationSelectionChanged(e: any) {
     if (e && e.value && e.value.id) {
       this.selectedLocation = e.value;
     }
+    this.resetBilling();
   }
   submit() {
     this.isStart = true;
@@ -655,4 +640,25 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     document.getElementById('main_menu')?.click();
   }
 
+  resetBilling() {
+    this.tableForm = this.fb.group({
+      rows: this.fb.array([])
+    });
+    this.addRow();
+  }
+  printInvoice() {
+    let w: any = window.open();
+    let html = $("#print_invoice").html();
+    let htmlToPrint =
+      "" +
+      '<style type="text/css">' +
+      "table {" +
+      "border-collapse: collapse;" +
+      "}</style>";
+    w.document.write(htmlToPrint + html); //only part of the page to print, using jquery
+    w.document.close(); //this seems to be the thing doing the trick
+    w.focus();
+    w.print();
+    w.close();
+  }
 }
