@@ -377,13 +377,14 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       this.recipeService
         .orders({
           location_id: this.selectedLocation.id,
-          is_draft: isDraft
+          is_draft: isDraft,
+          q: 'all'
         }, null)
         .subscribe(
           (response: any) => {
             this.clearLoading();
             if (response.status === "success") {
-              if (response.data && response.data.data.length > 0) {
+              if (response.data && response.data.length > 0) {
                 this.carts = response.data;
                  this.modalReference = this.modalService.open(content);
                  this.modalReference.result.then(() => { });
@@ -421,7 +422,35 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     }
 
   }
-
+  editCart(cart: any) {
+    this.resetBilling(true);
+    for (let i = 1; i <= cart.details.length; i++) {
+     this.addRow();
+    }
+    cart.details.forEach((item: any, index: any) => {
+      let prod = item.product;
+      const product = this.products.find((item: any) => item.name === prod.name);
+      this.rows.at(index).patchValue({
+        product_id: prod.id,
+        product_name: prod.name,
+        product_name_tamil: prod.tamil_name,
+        unit_size: prod.unit_id,
+        product_stock: product ? product.quantity : 0,
+        unit_quantity: item.quantity
+      });
+      this.performCalculations(index);
+    });
+    this.closePopUp();
+  }
+  performCalculations(index: number) {
+    this.unitSelection(index);
+    this.totalCalculation(index);
+  }
+  closePopUp() {
+    if (this.modalReference) {
+      this.modalReference.close();
+    }
+  }
   validatePhoneNumber() {
       const re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
       return re.test(this.mobile);
@@ -640,12 +669,41 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     document.getElementById('main_menu')?.click();
   }
 
-  resetBilling() {
+  resetBilling(isNotAddRow?: boolean) {
     this.tableForm = this.fb.group({
       rows: this.fb.array([])
     });
-    this.addRow();
+    if (!isNotAddRow) {
+      this.addRow();
+    }
   }
+  saveCustomer() {
+      this.showLoading();
+      if (this.customerdetail.customer_name) {
+        this.customerdetail.location_id = this.isShowLocation ? this.selectedLocation.id : undefined;
+        this.customerdetail.customer_mobile = this.mobile;
+        this.recipeService.saveCustomer(this.customerdetail)
+          .subscribe((response: any) => {
+            this.clearLoading();
+            //this.carts.customer_id = response.data.id;
+              Swal.fire(
+                'Saved',
+                'Your Customer has been saved.',
+                'success'
+              );
+            this.closePopUp();
+          },
+          (err: any) => {
+            this.networkIssue();
+         });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Please enter name'
+        });
+      }
+    }
   printInvoice() {
     let w: any = window.open();
     let html = $("#print_invoice").html();
