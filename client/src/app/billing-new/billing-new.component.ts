@@ -26,6 +26,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   public unitNames: any = [];
   public products: any = [];
   public carts: any = [];
+  totalQty: any = 0;
   public productsname: any = [];
   userDetail: any;
   isStart: any;
@@ -94,6 +95,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     const row = this.fb.group({
       product_id: [''],
       product_name: [''],
+      hsn_code: [''],
       product_name_tamil: [''],
       product_stock: [''],
       unit_size: [''],
@@ -145,7 +147,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         product_name: product.name,
         product_name_tamil: product.tamil_name, // Assuming you want to set this later
         product_stock: product.quantity,
-        purchase_price: product.purchase_price
+        purchase_price: product.purchase_price,
+        hsn_code: product.hsn_code
       });
       this.filteredProducts[index] = [];
       this.activeDropdownIndex = null;
@@ -268,11 +271,17 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   }
   saveInvoice() {
     this.showLoading();
+    this.carts = this.tableForm.value.rows.filter((p: any) => p.product_id !== '' );
+    this.totalQty = this.carts.reduce(
+      (accumulator: any, current: any) =>
+        accumulator + parseFloat(current.added_quantity),
+      0
+    );
     let order = {
         location_id: this.selectedLocation.id,
         order_type_id: 1, // Assuming 1 is the order type for retail
         payment_mode_id: 1, // Assuming 1 is the payment mode for cash
-        carts: this.tableForm.value.rows.filter((p: any) => p.product_id !== '' ),
+        carts: this.carts,
         parcel_charge: null,
         customer_id: this.customer ? this.customer.id : null,
         reference_no: null,
@@ -298,12 +307,9 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
                 if (response.status === "success") {
                   this.invoice_no = response.invoice_no;
                   this.invoice_date = response.invoice_datetime;
-                  this.printInvoice();
-                  Swal.fire(
-                    'Saved',
-                    'Your Order has been saved.',
-                    'success'
-                  );
+                  setTimeout(()=> {
+                    this.printInvoice();
+                  }, 0);
                   this.formReload();
                 } else if (response.error) {
                   Swal.fire({
@@ -767,5 +773,23 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     w.focus();
     w.print();
     w.close();
+  }
+  clearBilling() {
+    this.totalQty = 0;
+    this.invoice_no = '';
+    this.invoice_date = "";
+    this.customerdetail = {
+      customer_name: "",
+      customer_email: "",
+      customer_city: "",
+      customer_dob: "",
+      customer_gender: "",
+      customer_address: ""
+    };
+    this.mobile = "";
+    this.totalBillAmount = 0;
+    this.SGST = 0;
+    this.CGST = 0;
+    this.IGST = 0;
   }
 }
