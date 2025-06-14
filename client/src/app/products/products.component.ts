@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RecipeService } from '../shared/service/recipe.service';
-import { BaseComponent} from '../base.component';
+import { BaseComponent } from '../base.component';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 
@@ -11,6 +11,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   isSearch: boolean = true;
   isAdd: boolean = false;
   isEdit: boolean = false;
+  ishidePrice: boolean = false;
   units: any = [];
   products: any = [];
   categories: any = [];
@@ -51,7 +52,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     pos_return: false,
     food_type: false
   };
-  days: any = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  days: any = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   lastPage: any;
   page: any;
   currentPage: any = 1;
@@ -63,19 +64,19 @@ export class ProductsComponent extends BaseComponent implements OnInit {
   config: any;
   dayConfig: any;
 
-  constructor(public recipeService: RecipeService,public router: Router) {
+  constructor(public recipeService: RecipeService, public router: Router) {
     super(recipeService, router);
   }
   ngOnInit() {
     this.dtOptions = {
-      order:[[2, 'desc']]
+      order: [[2, 'desc']]
     };
     this.config = {
       displayKey: "name",
       search: true,
       height: "auto",
       placeholder: "Search",
-      customComparator: () => {},
+      customComparator: () => { },
       moreText: "more",
       noResultsFound: "No results found!",
       searchPlaceholder: "Search",
@@ -85,7 +86,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       search: true,
       height: "auto",
       placeholder: "Search",
-      customComparator: () => {},
+      customComparator: () => { },
       moreText: "more",
       noResultsFound: "No results found!",
       searchPlaceholder: "Search"
@@ -119,7 +120,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
       );
   }
   sorting(sort: any) {
-    this.sortOrder = (this.sortBy === sort) ? ((this.sortOrder === 'ASC') ? 'DESC' : 'ASC')  : 'ASC';
+    this.sortOrder = (this.sortBy === sort) ? ((this.sortOrder === 'ASC') ? 'DESC' : 'ASC') : 'ASC';
     this.sortBy = sort;
     this.showLoading();
     this.currentPage = 1;
@@ -182,11 +183,12 @@ export class ProductsComponent extends BaseComponent implements OnInit {
         selling_IGST_percentage: 0,
         selling_cess_percentage: 0,
         selling_price: 0,
-        mrp_selling_price: 0
+        mrp_selling_price: 0,
+        is_default: false
       });
     } else {
       this.prices = [];
-      this.units.forEach((element: any) => {
+      this.units.forEach((element: any, index: any) => {
         this.prices.push({
           location_id: 0,
           location: null,
@@ -198,11 +200,21 @@ export class ProductsComponent extends BaseComponent implements OnInit {
           selling_IGST_percentage: 0,
           selling_cess_percentage: 0,
           selling_price: 0,
-          mrp_selling_price: 0
+          mrp_selling_price: 0,
+          is_default: (index === 0)
         });
       });
     }
   }
+  defaultPrice(index: number) {
+    this.prices.forEach((p: any, i: number) => {
+      p.is_default = false;
+    });
+    setTimeout(() => {
+      this.prices[index].is_default = true;
+    }, 0);
+  }
+
   edit(product: any): void {
     this.isAdd = false;
     this.isEdit = true;
@@ -250,7 +262,8 @@ export class ProductsComponent extends BaseComponent implements OnInit {
             selling_IGST_percentage: e.selling_IGST_percentage,
             selling_cess_percentage: e.selling_cess_percentage,
             selling_price: e.selling_price,
-            mrp_selling_price: e.mrp_selling_price
+            mrp_selling_price: e.mrp_selling_price,
+            is_default: (e.is_default === 1)
           });
         });
       } else {
@@ -357,7 +370,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.recipeService.getProductPriceHistory({
       product_id: product.id
     })
-    .subscribe((response: any) => {
+      .subscribe((response: any) => {
         this.priceHistory = true;
         if (response.data && response.data.length > 0) {
           //response.data.sort((a : any, b: any) => <any>new Date(b.transcation_date) - <any>new Date(a.transcation_date));
@@ -367,49 +380,49 @@ export class ProductsComponent extends BaseComponent implements OnInit {
         }
         this.clearLoading();
       },
-      (err: any) => {
-        this.networkIssue();
-     });
+        (err: any) => {
+          this.networkIssue();
+        });
   }
   cancelPriceHistory() {
     this.priceHistory = false;
     this.prices = [];
     this.productName = '';
   }
-  setPagination(currentPage : any) {
+  setPagination(currentPage: any) {
     this.showLoading();
     this.currentPage = currentPage;
     this.getRecords();
   }
   getRecords() {
     this.recipeService.getProducts({
-        isLoadRecipe: false,
-        tamil_name: this.productInfo.tamil_name,
-        name: this.productInfo.name,
-        category_id: this.productInfo.category_id,
-        brand_id: this.productInfo.brand_id,
-        unit_id: this.productInfo.unit_id,
-        hsn_code: this.productInfo.hsn_code,
-        is_show_in_pos: this.productInfo.is_show_in_pos,
-        is_dashbord: this.productInfo.is_dashbord,
-        sort_by: this.sortBy,
-        sort_order: this.sortOrder
-      }, this.currentPage)
+      isLoadRecipe: false,
+      tamil_name: this.productInfo.tamil_name,
+      name: this.productInfo.name,
+      category_id: this.productInfo.category_id,
+      brand_id: this.productInfo.brand_id,
+      unit_id: this.productInfo.unit_id,
+      hsn_code: this.productInfo.hsn_code,
+      is_show_in_pos: this.productInfo.is_show_in_pos,
+      is_dashbord: this.productInfo.is_dashbord,
+      sort_by: this.sortBy,
+      sort_order: this.sortOrder
+    }, this.currentPage)
       .subscribe((response: any) => {
-          if (response.data && response.data.data.length > 0) {
-            this.products = response.data.data;
-            this.page = response.data.current_page;
-            this.lastPage = response.data.total;
-          } else {
-            this.products = [];
-            this.page = 0;
-            this.lastPage = 0;
-          }
-          this.clearLoading();
-        },
+        if (response.data && response.data.data.length > 0) {
+          this.products = response.data.data;
+          this.page = response.data.current_page;
+          this.lastPage = response.data.total;
+        } else {
+          this.products = [];
+          this.page = 0;
+          this.lastPage = 0;
+        }
+        this.clearLoading();
+      },
         (err: any) => {
           this.networkIssue();
-       });
+        });
   }
   locationSelectionChanged(price: any, e: any) {
     if (e && e.value && e.value.id) {
@@ -436,7 +449,7 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.prices.splice(removeIndex, 1);
   }
   saveDetails(id: any, isDelete?: any) {
-    let request: any = (isDelete === true) ? {id: id, isDelete: true} : this.productInfo;
+    let request: any = (isDelete === true) ? { id: id, isDelete: true } : this.productInfo;
     if (this.productInfo.is_show_in_pos === 1 || this.productInfo.is_show_in_pos === true) {
       // let priceCheck = this.prices.slice(0, this.paymentModes.length).filter((e: any) => !this.prices[0].selling_price).length;
       let priceCheck = this.prices.filter((e: any) => (+e.selling_price > 0)).length;
@@ -455,77 +468,77 @@ export class ProductsComponent extends BaseComponent implements OnInit {
     this.showLoading();
     request.eod_days = (request.eod_days && request.eod_days.length > 0) ? request.eod_days.toString() : null;
     this.recipeService.saveProduct(request)
-        .subscribe(() => {
-          this.clearLoading();
-          if (id) {
-            Swal.fire(
-              'Deleted!',
-              'Your Product has been deleted.',
-              'success'
-            );
-          } else {
-            Swal.fire(
-              'Saved',
-              'Your Product has been saved.',
-              'success'
-            );
-          }
-          this.cancel();
-          this.getRecords();
-        },
-        (err: any) => {
-          this.networkIssue();
-       });
-  }
-  getUnits()  {
-    this.units = [];
-    this.recipeService.getUnits()
-      .subscribe((response: any) => {
-          if (response.data && response.data.length > 0) {
-            this.units = response.data;
-            this.productInfo.unit_id = 0;
-          }
-        },
+      .subscribe(() => {
+        this.clearLoading();
+        if (id) {
+          Swal.fire(
+            'Deleted!',
+            'Your Product has been deleted.',
+            'success'
+          );
+        } else {
+          Swal.fire(
+            'Saved',
+            'Your Product has been saved.',
+            'success'
+          );
+        }
+        this.cancel();
+        this.getRecords();
+      },
         (err: any) => {
           this.networkIssue();
         });
   }
-  getBrands()  {
+  getUnits() {
+    this.units = [];
+    this.recipeService.getUnits()
+      .subscribe((response: any) => {
+        if (response.data && response.data.length > 0) {
+          this.units = response.data;
+          this.productInfo.unit_id = 0;
+        }
+      },
+        (err: any) => {
+          this.networkIssue();
+        });
+  }
+  getBrands() {
     this.recipeService.getBrands({
       q: 'all'
     }, null)
       .subscribe((response: any) => {
-          if (response.data && response.data.length > 0) {
-            this.brands = response.data;
-            this.productInfo.brand_id = 0;
-          }
-        },
+        if (response.data && response.data.length > 0) {
+          this.brands = response.data;
+          this.productInfo.brand_id = 0;
+        }
+      },
         (err: any) => {
           this.networkIssue();
-       });
+        });
   }
-  getCategories()  {
+  getCategories() {
     this.recipeService.getCategories({
       q: 'all'
     }, null)
       .subscribe((response: any) => {
-          if (response.data && response.data.length > 0) {
-            this.categories = response.data;
-            let anyIndex = this.categories.findIndex((a: any) => {
+        if (response.data && response.data.length > 0) {
+          this.categories = response.data;
+          let anyIndex = this.categories.findIndex((a: any) => {
+            return a.name.toLowerCase().includes('any');
+          });
+          if (anyIndex > -1) {
+            let any = this.categories[anyIndex];
+            this.categories.splice(this.categories.findIndex((a: any) => {
               return a.name.toLowerCase().includes('any');
-            });
-            if (anyIndex > -1) {
-              let any = this.categories[anyIndex];
-              this.categories.splice(this.categories.findIndex((a: any) => {
-                return a.name.toLowerCase().includes('any');
-              }) , 1);
-              this.categories.unshift(any);
-            }
-            this.productInfo.category_id = 0;
+            }), 1);
+            this.categories.unshift(any);
           }
-        },
+          this.productInfo.category_id = 0;
+        }
+      },
         (err: any) => {
           this.networkIssue();
-       });
+        });
   }
 }

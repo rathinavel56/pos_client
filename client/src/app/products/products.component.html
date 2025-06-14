@@ -24,7 +24,7 @@
           <br>
           <div class="row">
             <div class="col-2 mobile-full-width">
-              <label>Tamil Name<span *ngIf="isAdd || isEdit">*</span></label>
+              <label>Tamil Name</label>
             </div>
             <div class="col-4 mobile-full-width">
               <input type="text" class="form-control" [(ngModel)]="productInfo.tamil_name"
@@ -203,7 +203,7 @@
               </div>
             </div>
           </ng-container>
-          <ng-container *ngIf="productInfo.is_show_in_pos && (isAdd || isEdit)">
+          <ng-container *ngIf="productInfo.is_show_in_pos && !ishidePrice && (isAdd || isEdit)">
             <br>
             <div *ngFor="let price of prices; let i = index;" class="card" style="border: 1px solid;">
               <div class="card-body">
@@ -240,6 +240,15 @@
                 <br>
                 <div class="row">
                   <div class="col-2 mobile-full-width">
+                    <label>Default</label>
+                  </div>
+                  <div class="col-4 mobile-full-width">
+                    <label class="toggle-switch">
+                      <input type="checkbox" [(ngModel)]="price.is_default"  (change)="defaultPrice(i)">
+                      <span class="toggle-slider toggle-round"></span>
+                    </label>
+                  </div>
+                  <div class="col-2 mobile-full-width">
                     <label>Unit Quantity</label>
                   </div>
                   <div class="col-4 mobile-full-width">
@@ -253,7 +262,7 @@
                   </div>
                   <div class="col-4 mobile-full-width">
                     <input class="form-control" type="text" [appTwoDigitDecimaNumber]="true" [(ngModel)]="price.mrp_selling_price"
-                      (focus)="onFocusZeroClear(price, 'selling_price')" />
+                      (focus)="onFocusZeroClear(price, 'mrp_selling_price')" />
                   </div>
                   <div class="col-2 mobile-full-width">
                     <label>Net Selling Price (Rs.)</label>

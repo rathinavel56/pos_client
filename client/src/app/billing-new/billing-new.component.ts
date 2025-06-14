@@ -134,7 +134,6 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     const filtered = this.productsname;
     this.filteredProducts[index] = this.products
       .filter((p: any) => p.name.toLowerCase().includes(value));
-      //.filter((p: any) => p.toLowerCase().includes(value));
     this.activeDropdownIndex = index;
     this.activeOptionIndex[index] = filtered.length ? 0 : -1;
   }
@@ -150,6 +149,14 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         purchase_price: product.purchase_price,
         hsn_code: product.hsn_code
       });
+      if  (!this.tableForm.value.rows[index].unit_size) {
+        let defaultPrice = product.prices.find((e: any) => e.is_default === true);
+        if (defaultPrice) {
+          this.rows.at(index).patchValue({
+            unit_size: defaultPrice.unit_id
+          });
+        }
+      }
       this.filteredProducts[index] = [];
       this.activeDropdownIndex = null;
       this.activeOptionIndex[index] = -1;
