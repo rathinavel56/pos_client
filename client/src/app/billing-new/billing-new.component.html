@@ -29,7 +29,7 @@
           <ul class="dropdown-list" *ngIf="activeDropdownIndex === i && filteredProducts[i]?.length">
             <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option.name)"
               [class.active]="activeOptionIndex[i] === j">
-              {{ option.name }} ({{option.tamil_name}}) ({{option.quantity}}) ({{option.purchase_price}})
+              {{ option.name }} ({{option.tamil_name}}) ({{option.quantity}}) ({{(option.prices | defaultPrices)[0]?.selling_price || option.purchase_price}})
             </li>
           </ul>
         </span>

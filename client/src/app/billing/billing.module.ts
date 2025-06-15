@@ -10,6 +10,7 @@ import { SelectDropDownModule } from 'ngx-select-dropdown';
 import { FilterPipe } from '../shared/util/filter.pipe';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { BillingNewComponent } from '../billing-new/billing-new.component';
+import { DefaultPricesPipe } from '../shared/util/defaultprices.pipe';
 const routes: Routes = [
   {
     path: '',
@@ -34,6 +35,7 @@ const routes: Routes = [
   ],
   declarations: [
     FilterPipe,
+    DefaultPricesPipe,
     BillingComponent,
     BillingNewComponent
   ]
