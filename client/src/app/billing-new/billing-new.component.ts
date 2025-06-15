@@ -147,6 +147,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     // Delay hiding to allow click event on suggestion
     setTimeout(() => {
       this.showSuggestions = false;
+      this.activeDropdownIndex = null; // hide dropdown
     }, 200);
   }
 

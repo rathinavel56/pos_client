@@ -73,7 +73,7 @@
         <!-- Product Field -->
         <td>
           <input #cellInput type="text" formControlName="product_name" (input)="onProductInput(i, $event)"
-            (keydown)="handleKeyDown($event, i)" autocomplete="off" (change)="selectProduct(i, $event.value)" />
+            (keydown)="handleKeyDown($event, i)" (blur)="hideSuggestions()" autocomplete="off" (change)="selectProduct(i, $event.value)" />
           <ul class="dropdown-list" *ngIf="activeDropdownIndex === i && filteredProducts[i]?.length">
             <li *ngFor="let option of filteredProducts[i]; let j = index" (click)="selectProduct(i, option.name)"
               [class.active]="activeOptionIndex[i] === j">
