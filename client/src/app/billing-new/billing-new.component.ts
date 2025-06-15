@@ -54,6 +54,9 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   customerRes: any;
   customer: any;
   order: any;
+  query = '';
+  showSuggestions = false;
+  filteredOptions: string[] = [];
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -127,6 +130,24 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
 
   logData() {
     console.log(this.tableForm.value);
+  }
+  onSearch() {
+    const lowerQuery = this.query.toLowerCase();
+    this.filteredOptions = this.products.filter(
+      (item: any) => item.name.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  selectOption(item: any) {
+    this.query = item.name;
+    this.showSuggestions = false;
+  }
+
+  hideSuggestions() {
+    // Delay hiding to allow click event on suggestion
+    setTimeout(() => {
+      this.showSuggestions = false;
+    }, 200);
   }
 
   onProductInput(index: number, event: Event) {
