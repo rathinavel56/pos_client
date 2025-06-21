@@ -70,21 +70,6 @@ export const Approutes: Routes = [
         loadChildren: () => import('./sub-category/sub-category.module').then(m => m.SubCategoryModule),
         canActivate: [AuthGuard]
       },
-	    {
-        path: 'recipes',
-        loadChildren: () => import('./recipe/recipe.module').then(m => m.RecipeModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'calculator',
-        loadChildren: () => import('./calculator/calculator.module').then(m => m.CalculatorModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'sfgcalculator',
-        loadChildren: () => import('./calculator/calculator.module').then(m => m.CalculatorModule),
-        canActivate: [AuthGuard]
-      },
       {
         path: 'brand',
         loadChildren: () => import('./brand/brand.module').then(m => m.BrandModule),
@@ -191,11 +176,6 @@ export const Approutes: Routes = [
         canActivate: [AuthGuard]
       },
       {
-        path: 'kitchen',
-        loadChildren: () => import('./kitchen/kitchen.module').then(m => m.KitchenModule),
-        canActivate: [AuthGuard]
-      },
-      {
         path: 'approve-outlet-stocks',
         loadChildren: () => import('./approve-outlet-stocks/approve-outlet-stocks.module').then(m => m.ApproveOutletStocksModule),
         canActivate: [AuthGuard]
@@ -203,11 +183,6 @@ export const Approutes: Routes = [
       {
         path: 'pickup-outlet-stocks',
         loadChildren: () => import('./pickup-outlet-stocks/pickup-outlet-stocks.module').then(m => m.PickupOutletStocksModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'orders',
-        loadChildren: () => import('./orders/orders.module').then(m => m.OrderModule),
         canActivate: [AuthGuard]
       },
       {
@@ -256,33 +231,8 @@ export const Approutes: Routes = [
         canActivate: [AuthGuard]
       },
       {
-        path: 'earn-burn',
-        loadChildren: () => import('./loyalty-dashboard/loyalty-dashboard.module').then(m => m.LoyaltyDashboardModule),
-        canActivate: [AuthGuard]
-      },
-      {
         path: 'category-wise-analysis',
         loadChildren: () => import('./loyalty/loyalty.module').then(m => m.LoyaltyModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'jobs',
-        loadChildren: () => import('./jobs/jobs.module').then(m => m.JobModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'loyalty-dashboard',
-        loadChildren: () => import('./loyalty-dashboard/loyalty-dashboard.module').then(m => m.LoyaltyDashboardModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'member-dashboard',
-        loadChildren: () => import('./member-dashboard/member-dashboard.module').then(m => m.MemberDashboardModule),
-        canActivate: [AuthGuard]
-      },
-      {
-        path: 'disable-item-in-online-order',
-        loadChildren: () => import('./disable-item-in-online-order/disable-item-in-online-order.module').then(m => m.DisableItemInOnlineOrderModule),
         canActivate: [AuthGuard]
       },
       {

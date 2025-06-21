@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { PhoneMaskPipe } from './phone_maske';
 import { NumberToWordsPipe } from './util/number-to-words.pipe';
 import { CategoryPipe } from './util/category.pipe';
+import { PrintInvoiceComponent } from '../print-invoice/print-invoice.component';
 @NgModule({
   imports: [
     NgbModule,
@@ -15,6 +16,7 @@ import { CategoryPipe } from './util/category.pipe';
   ],
   declarations: [
     paginationComponent,
+    PrintInvoiceComponent,
     TwoDigitDecimaNumberDirective,
     AmountToWordPipe,
     PhoneMaskPipe,
@@ -23,6 +25,7 @@ import { CategoryPipe } from './util/category.pipe';
   ],
   exports: [
     paginationComponent,
+    PrintInvoiceComponent,
     TwoDigitDecimaNumberDirective,
     AmountToWordPipe,
     PhoneMaskPipe,

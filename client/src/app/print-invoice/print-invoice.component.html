@@ -1,0 +1,105 @@
+<div id="print_invoice" style="width: 35%; margin-left: 30px;" class="hide" *ngIf="data.carts && data.carts.length > 0">
+  <div class="header">
+    <h2>{{data.name}}</h2>
+    <p>{{data.address}}</p>
+    <p>CELL: {{data.phone_no}}</p>
+    <p>GSTIN: {{data.gstin}} | FSSAI No: {{data.fssai_no}}</p>
+    <h4>CASH BILL</h4>
+  </div>
+  <div class="info" *ngIf="data.invoice_no && data.invoice_date">
+    <table class="no-border">
+      <tr>
+        <td>BILL NO: {{data.invoice_no}}</td>
+        <td>Date: {{data.invoice_date | date: 'dd-MM-yyyy'}}</td>
+      </tr>
+      <tr>
+        <td>
+          <ng-container *ngIf="customer">
+            <span>Customer: {{customer.customer_name}}</span>
+          </ng-container>
+        </td>
+        <td>Time: {{invoice_date | date: 'hh:mm a'}}</td>
+      </tr>
+    </table>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>{{translations['item']}}<br>Item</th>
+        <th>MRP</th>
+        <th>GST</th>
+        <th>{{translations['quantity']}}<br>Qty</th>
+        <th>{{translations['price']}}<br>Rate</th>
+        <th>{{translations['money']}}<br>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cart of data.carts">
+        <td>{{cart.product_name}} HSN: {{cart.hsn_code}}</td>
+        <td>{{cart.mrp_selling_price}}</td>
+        <td>{{cart.total_tax}}%</td>
+        <td>{{cart.added_quantity}}</td>
+        <td>{{cart.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{cart.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+      </tr>
+
+    </tbody>
+  </table>
+  <table class="no-border summary">
+    <tr>
+      <td>Qty: <strong>{{data.totalQty}}</strong></td>
+      <td>Total: <strong>{{(data.totalBillAmount ? data.totalBillAmount : 0) |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</strong></td>
+    </tr>
+    <tr>
+      <td>Items: {{data.carts.length}}</td>
+      <td>
+        <p>{{translations['rent']}}</p>: 0.00
+      </td>
+    </tr>
+    <tr>
+      <td>RoundOff: {{data.billTotalRound |
+        currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+      <td colspan="2" class="bold">
+        <p>{{translations['total']}}</p>: {{(data.billTotaldue ? data.billTotaldue : 0) |
+        currency:'INR':'symbol-narrow':'1.2-2'}}
+      </td>
+    </tr>
+  </table>
+  <table class="no-border">
+    <thead>
+      <tr>
+        <th>GST</th>
+        <th>Taxable Value</th>
+        <th>SGST</th>
+        <th>CGST</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tax of data.taxs">
+        <td>{{tax.total_tax}}%</td>
+        <td>{{tax.total_net_price |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.SGST |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.CGST |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.total |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info">
+    <table class="no-border">
+      <tr>
+        <td>{{translations['box']}}:</td>
+        <td>{{translations['chip']}}:</td>
+        <td>{{translations['change']}}:</td>
+      </tr>
+    </table>
+  </div>
+  <div class="footer">
+    <p><strong>{{data.message}}</strong></p>
+  </div>
+</div>

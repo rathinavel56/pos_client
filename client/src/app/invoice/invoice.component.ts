@@ -180,66 +180,28 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
         .length === 0;
     this.returnTotal();
   }
-  submit(location_id: any) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Return!",
-    }).then((result: any) => {
-      if (result.isConfirmed) {
-        this.showLoading();
-        this.recipeService
-          .returnStocks({
-            location_id: location_id,
-            details: this.invoiceDetail.details.filter(
-              (e: any) => e.return === true
-            ),
-          })
-          .subscribe(
-            () => {
-              this.clearLoading();
-              this.cancelPop();
-              this.cancel();
-              Swal.fire("Saved!", "Saved Successfully.", "success");
-              this.getRecords();
-            },
-            (err: any) => {
-              this.networkIssue();
-            }
-          );
-      }
-    });
-  }
   saveReturn() {
     let returnItems = this.invoiceDetail.details.filter((e: any) => e.return === true && +e.return_quantity > 0);
     if (returnItems.length === 0) {
       Swal.fire("Return", "Please select at least one item to return", "warning");
       return;
     }
-    // let order = {
-    //     location_id: this.selectedLocation.id,
-    //     order_type_id: 1, // Assuming 1 is the order type for retail
-    //     payment_mode_id: 1, // Assuming 1 is the payment mode for cash
-    //     carts: this.carts,
-    //     parcel_charge: null,
-    //     customer_id: this.customer ? this.customer.id : null,
-    //     reference_no: null,
-    //     is_take_away: true,
-    //     SGST_amount: +this.SGST,
-    //     CGST_amount: +this.CGST,
-    //     IGST_amount: +this.IGST,
-    //     cess_amount: +this.cess,
-    //     discount_mloyal_amount: 0,
-    //     discount_amount: 0,
-    //     discount_percentage: 0,
-    //     roundoff: +this.billTotalRound,
-    //     advance_amount: 0,
-    //     total: +this.totalBillAmount,
-    //   };
+    this.showLoading();
+    let order = {
+        carts: this.carts,
+        parcel_charge: null,
+        SGST_amount: +this.SGST,
+        CGST_amount: +this.CGST,
+        IGST_amount: +this.IGST,
+        cess_amount: +this.cess,
+        roundoff: +this.billTotalRound,
+        total: +this.totalBillAmount
+      };
+      this.recipeService
+          .returnStocks(order)
+          .subscribe(() => {
+
+          });
   }
   getTotalAmount() {
     this.taxs = [];
