@@ -26,4 +26,13 @@ export class TableUtil {
     XLSX.writeFile(wb, fileName + '.xlsx');
     return true;
   }
+
+  static toUnicodeEscape(text: string): string {
+  return text.split('').map(char => {
+    const code = char.charCodeAt(0).toString(16).padStart(4, '0');
+    return '\\u' + code;
+  }).join('');
 }
+}
+
+

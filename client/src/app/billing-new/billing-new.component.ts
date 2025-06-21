@@ -57,6 +57,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   query = '';
   showSuggestions = false;
   filteredOptions: string[] = [];
+  taxs: any = [];
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -282,6 +283,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     this.getTotalAmount();
   }
   getTotalAmount() {
+    this.taxs = [];
     this.SGST = this.rows.controls.reduce((sum, row) => {
       return sum + (+row.get('SGST')?.value || 0);
     }, 0);
@@ -297,15 +299,42 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     this.totalBillAmount = this.rows.controls.reduce((sum, row) => {
       return sum + (+row.get('total')?.value || 0);
     }, 0);
-  }
-  saveInvoice() {
-    this.showLoading();
-    this.carts = this.tableForm.value.rows.filter((p: any) => p.product_id !== '' );
+    if (this.totalBillAmount > 0) {
+      this.tableForm.value.rows.forEach((row: any) => {
+        if (row.total_tax > 0) {
+          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax === row.total_tax);
+          if (existingTaxIndex > -1) {
+            this.taxs[existingTaxIndex].SGST += row.SGST;
+            this.taxs[existingTaxIndex].CGST += row.CGST;
+            this.taxs[existingTaxIndex].IGST += row.IGST;
+            this.taxs[existingTaxIndex].cess += row.cess;
+            this.taxs[existingTaxIndex].total_tax_value += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_value;
+          } else {
+            let total_tax = row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs.push({
+              SGST: row.SGST,
+              CGST: row.CGST,
+              IGST: row.IGST,
+              cess: row.cess,
+              total_tax: row.total_tax,
+              total_tax_value: total_tax,
+              total : row.total_net_price + total_tax
+            })
+          }
+        }
+       });
+    }
+    this.carts = JSON.parse(JSON.stringify(this.tableForm.value.rows));
     this.totalQty = this.carts.reduce(
       (accumulator: any, current: any) =>
         accumulator + parseFloat(current.added_quantity),
       0
     );
+  }
+  saveInvoice() {
+    this.showLoading();
+    this.carts = this.tableForm.value.rows.filter((p: any) => p.product_id !== '' );
     let order = {
         location_id: this.selectedLocation.id,
         order_type_id: 1, // Assuming 1 is the order type for retail
@@ -792,11 +821,37 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     let w: any = window.open();
     let html = $("#print_invoice").html();
     let htmlToPrint =
-      "" +
-      '<style type="text/css">' +
-      "table {" +
-      "border-collapse: collapse;" +
-      "}</style>";
+      `<style type="text/css">body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      font-size: 14px;
+    }
+    h2, h4, p {
+      margin: 0;
+      text-align: center;
+    }
+    .header, .footer {
+      text-align: center;
+    }
+    .info, .summary {
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px dashed #000;
+      padding: 5px;
+      text-align: center;
+    }
+    .no-border td {
+      border: none;
+    }
+    .bold {
+      font-weight: bold;
+    }</style>`;
     w.document.write(htmlToPrint + html); //only part of the page to print, using jquery
     w.document.close(); //this seems to be the thing doing the trick
     w.focus();

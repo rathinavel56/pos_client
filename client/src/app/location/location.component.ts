@@ -4,6 +4,7 @@ import { RecipeService } from '../shared/service/recipe.service';
 import { BaseComponent} from '../base.component';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { TableUtil } from '../shared/util/tableUtil';
 
 @Component({
   templateUrl: './location.component.html'

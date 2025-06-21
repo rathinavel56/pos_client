@@ -164,44 +164,6 @@
               </div>
             </div>
             <br>
-            <div class="row">
-              <div class="col-2 mobile-full-width">
-                <label>Net Purchase Price (Rs.)</label>
-              </div>
-              <div class="col-4 mobile-full-width">
-                {{productInfo.purchase_price}}
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-2 mobile-full-width">
-                <label>Purchase SGST (%)</label>
-              </div>
-              <div class="col-4 mobile-full-width">
-                {{productInfo.purchase_SGST_percentage}}
-              </div>
-              <div class="col-2 mobile-full-width">
-                <label>Purchase CGST (%)</label>
-              </div>
-              <div class="col-4 mobile-full-width">
-                {{productInfo.purchase_CGST_percentage}}
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-2 mobile-full-width">
-                <label>Purchase IGST (%)</label>
-              </div>
-              <div class="col-4 mobile-full-width">
-                {{productInfo.purchase_IGST_percentage}}
-              </div>
-              <div class="col-2 mobile-full-width">
-                <label>Purchase Cess (%)</label>
-              </div>
-              <div class="col-4 mobile-full-width">
-                {{productInfo.purchase_cess_percentage}}
-              </div>
-            </div>
           </ng-container>
           <ng-container *ngIf="productInfo.is_show_in_pos && !ishidePrice && (isAdd || isEdit)">
             <br>

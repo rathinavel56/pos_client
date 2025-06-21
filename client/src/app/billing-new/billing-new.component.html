@@ -42,15 +42,6 @@
       <span (click)="mainMenu()"><img width="30" height="30"
                 src="assets/images/back_arrow.png"></span>
     </div>
-    <!-- <span class="pull-right">
-                <label>Customer Mobile No:</label>
-                <span>
-                  <input type="text" placeholder="Maximum 10 Digits Only" [appTwoDigitDecimaNumber]="true" maxlength="10"
-                    class="form-control" [(ngModel)]="mobile" (blur)="getCustomer(mymodal)"
-                    (keydown.enter)="getCustomer(mymodal)"
-                    [ngStyle]="{'border': (customer.length < 10) ? '1px solid red !important;' : '1px solid black !important;'}">
-                </span>
-              </span> -->
   </div>
 <form [formGroup]="tableForm" class="product-table" *ngIf="selectedLocation">
   <table class="excel-table">
@@ -63,7 +54,7 @@
         <th>Quantity</th>
         <th>MRP</th>
         <th>Net</th>
-        <th>Tax</th>
+        <th>Tax%</th>
         <th>Total Net</th>
         <th></th>
       </tr>
@@ -136,6 +127,7 @@
   <button type="button" class="btn btn-rounded btn-default button-space" (click)="resetBilling()">Cancel</button>
   <button type="button" class="btn btn-rounded btn-warning button-space" [disabled]="!totalBillAmount" (click)="orderInvoice(true)">Hold</button>
   <button type="button" class="btn btn-rounded btn-primary button-space" [disabled]="!totalBillAmount" (click)="saveInvoice()">Save</button>
+  <button type="button" class="btn btn-rounded btn-default button-space" (click)="printInvoice()">print</button>
 
 </form>
 </ng-container>
@@ -270,120 +262,104 @@
     </div>
   </div>
 </ng-template>
-<div id="print_invoice" *ngIf="carts && carts.length > 0">
-  <table style="width: 85%; margin-left: 30px;">
+<div id="print_invoice" style="width: 100%; margin-left: 30px;" *ngIf="selectedLocation && selectedLocation.name">
+
+  <div class="header">
+    <h2>{{selectedLocation.name}}</h2>
+    <p>{{selectedLocation.address}}</p>
+    <p>CELL: {{selectedLocation.phone_no}}</p>
+    <p>GSTIN: {{selectedLocation.gstin}} | FSSAI No: {{selectedLocation.fssai_no}}</p>
+    <h4>CASH BILL</h4>
+  </div>
+
+  <div class="info">
+    <table class="no-border">
+      <tr>
+        <td>BILL NO: {{invoice_no}}</td>
+        <td>Date: {{invoice_date | date: 'dd-MM-yyyy'}}</td>
+      </tr>
+      <tr>
+        <td>
+          <ng-container *ngIf="customer">
+            <span>Customer: {{customer.customer_name}}</span>
+          </ng-container>
+        </td>
+        <td>Time:  {{invoice_date | date: 'hh:mm a'}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <table>
     <thead>
       <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
-          <h3>{{userDetail.session_detail.settings['bill_header']}}</h3>
-        </th>
-      </tr>
-      <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
-          {{userDetail.session_detail.settings['bill_address']}}</th>
-      </tr>
-      <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
-          {{userDetail.session_detail.settings['bill_gstin']}}</th>
-      </tr>
-      <tr>
-        <th colspan="4"><br></th>
-      </tr>
-      <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.name}}
-        </th>
-      </tr>
-      <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">{{selectedLocation.address}}.
-          Ph: {{selectedLocation.phone_no}}
-        </th>
-      </tr>
-      <tr *ngIf="selectedLocation.gstin">
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">
-          GSTIN:{{selectedLocation.gstin}}</th>
-      </tr>
-      <tr>
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">Invoice:{{invoice_no}}</th>
-      </tr>
-      <tr style="border-bottom: 1px solid grey;">
-        <th colspan="4" style="font-size: 10px !important;text-align: center !important">Invoice Date & Time:
-          {{invoice_date | date: 'dd-MM-yyyy hh:mm a'}}</th>
-      </tr>
-      <tr style="border-bottom: 1px solid grey;">
-        <th style="font-size: 10px !important;">Item</th>
-        <th style="font-size: 10px !important;">Rate</th>
-        <th style="font-size: 10px !important;">Qty</th>
-        <th style="font-size: 10px !important;">Amt</th>
+        <th>&#2986;&#3007;&#2992;&#3640;&#2992;&#3021;<br>Item</th>
+        <th>MRP</th>
+        <th>GST</th>
+        <th>&#2949;&#2994;&#2997;&#3640;<br>Qty</th>
+        <th>&#2997;&#3021;&#2994;&#2997;&#3021;<br>Rate</th>
+        <th>&#2975;&#3015;&#2965;&#3021;<br>Total</th>
       </tr>
     </thead>
     <tbody>
-      <tr
-        style="border-bottom: 1px solid grey;border-style: dotted;border-top: 0px;border-right: 0px;border-left: 0px;"
-        *ngFor="let cart of carts">
-        <td>
-          <table>
-            <tr>
-              <td style="font-size: 10px !important;">{{cart.product_name}}</td>
-            <tr>
-            <tr *ngIf="cart.hsn_code">
-              <td style="font-size: 10px !important;">HSN: {{cart.hsn_code}}</td>
-            </tr>
-          </table>
-        </td>
-        <td style="font-size: 10px !important;">{{cart.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-        <td style="font-size: 10px !important;">{{cart.added_quantity}} </td>
-        <!-- ({{cart.unit}}) -->
-        <td style="font-size: 10px !important;">{{cart.total_net_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+       <tr *ngFor="let cart of carts">
+        <td>{{cart.product_name}} HSN: {{cart.hsn_code}}</td>
+        <td>{{cart.mrp_selling_price}}</td>
+        <td>{{cart.total_tax}}%</td>
+        <td>{{cart.added_quantity}}</td>
+        <td>{{cart.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{cart.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+       </tr>
+
+    </tbody>
+  </table>
+
+  <table class="no-border summary">
+    <tr>
+      <td>Qty: <strong>{{totalQty}}</strong></td>
+      <td>Total: <strong>{{(totalBillAmount ? totalBillAmount : 0) |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</strong></td>
+    </tr>
+    <tr>
+      <td>Items: {{carts.length}}</td>
+      <td><p>&#x0BB5;&#x0BBE;&#x0B9F;&#x0B95;&#x0BC8;</p>: 0.00</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold"><p>&#x0BAE;&#x0BCA;&#x0BA4;&#x0BCD;&#x0BA4;&#x0BAE;&#x0BCD;</p>: ₹ 245.00</td>
+    </tr>
+  </table>
+
+  <table class="no-border">
+    <thead>
+      <tr>
+        <th>GST</th>
+        <th>Taxable Value</th>
+        <th>SGST</th>
+        <th>CGST</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tax of taxs">
+        <td>{{tax.total_tax}}%</td>
+        <td>{{tax.total_tax_value}}</td>
+        <td>{{tax.SGST}}</td>
+        <td>{{tax.CGST}}</td>
+        <td>{{tax.total}}</td>
       </tr>
     </tbody>
-    <tfoot>
-      <tr style="border-top: 1px solid grey;">
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Total Qty</td>
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{totalQty}}</td>
-      </tr>
-      <tr style="border-top: 1px solid grey;">
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Bill Total</td>
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(totalBillAmount ? totalBillAmount : 0) |
-          currency:'INR':'symbol-narrow':'1.2-2'}}
-        </td>
-      </tr>
-      <tr *ngIf="customer" style="border-top: 1px solid grey;">
-        <td colspan="4" style="font-size: 10px !important;text-align: center;font-weight: bold;">Customer Information
-        </td>
-      </tr>
-      <tr *ngIf="customer">
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Name</td>
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{customer ? customer.customer_name :
-          ''}}</td>
-      </tr>
-      <tr *ngIf="customer">
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">Mobile</td>
-        <td style="font-size: 10px !important;font-weight: bold;" colspan="2">{{(customer ? customer.customer_mobile :
-          '') | phoneMask}}</td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          <img style="display: block;margin: 0 auto;width: 60px;height: 60px;margin-top: 0px;"
-            src="{{hostName}}/assets/images/fssai.png">
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4" style="font-size: 10px !important;text-align: center !important">FSSAI
-          NO:{{selectedLocation.fssai_no}}</td>
-      </tr>
-      <tr>
-        <td colspan="4"><br></td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          <div style="text-align: center;"><span style="font-size: 10px !important;text-align: justify;">I/We hereby
-              certily that food foods mentioned in this invoice is/are warranted to be of nature & quality which
-              it/these purport/purported to be.</span></div>
-        </td>
-      </tr>
-      <tr class="print-message" *ngIf="selectedLocation.message">
-        <th colspan="4" style="font-size: 10px !important;text-align: center;">{{selectedLocation.message}}</th>
-      </tr>
-    </tfoot>
   </table>
+
+  <div class="info">
+    <!-- <table class="no-border">
+      <tr>
+        <td>பெட்டி:</td>
+        <td>சிப்பம்:</td>
+        <td>சில்லறை:</td>
+      </tr>
+    </table> -->
+  </div>
+
+  <div class="footer">
+    <p><strong>{{selectedLocation.message}}</strong></p>
+  </div>
 </div>
