@@ -127,7 +127,7 @@
   <button type="button" class="btn btn-rounded btn-default button-space" (click)="resetBilling()">Cancel</button>
   <button type="button" class="btn btn-rounded btn-warning button-space" [disabled]="!totalBillAmount" (click)="orderInvoice(true)">Hold</button>
   <button type="button" class="btn btn-rounded btn-primary button-space" [disabled]="!totalBillAmount" (click)="saveInvoice()">Save</button>
-  <button type="button" class="btn btn-rounded btn-default button-space hide" (click)="printInvoice()">Preview</button>
+  <button type="button" class="btn btn-rounded btn-default button-space" (click)="printInvoice()">Print preview</button>
 
 </form>
 </ng-container>
@@ -262,7 +262,7 @@
     </div>
   </div>
 </ng-template>
-<div id="print_invoice" style="width: 100%; margin-left: 30px;" class="hide" *ngIf="carts && carts.length > 0">
+<div id="print_invoice" style="width: 35%; margin-left: 30px;" class="hide" *ngIf="carts && carts.length > 0">
 
   <div class="header">
     <h2>{{selectedLocation.name}}</h2>
@@ -272,7 +272,7 @@
     <h4>CASH BILL</h4>
   </div>
 
-  <div class="info">
+  <div class="info" *ngIf="invoice_no && invoice_date">
     <table class="no-border">
       <tr>
         <td>BILL NO: {{invoice_no}}</td>
@@ -292,12 +292,12 @@
   <table>
     <thead>
       <tr>
-        <th>&#2986;&#3007;&#2992;&#3640;&#2992;&#3021;<br>Item</th>
+        <th>{{translations['item']}}<br>Item</th>
         <th>MRP</th>
         <th>GST</th>
-        <th>&#2949;&#2994;&#2997;&#3640;<br>Qty</th>
-        <th>&#2997;&#3021;&#2994;&#2997;&#3021;<br>Rate</th>
-        <th>&#2975;&#3015;&#2965;&#3021;<br>Total</th>
+        <th>{{translations['quantity']}}<br>Qty</th>
+        <th>{{translations['price']}}<br>Rate</th>
+        <th>{{translations['money']}}<br>Total</th>
       </tr>
     </thead>
     <tbody>
@@ -321,12 +321,12 @@
     </tr>
     <tr>
       <td>Items: {{carts.length}}</td>
-      <td><p>&#x0BB5;&#x0BBE;&#x0B9F;&#x0B95;&#x0BC8;</p>: 0.00</td>
+      <td><p>{{translations['rent']}}</p>: 0.00</td>
     </tr>
     <tr>
       <td>RoundOff: {{billTotalRound |
           currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-      <td colspan="2" class="bold"><p>&#x0BAE;&#x0BCA;&#x0BA4;&#x0BCD;&#x0BA4;&#x0BAE;&#x0BCD;</p>: {{(billTotaldue ? billTotaldue : 0) |
+      <td colspan="2" class="bold"><p>{{translations['total']}}</p>: {{(billTotaldue ? billTotaldue : 0) |
           currency:'INR':'symbol-narrow':'1.2-2'}}</td>
     </tr>
   </table>
@@ -357,13 +357,13 @@
   </table>
 
   <div class="info">
-    <!-- <table class="no-border">
+    <table class="no-border">
       <tr>
-        <td>பெட்டி:</td>
-        <td>சிப்பம்:</td>
-        <td>சில்லறை:</td>
+        <td>{{translations['box']}}:</td>
+        <td>{{translations['chip']}}:</td>
+        <td>{{translations['change']}}:</td>
       </tr>
-    </table> -->
+    </table>
   </div>
 
   <div class="footer">

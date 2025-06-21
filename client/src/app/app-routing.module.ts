@@ -284,6 +284,11 @@ export const Approutes: Routes = [
         path: 'disable-item-in-online-order',
         loadChildren: () => import('./disable-item-in-online-order/disable-item-in-online-order.module').then(m => m.DisableItemInOnlineOrderModule),
         canActivate: [AuthGuard]
+      },
+      {
+        path: 'translations',
+        loadChildren: () => import('./translation/transaltion.module').then(m => m.TranslationModule),
+        canActivate: [AuthGuard],
       }
     ]
   },

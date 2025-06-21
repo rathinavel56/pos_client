@@ -97,6 +97,15 @@ export class RecipeService {
     saveBrand(request: any): Observable<any> {
         return this.apiService.httpPost('/brand', request);
     }
+    getTranslations(request: any): Observable<any> {
+        return this.apiService.httpPost('/translations', request);
+    }
+    saveTranslation(request: any): Observable<any> {
+        return this.apiService.httpPost('/translation', request);
+    }
+    getLanguages(request: any): Observable<any> {
+        return this.apiService.httpPost('/languages', request);
+    }
     getCustomer(request: any): Observable<any> {
       return this.apiService.httpPost('/customer', request);
     }

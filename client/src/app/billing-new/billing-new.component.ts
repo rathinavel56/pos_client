@@ -60,6 +60,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   taxs: any = [];
   billTotalRound: number = 0;
   billTotaldue: number = 0;
+  translations: any = [];
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -92,9 +93,23 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       this.selectedLocation = this.userDetail.session_detail.location;
       this.resetBilling();
     }
+    this.getTranslations();
   }
   get rows() {
     return this.tableForm.get('rows') as FormArray;
+  }
+
+  getTranslations() {
+    this.recipeService.getTranslations({
+          language_id: 1,
+        })
+        .subscribe((response: any) => {
+          if (response.data && response.data.length > 0) {
+            response.data.forEach((item: any) => {
+              this.translations[item.key_text] = item.value;
+            });
+          }
+         });
   }
 
   addRow() {
