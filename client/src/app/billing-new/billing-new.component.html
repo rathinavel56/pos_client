@@ -119,7 +119,7 @@
       <tr class="table-footer">
         <td colspan="9" style="text-align: right; padding-right: 20px;">
           <strong style="margin-left: 20px;">Total Tax: {{ (totalBillAmount > 0) ? (SGST + CGST + IGST + cess) : '0' }}</strong>
-          <strong>Total: {{ totalBillAmount }}</strong>
+          <strong>Total: {{ billTotaldue }}</strong>
         </td>
       </tr>
     </tbody>
@@ -324,7 +324,10 @@
       <td><p>&#x0BB5;&#x0BBE;&#x0B9F;&#x0B95;&#x0BC8;</p>: 0.00</td>
     </tr>
     <tr>
-      <td colspan="2" class="bold"><p>&#x0BAE;&#x0BCA;&#x0BA4;&#x0BCD;&#x0BA4;&#x0BAE;&#x0BCD;</p>: ₹ 245.00</td>
+      <td>RoundOff: {{billTotalRound |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+      <td colspan="2" class="bold"><p>&#x0BAE;&#x0BCA;&#x0BA4;&#x0BCD;&#x0BA4;&#x0BAE;&#x0BCD;</p>: {{(billTotaldue ? billTotaldue : 0) |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
     </tr>
   </table>
 
@@ -341,10 +344,14 @@
     <tbody>
       <tr *ngFor="let tax of taxs">
         <td>{{tax.total_tax}}%</td>
-        <td>{{tax.total_tax_value}}</td>
-        <td>{{tax.SGST}}</td>
-        <td>{{tax.CGST}}</td>
-        <td>{{tax.total}}</td>
+        <td>{{tax.total_net_price |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.SGST |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.CGST |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{tax.total |
+          currency:'INR':'symbol-narrow':'1.2-2'}}</td>
       </tr>
     </tbody>
   </table>

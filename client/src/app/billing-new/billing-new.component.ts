@@ -58,6 +58,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   showSuggestions = false;
   filteredOptions: string[] = [];
   taxs: any = [];
+  billTotalRound: number = 0;
+  billTotaldue: number = 0;
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -259,8 +261,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
       const price = product.prices.find((item: any) => item.unit_id === +unitId);
       if (price) {
         const totalNetPrice = unitQuantity * price.selling_price;
-        //const totalTax = totalNetPrice * (price.selling_CGST_percentage + price.selling_SGST_percentage + price.selling_IGST_percentage + price.selling_cess_percentage) / 100;
-        const totalTax = price.selling_CGST_percentage + price.selling_IGST_percentage + price.selling_SGST_percentage + price.selling_cess_percentage
+        const totalTax = totalNetPrice * (price.selling_CGST_percentage + price.selling_SGST_percentage + price.selling_IGST_percentage + price.selling_cess_percentage) / 100;
+        //const totalTax = price.selling_CGST_percentage + price.selling_IGST_percentage + price.selling_SGST_percentage + price.selling_cess_percentage
         const totalAmount = totalNetPrice + totalTax;
         this.rows.at(index).patchValue({
           selling_price: totalNetPrice,
@@ -284,6 +286,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
   }
   getTotalAmount() {
     this.taxs = [];
+    this.billTotalRound = 0;
     this.SGST = this.rows.controls.reduce((sum, row) => {
       return sum + (+row.get('SGST')?.value || 0);
     }, 0);
@@ -299,6 +302,8 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
     this.totalBillAmount = this.rows.controls.reduce((sum, row) => {
       return sum + (+row.get('total')?.value || 0);
     }, 0);
+    this.billTotalRound = Math.round(this.totalBillAmount) - this.totalBillAmount;
+    this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
       this.tableForm.value.rows.forEach((row: any) => {
         if (row.total_tax > 0) {
@@ -309,6 +314,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
             this.taxs[existingTaxIndex].IGST += row.IGST;
             this.taxs[existingTaxIndex].cess += row.cess;
             this.taxs[existingTaxIndex].total_tax_value += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
             this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_value;
           } else {
             let total_tax = row.SGST + row.CGST + row.IGST + row.cess;
@@ -319,6 +325,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
               cess: row.cess,
               total_tax: row.total_tax,
               total_tax_value: total_tax,
+              total_net_price: row.total_net_price,
               total : row.total_net_price + total_tax
             })
           }
