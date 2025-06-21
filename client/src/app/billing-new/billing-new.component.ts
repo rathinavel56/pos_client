@@ -373,7 +373,7 @@ export class BillingNewComponent extends BaseComponent implements OnInit {
         discount_mloyal_amount: 0,
         discount_amount: 0,
         discount_percentage: 0,
-        roundoff: 0,
+        roundoff: +this.billTotalRound,
         advance_amount: 0,
         total: +this.totalBillAmount,
       };

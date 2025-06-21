@@ -322,7 +322,8 @@
                         <td>{{(+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
                         <td>{{invoiceDetail.price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
                         <td>{{(invoiceDetail.price + (+invoiceDetail.SGST_percentage ? ((+invoiceDetail.SGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.CGST_percentage ? ((+invoiceDetail.CGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.IGST_percentage ? ((+invoiceDetail.IGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.price) : 0)) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td *ngIf="isReturnAva"><input type="checkbox" *ngIf="(invoiceDetail.is_active === 1 && ((invoiceDetail.product && invoiceDetail.product.pos_return === 1) || (invoiceDetail.receipe && invoiceDetail.receipe.pos_return === 1)))" class="form-check" [(ngModel)]="invoiceDetail.return" (change)="returnStock()"></td>
+                        <td *ngIf="isReturnAva"><input type="checkbox"  *ngIf="!invoiceDetail.return &&(invoiceDetail.is_active === 1 && ((invoiceDetail.product && invoiceDetail.product.pos_return === 1) || (invoiceDetail.receipe && invoiceDetail.receipe.pos_return === 1)))" class="form-check" [(ngModel)]="invoiceDetail.return" (change)="returnStock()">
+                        <input type="text" *ngIf="invoiceDetail.return" [(ngModel)]="invoiceDetail.return_quantity" (change)="checkReturnStock(invoiceDetail)"></td>
                       </tr>
                     </tbody>
                   </table>

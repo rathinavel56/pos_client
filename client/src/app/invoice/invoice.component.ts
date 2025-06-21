@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { Router } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { TableUtil } from "../shared/util/tableUtil";
+import { quantity } from "chartist";
 
 
 @Component({
@@ -43,6 +44,14 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
   totalQty: any = 0;
   hostName: any;
   userDetail: any;
+  billTotalRound: number = 0;
+  SGST: any;
+  CGST: any;
+  IGST: any;
+  cess: any;
+  totalBillAmount: any;
+  billTotaldue: number = 0;
+  carts: any;
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -204,6 +213,88 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
           );
       }
     });
+  }
+  saveReturn() {
+    let returnItems = this.invoiceDetail.details.filter((e: any) => e.return === true && +e.return_quantity > 0);
+    if (returnItems.length === 0) {
+      Swal.fire("Return", "Please select at least one item to return", "warning");
+      return;
+    }
+    // let order = {
+    //     location_id: this.selectedLocation.id,
+    //     order_type_id: 1, // Assuming 1 is the order type for retail
+    //     payment_mode_id: 1, // Assuming 1 is the payment mode for cash
+    //     carts: this.carts,
+    //     parcel_charge: null,
+    //     customer_id: this.customer ? this.customer.id : null,
+    //     reference_no: null,
+    //     is_take_away: true,
+    //     SGST_amount: +this.SGST,
+    //     CGST_amount: +this.CGST,
+    //     IGST_amount: +this.IGST,
+    //     cess_amount: +this.cess,
+    //     discount_mloyal_amount: 0,
+    //     discount_amount: 0,
+    //     discount_percentage: 0,
+    //     roundoff: +this.billTotalRound,
+    //     advance_amount: 0,
+    //     total: +this.totalBillAmount,
+    //   };
+  }
+  getTotalAmount() {
+    this.taxs = [];
+    this.billTotalRound = 0;
+    this.SGST = this.invoiceDetail.details.reduce((sum:any, row:any) => {
+      return sum + (+row['SGST']);
+    }, 0);
+    this.CGST = this.invoiceDetail.details.reduce((sum:any, row:any) => {
+      return sum + (+row['CGST']);
+    }, 0);
+    this.IGST = this.invoiceDetail.details.reduce((sum:any, row:any) => {
+      return sum + (+row['IGST']);
+    }, 0);
+    this.cess = this.invoiceDetail.details.reduce((sum:any, row:any) => {
+      return sum + (+row['cess']);
+    }, 0);
+    this.totalBillAmount = this.invoiceDetail.details.reduce((sum:any, row:any) => {
+      return sum + (+row['total']);
+    }, 0);
+    this.billTotalRound = Math.round(this.totalBillAmount) - this.totalBillAmount;
+    this.billTotaldue = Math.round(this.totalBillAmount);
+    if (this.totalBillAmount > 0) {
+      this.invoiceDetail.details.forEach((row: any) => {
+        if (row.total_tax > 0) {
+          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax === row.total_tax);
+          if (existingTaxIndex > -1) {
+            this.taxs[existingTaxIndex].SGST += row.SGST;
+            this.taxs[existingTaxIndex].CGST += row.CGST;
+            this.taxs[existingTaxIndex].IGST += row.IGST;
+            this.taxs[existingTaxIndex].cess += row.cess;
+            this.taxs[existingTaxIndex].total_tax_value += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
+            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_value;
+          } else {
+            let total_tax = row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs.push({
+              SGST: row.SGST,
+              CGST: row.CGST,
+              IGST: row.IGST,
+              cess: row.cess,
+              total_tax: row.total_tax,
+              total_tax_value: total_tax,
+              total_net_price: row.total_net_price,
+              total : row.total_net_price + total_tax
+            })
+          }
+        }
+       });
+    }
+    this.carts = JSON.parse(JSON.stringify(this.invoiceDetail.details));
+    this.totalQty = this.carts.reduce(
+      (accumulator: any, current: any) =>
+        accumulator + parseFloat(current.added_quantity),
+      0
+    );
   }
   getInvoice(invoice: any, content: any) {
     this.showLoading();
@@ -473,6 +564,28 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
         }, 1000);
       }, 1000);
     }, 1000);
+  }
+  checkReturnStock(details: any) {
+    setTimeout(() => {
+      if (+details.return_quantity > +details.quantity) {
+        details.return_quantity = details.quantity;
+      }
+      details.is_active = (+details.return_quantity !== +details.quantity);
+      if (details.is_active) {
+        let totalNetPrice = details.return_quantity * details.selling_price;
+        const totalTax = totalNetPrice * (details.selling_CGST_percentage + details.selling_SGST_percentage + details.selling_IGST_percentage + details.selling_cess_percentage) / 100;
+        const totalAmount = totalNetPrice + totalTax;
+        details.total_net_price = totalNetPrice,
+        details.total_tax = totalTax,
+        details.total = totalAmount,
+        details.SGST = +details.selling_SGST_percentage ? (+details.selling_SGST_percentage * totalNetPrice / 100) : 0;
+        details.CGST = +details.selling_CGST_percentage ? (+details.selling_CGST_percentage * totalNetPrice / 100) : 0;
+        details.IGST = +details.selling_IGST_percentage ? (+details.selling_IGST_percentage * totalNetPrice / 100) : 0;
+        details.cess = +details.selling_cess_percentage ? (+details.selling_cess_percentage * totalNetPrice / 100) : 0;
+      }
+    }, 0);
+
+
   }
   cancelBill(sale: any) {
     Swal.fire({
