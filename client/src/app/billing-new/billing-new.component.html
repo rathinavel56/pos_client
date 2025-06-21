@@ -127,7 +127,7 @@
   <button type="button" class="btn btn-rounded btn-default button-space" (click)="resetBilling()">Cancel</button>
   <button type="button" class="btn btn-rounded btn-warning button-space" [disabled]="!totalBillAmount" (click)="orderInvoice(true)">Hold</button>
   <button type="button" class="btn btn-rounded btn-primary button-space" [disabled]="!totalBillAmount" (click)="saveInvoice()">Save</button>
-  <button type="button" class="btn btn-rounded btn-default button-space" (click)="printInvoice()">print</button>
+  <button type="button" class="btn btn-rounded btn-default button-space hide" (click)="printInvoice()">Preview</button>
 
 </form>
 </ng-container>
