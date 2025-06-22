@@ -18,7 +18,7 @@
             <span>Customer: {{customer.customer_name}}</span>
           </ng-container>
         </td>
-        <td>Time: {{invoice_date | date: 'hh:mm a'}}</td>
+        <td>Time: {{data.invoice_date | date: 'hh:mm a'}}</td>
       </tr>
     </table>
   </div>
@@ -39,7 +39,7 @@
         <td>{{cart.mrp_selling_price}}</td>
         <td>{{cart.total_tax_percentage}}%</td>
         <td>{{cart.added_quantity}}</td>
-        <td>{{cart.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+        <td>{{cart.total_net_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
         <td>{{cart.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
       </tr>
 

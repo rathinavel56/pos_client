@@ -315,15 +315,15 @@
                     <tbody>
                       <tr *ngFor="let invoiceDetail of invoiceDetail.details">
                         <td>{{invoiceDetail.product ? invoiceDetail.product.name : invoiceDetail.receipe.name}}</td>
-                        <td>{{invoiceDetail.quantity}} ({{invoiceDetail.product ? invoiceDetail.product.unit.name : invoiceDetail.receipe.unit.name}})</td>
-                        <td>{{(+invoiceDetail.SGST_percentage ? ((+invoiceDetail.SGST_percentage / 100) * invoiceDetail.price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td>{{(+invoiceDetail.CGST_percentage ? ((+invoiceDetail.CGST_percentage / 100) * invoiceDetail.price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td>{{(+invoiceDetail.IGST_percentage ? ((+invoiceDetail.IGST_percentage / 100) * invoiceDetail.price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td>{{(+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td>{{invoiceDetail.price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
-                        <td>{{(invoiceDetail.price + (+invoiceDetail.SGST_percentage ? ((+invoiceDetail.SGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.CGST_percentage ? ((+invoiceDetail.CGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.IGST_percentage ? ((+invoiceDetail.IGST_percentage / 100) * invoiceDetail.price) : 0) + (+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.price) : 0)) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{invoiceDetail.quantity}}</td>
+                        <td>{{(+invoiceDetail.SGST_percentage ? ((+invoiceDetail.SGST_percentage / 100) * invoiceDetail.total_net_price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(+invoiceDetail.CGST_percentage ? ((+invoiceDetail.CGST_percentage / 100) * invoiceDetail.total_net_price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(+invoiceDetail.IGST_percentage ? ((+invoiceDetail.IGST_percentage / 100) * invoiceDetail.total_net_price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.total_net_price) : 0)  | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{invoiceDetail.total_net_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
+                        <td>{{(invoiceDetail.total_net_price + (+invoiceDetail.SGST_percentage ? ((+invoiceDetail.SGST_percentage / 100) * invoiceDetail.total_net_price) : 0) + (+invoiceDetail.CGST_percentage ? ((+invoiceDetail.CGST_percentage / 100) * invoiceDetail.total_net_price) : 0) + (+invoiceDetail.IGST_percentage ? ((+invoiceDetail.IGST_percentage / 100) * invoiceDetail.total_net_price) : 0) + (+invoiceDetail.cess_percentage ? ((invoiceDetail.cess_percentage / 100) * invoiceDetail.total_net_price) : 0)) | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
                         <td><input type="checkbox"  *ngIf="!invoiceDetail.return &&(invoiceDetail.is_active === 1 && ((invoiceDetail.product && invoiceDetail.product.pos_return === 1) || (invoiceDetail.receipe && invoiceDetail.receipe.pos_return === 1)))" class="form-check" [(ngModel)]="invoiceDetail.return" (change)="returnStock()">
-                        <input type="text" *ngIf="invoiceDetail.return" [(ngModel)]="invoiceDetail.added_quantity" (change)="checkReturnStock(invoiceDetail)"></td>
+                        <input type="text" *ngIf="invoiceDetail.return" [(ngModel)]="invoiceDetail.return_quantity" (change)="checkReturnStock(invoiceDetail)"></td>
                       </tr>
                     </tbody>
                   </table>
@@ -336,11 +336,11 @@
     </div>
     <div class="modal-footer">
       <div class="row">
-        <div class="col-sm-6 text-left">
+        <div class="col-sm-4 text-left">
           <button type="button" class="btn btn-rounded btn-default"
             (click)="modal.dismiss();cancelPop()">Cancel</button>
         </div>
-        <div class="col-sm-6 text-right">
+        <div class="col-sm-8 text-right">
           <button type="button" class="btn btn-primary" (click)="saveReturn()">Submit Return</button>
         </div>
       </div>

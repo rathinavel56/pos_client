@@ -189,14 +189,13 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     this.showLoading();
     let order = {
         details: this.carts,
-        parcel_charge: null,
         SGST_amount: +this.SGST,
         CGST_amount: +this.CGST,
         IGST_amount: +this.IGST,
         cess_amount: +this.cess,
         roundoff: +this.billTotalRound,
         total: +this.totalBillAmount,
-        location_id: this.invoiceDetail.details.location_id,
+        location_id: this.invoiceDetail.location_id,
       };
       this.recipeService
           .returnStocks(order)
@@ -206,6 +205,8 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
               'Your Return Order has been saved.',
               'success'
             );
+            this.getInvoice(this.invoiceDetail, null);
+            this.getRecords();
           });
   }
   getTotalAmount() {
@@ -230,7 +231,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
       this.invoiceDetail.details.forEach((row: any) => {
-        if (row.total_tax_amount > 0) {
+        if (row.total_tax_percentage > 0) {
           let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.name === row.total_tax_percentage);
           let total_tax_amount = row.SGST + row.CGST + row.IGST + row.cess;
           if (existingTaxIndex > -1) {
@@ -239,8 +240,8 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
             this.taxs[existingTaxIndex].IGST += row.IGST;
             this.taxs[existingTaxIndex].cess += row.cess;
             this.taxs[existingTaxIndex].total_tax_amount += row.SGST + row.CGST + row.IGST + row.cess;
-            this.taxs[existingTaxIndex].total_net_price += row.selling_price;
-            this.taxs[existingTaxIndex].total += row.selling_price + total_tax_amount;
+            this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
+            this.taxs[existingTaxIndex].total += row.total_net_price + total_tax_amount;
           } else {
             this.taxs.push({name: row.total_tax_percentage,
               SGST: row.SGST,
@@ -248,8 +249,8 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
               IGST: row.IGST,
               cess: row.cess,
               total_tax_amount: row.total_tax_amount,
-              total_net_price: row.selling_price,
-              total : row.selling_price + total_tax_amount,
+              total_net_price: row.total_net_price,
+              total : row.total_net_price + total_tax_amount,
               total_tax_percentage: row.total_tax_percentage
             })
           }
@@ -278,21 +279,23 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
                 el.product_name_tamil = el.product.tamil_name;
                 el.hsn_code = el.product.hsn_code;
                 el.added_quantity = +el.quantity;
-                el.total_net_price = +el.price;
                 el.total_tax_percentage = +el.CGST_percentage + +el.SGST_percentage + +el.IGST_percentage + +el.cess_percentage;
-                el.total_tax_amount = +el.price * (el.total_tax_percentage / 100);
-                el.SGST = +el.selling_SGST_percentage ? (+el.selling_SGST_percentage * el.total_net_price / 100) : 0;
-                el.CGST = +el.selling_CGST_percentage ? (+el.selling_CGST_percentage * el.total_net_price / 100) : 0;
-                el.IGST = +el.selling_IGST_percentage ? (+el.selling_IGST_percentage * el.total_net_price / 100) : 0;
-                el.cess = +el.selling_cess_percentage ? (+el.selling_cess_percentage * el.total_net_price / 100) : 0;
+                el.total_net_price = +el.selling_price * +el.added_quantity;
+                el.return_quantity = 0;
+                el.SGST = +el.SGST_percentage ? (+el.SGST_percentage * el.total_net_price / 100) : 0;
+                el.CGST = +el.CGST_percentage ? (+el.CGST_percentage * el.total_net_price / 100) : 0;
+                el.IGST = +el.IGST_percentage ? (+el.IGST_percentage * el.total_net_price / 100) : 0;
+                el.cess = +el.cess_percentage ? (+el.cess_percentage * el.total_net_price / 100) : 0;
               });
-            this.cartTotal();
-            this.modalReference = this.modalService.open(content);
-            let popUp = document.querySelector(".modal-dialog");
-            if (popUp) {
-              popUp.classList.remove("modal-dialog");
+            if (content !== null) {
+              this.modalReference = this.modalService.open(content);
+              let popUp = document.querySelector(".modal-dialog");
+              if (popUp) {
+                popUp.classList.remove("modal-dialog");
+              }
+              this.modalReference.result.then(() => { });
             }
-            this.modalReference.result.then(() => {});
+
             this.setPrintData();
             this.clearLoading();
           } else {
@@ -308,143 +311,6 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
           this.networkIssue();
         }
       );
-  }
-  cartTotal() {
-    if (!this.invoiceDetail.discount_amount) {
-      this.invoiceDetail.discount_amount = 0;
-    }
-    if (!this.invoiceDetail.discount_mloyal_amount) {
-      this.invoiceDetail.discount_mloyal_amount = 0;
-    }
-    this.taxs = [];
-    this.totalQty = this.invoiceDetail.details.reduce(
-      (accumulator: any, current: any) =>
-        accumulator + parseFloat(current.quantity),
-      0
-    );
-    let taxExisting: any;
-    this.invoiceDetail.details.forEach((e: any) => {
-        e.CGST = 0;
-        e.SGST = 0;
-        e.IGST = 0;
-        e.cess = 0;
-        if (+this.invoiceDetail.discount_percentage > 0 && +this.invoiceDetail.discount_mloyal_amount <= 0) {
-          e.discount_percentage = +this.invoiceDetail.discount_percentage;
-          e.discount_amount = (((e.actual_price.toFixed(2) * e.quantity)/100) * +this.invoiceDetail.discount_percentage);
-          e.net_price = +((+e.actual_price - (e.discount_amount/e.quantity)).toFixed(2));
-          e.total_net_price = (e.net_price * e.quantity);
-        } else if (+this.invoiceDetail.discount_mloyal_amount > 0) {
-          e.discount_percentage = +e.bill_percentage.toFixed(2);
-          e.discount_amount = (this.invoiceDetail.discount_mloyal_amount * (+e.bill_percentage.toFixed(2)/100));
-          e.total_net_price = e.lineTotal - e.discount_amount;
-          e.net_price = (e.total_net_price/e.quantity).toFixed(2);
-        } else {
-          e.total_net_price = +e.total;
-          e.net_price = +e.actual_price;
-          e.discount_percentage = 0;
-          e.discount_amount = 0;
-        }
-        if (e.CGST_percentage > 0) {
-          const camount = parseFloat(
-            ((e.CGST_percentage / 100) * e.net_price).toFixed(2)
-          );
-          e.CGST = camount;
-          taxExisting = this.taxs.findIndex(
-            (ele: any) =>
-              ele.name === "CGST" &&
-              ele.percentage === e.CGST_percentage
-          );
-          if (taxExisting > -1) {
-            this.taxs[taxExisting].amount =
-              this.taxs[taxExisting].amount + camount;
-            this.taxs[taxExisting].withoutTaxAmount =
-              this.taxs[taxExisting].withoutTaxAmount + (e.net_price * e.quantity);
-          } else {
-            this.taxs.push({
-              name: "CGST",
-              hsn: e.hsn_code,
-              percentage: e.CGST_percentage,
-              withoutTaxAmount: (e.net_price * e.quantity),
-              amount: camount,
-            });
-          }
-        }
-        if (e.SGST_percentage > 0) {
-          const samount = parseFloat(
-            ((e.SGST_percentage / 100) * e.net_price).toFixed(2)
-          );
-          e.SGST = samount;
-          taxExisting = this.taxs.findIndex(
-            (ele: any) =>
-              ele.name === "SGST" &&
-              ele.percentage === e.SGST_percentage
-          );
-          if (taxExisting > -1) {
-            this.taxs[taxExisting].amount =
-              this.taxs[taxExisting].amount + samount;
-            this.taxs[taxExisting].withoutTaxAmount =
-              this.taxs[taxExisting].withoutTaxAmount + (e.net_price * e.quantity);
-          } else {
-            this.taxs.push({
-              name: "SGST",
-              hsn: e.hsn_code,
-              percentage: e.SGST_percentage,
-              withoutTaxAmount: (e.net_price * e.quantity),
-              amount: samount,
-            });
-          }
-        }
-        if (e.IGST_percentage > 0) {
-          const iamount = parseFloat(
-            ((e.IGST_percentage / 100) * e.net_price).toFixed(2)
-          );
-          e.IGST = iamount;
-          taxExisting = this.taxs.findIndex(
-            (ele: any) =>
-              ele.name === "IGST" &&
-              ele.percentage === e.IGST_percentage
-          );
-          if (taxExisting > -1) {
-            this.taxs[taxExisting].amount =
-              this.taxs[taxExisting].amount + iamount;
-            this.taxs[taxExisting].withoutTaxAmount =
-              this.taxs[taxExisting].withoutTaxAmount + (e.net_price * e.quantity);
-          } else {
-            this.taxs.push({
-              name: "IGST",
-              hsn: e.hsn_code,
-              percentage: e.IGST_percentage,
-              withoutTaxAmount: (e.net_price * e.quantity),
-              amount: iamount,
-            });
-          }
-        }
-        if (e.cess_percentage > 0) {
-          const ceamount = parseFloat(
-            ((e.cess_percentage / 100) * e.net_price).toFixed(2)
-          );
-          e.cess = ceamount;
-          taxExisting = this.taxs.findIndex(
-            (ele: any) =>
-              ele.name === "CESS" &&
-              ele.percentage === e.cess_percentage
-          );
-          if (taxExisting > -1) {
-            this.taxs[taxExisting].amount =
-              this.taxs[taxExisting].amount + ceamount;
-            this.taxs[taxExisting].withoutTaxAmount =
-              this.taxs[taxExisting].withoutTaxAmount + (e.net_price * e.quantity);
-          } else {
-            this.taxs.push({
-              name: "CESS",
-              hsn: e.hsn_code,
-              percentage: e.cess_percentage,
-              withoutTaxAmount: (e.net_price * e.quantity),
-              amount: ceamount,
-            });
-          }
-        }
-      });
   }
   printInvoice() {
     let w: any = window.open();
@@ -549,22 +415,24 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
   }
   checkReturnStock(details: any) {
     setTimeout(() => {
-      if (+details.added_quantity > +details.quantity) {
-        details.added_quantity = details.quantity;
+      if (+details.return_quantity > +details.quantity) {
+        details.return_quantity = details.quantity;
       }
-      details.is_active = (+details.added_quantity !== +details.quantity);
-      if (details.is_active) {
+      details.is_active = (+details.return_quantity !== +details.quantity);
+      details.added_quantity = details.quantity - details.return_quantity;
+
         let totalNetPrice = details.added_quantity * details.selling_price;
-        const totalTax = totalNetPrice * (details.selling_CGST_percentage + details.selling_SGST_percentage + details.selling_IGST_percentage + details.selling_cess_percentage) / 100;
+        details.total_tax_percentage = +details.CGST_percentage + +details.SGST_percentage + +details.IGST_percentage + +details.cess_percentage;
+        const totalTax = totalNetPrice * (details.total_tax_percentage / 100);
         const totalAmount = totalNetPrice + totalTax;
         details.total_net_price = totalNetPrice,
         details.total_tax_amount = totalTax,
         details.total = totalAmount,
-        details.SGST = +details.selling_SGST_percentage ? (+details.selling_SGST_percentage * totalNetPrice / 100) : 0;
-        details.CGST = +details.selling_CGST_percentage ? (+details.selling_CGST_percentage * totalNetPrice / 100) : 0;
-        details.IGST = +details.selling_IGST_percentage ? (+details.selling_IGST_percentage * totalNetPrice / 100) : 0;
-        details.cess = +details.selling_cess_percentage ? (+details.selling_cess_percentage * totalNetPrice / 100) : 0;
-      }
+        details.SGST = +details.SGST_percentage ? (+details.SGST_percentage * details.total_net_price / 100) : 0;
+        details.CGST = +details.CGST_percentage ? (+details.CGST_percentage * details.total_net_price / 100) : 0;
+        details.IGST = +details.IGST_percentage ? (+details.IGST_percentage * details.total_net_price / 100) : 0;
+        details.cess = +details.cess_percentage ? (+details.cess_percentage * details.total_net_price / 100) : 0;
+        this.setPrintData();
     }, 0);
 
 
@@ -643,11 +511,12 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     this.cartData = {
       name: this.invoiceDetail.location.name,
       address: this.invoiceDetail.location.address,
+      phone_no: this.invoiceDetail.location.phone_no,
       message: this.invoiceDetail.location.message,
       gstin: this.invoiceDetail.location.gstin,
       fssai_no: this.invoiceDetail.location.fssai_no,
-      invoice_no: this.invoiceDetail.name,
-      invoice_date: this.invoiceDetail.name,
+      invoice_no: this.invoiceDetail.invoice_no,
+      invoice_date: this.invoiceDetail.updated_at,
       customer: this.invoiceDetail.customer,
       details: this.carts,
       billTotalRound: this.billTotalRound,

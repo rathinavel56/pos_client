@@ -107,6 +107,9 @@ export class BillingComponent extends BaseComponent implements OnInit {
       product_name_tamil: [''],
       product_stock: [''],
       unit_size: [''],
+      unit: {
+        name: '',
+      },
       unit_quantity: [''],
       added_quantity: [''],  //D
       mrp_selling_price:[''], //D
@@ -247,10 +250,14 @@ export class BillingComponent extends BaseComponent implements OnInit {
     const productId = this.tableForm.value.rows[index].product_id;
     const unitId = this.tableForm.value.rows[index].unit_size;
     const product = this.products.find((item: any) => item.product_id === productId);
+    const unit = this.unitNames.find((item: any) => item.id === +unitId);
     if (product) {
       const price = product.prices.find((item: any) => item.unit_id === +unitId);
       this.rows.at(index).patchValue({
         mrp_selling_price: price.mrp_selling_price,
+        unit: {
+          name: unit.name
+        }
       });
     }
   }
@@ -262,13 +269,13 @@ export class BillingComponent extends BaseComponent implements OnInit {
     const product = this.products.find((item: any) => item.product_id === productId);
     if (product) {
       const price = product.prices.find((item: any) => item.unit_id === +unitId);
-      if (price) {
+      if (price && unitQuantity) {
         const totalNetPrice = unitQuantity * price.selling_price;
         const totalTaxPercentage = price.selling_CGST_percentage + price.selling_IGST_percentage + price.selling_SGST_percentage + price.selling_cess_percentage;
         const totalTaxAmount = totalNetPrice * (totalTaxPercentage / 100);
         const totalAmount = totalNetPrice + totalTaxAmount;
         this.rows.at(index).patchValue({
-          selling_price: totalNetPrice,
+          selling_price: price.selling_price / price.unit_quantity,
           total_net_price: totalNetPrice,
           unit_size: price.unit.id,
           added_quantity: unitQuantity * +price.unit_quantity,
@@ -411,6 +418,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
       name: this.selectedLocation.name,
       address: this.selectedLocation.address,
       message: this.selectedLocation.message,
+      phone_no: this.selectedLocation.phone_no,
       gstin: this.selectedLocation.gstin,
       fssai_no: this.selectedLocation.fssai_no,
       invoice_no: this.invoice_no,
