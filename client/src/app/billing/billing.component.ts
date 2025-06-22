@@ -416,7 +416,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
       invoice_no: this.invoice_no,
       invoice_date: this.invoice_date,
       customer: this.customer,
-      carts: this.carts,
+      details: this.carts,
       billTotalRound: this.billTotalRound,
       billTotaldue: this.billTotaldue,
       totalBillAmount: this.totalBillAmount,

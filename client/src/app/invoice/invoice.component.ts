@@ -255,12 +255,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
         }
        });
     }
-    this.carts = JSON.parse(JSON.stringify(this.invoiceDetail.details));
-    this.totalQty = this.carts.reduce(
-      (accumulator: any, current: any) =>
-        accumulator + parseFloat(current.added_quantity),
-      0
-    );
+
     this.setPrintData();
   }
   getInvoice(invoice: any, content: any) {
@@ -278,27 +273,16 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
           if (response.data) {
             this.invoicePreview = true;
             this.invoiceDetail = response.data;
-            this.isReturnAva =
-              this.invoiceDetail.details.filter(
-                (invoiceDetl: any) =>
-                  (invoiceDetl.product &&
-                    invoiceDetl.product.pos_return === 1) ||
-                  (invoiceDetl.receipe && invoiceDetl.receipe.pos_return === 1)
-              ).length > 0;
-            this.invoiceDetail.subTotal = 0;
-            if (this.isReturnAva) {
-              this.invoiceDetail.details.forEach((el: any) => {
+            this.invoiceDetail.details.forEach((el: any) => {
                 el.return = false;
-                el.lineTotal = (+el.actual_price.toFixed(2) * +el.quantity);
-                this.invoiceDetail.subTotal += el.lineTotal;
+                el.product_name = el.product.name;
+                el.product_name_tamil = el.product.tamil_name;
+                el.hsn_code = el.product.hsn_code;
+                el.added_quantity = +el.quantity;
+                el.total_net_price = +el.price;
+                el.total_tax_percentage = +el.CGST_percentage + +el.SGST_percentage + +el.IGST_percentage + +el.cess_percentage;
+                el.total_tax_amount = +el.price * (el.total_tax_percentage / 100);
               });
-            } else {
-              this.invoiceDetail.details.forEach((el: any) => {
-                el.return = false;
-                el.lineTotal = (+el.actual_price.toFixed(2) * +el.quantity);
-                this.invoiceDetail.subTotal += el.lineTotal;
-              });
-            }
             this.cartTotal();
             this.modalReference = this.modalService.open(content);
             let popUp = document.querySelector(".modal-dialog");
@@ -646,6 +630,12 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     });
   }
   setPrintData() {
+    this.carts = JSON.parse(JSON.stringify(this.invoiceDetail.details));
+    this.totalQty = this.carts.reduce(
+      (accumulator: any, current: any) =>
+        accumulator + parseFloat(current.added_quantity),
+      0
+    );
     this.cartData = {
       name: this.invoiceDetail.location.name,
       address: this.invoiceDetail.location.address,
@@ -655,7 +645,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
       invoice_no: this.invoiceDetail.name,
       invoice_date: this.invoiceDetail.name,
       customer: this.invoiceDetail.customer,
-      carts: this.carts,
+      details: this.carts,
       billTotalRound: this.billTotalRound,
       billTotaldue: this.billTotaldue,
       totalBillAmount: this.totalBillAmount,

@@ -326,10 +326,6 @@
                         <input type="text" *ngIf="invoiceDetail.return" [(ngModel)]="invoiceDetail.added_quantity" (change)="checkReturnStock(invoiceDetail)"></td>
                       </tr>
                     </tbody>
-                    <tfoot>
-                      <td colspan="7"></td>
-                      <td colspan="2"><button type="button" class="btn btn-rounded btn-primary" (click)="saveReturn()">Return</button></td>
-                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -338,17 +334,17 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">cartData
+    <div class="modal-footer">
       <div class="row">
         <div class="col-sm-6 text-left">
           <button type="button" class="btn btn-rounded btn-default"
             (click)="modal.dismiss();cancelPop()">Cancel</button>
         </div>
-        <div class="col-sm-6 text-right" *ngIf="isReturnAva">
-          <button type="button" class="btn btn-primary" [disabled]="isReturn" (click)="submit(invoiceDetail.location_id)">Submit</button>
+        <div class="col-sm-6 text-right">
+          <button type="button" class="btn btn-primary" (click)="saveReturn()">Submit Return</button>
         </div>
       </div>
     </div>
   </ng-container>
-  <app-print-invoice *ngIf="cartData && cartData.carts" [translations]="translations" [data]="cartData"></app-print-invoice>
+  <app-print-invoice *ngIf="cartData && cartData.details" [translations]="translations" [data]="cartData"></app-print-invoice>
 </ng-template>
