@@ -60,7 +60,6 @@ export class BillingComponent extends BaseComponent implements OnInit {
   taxs: any = [];
   billTotalRound: number = 0;
   billTotaldue: number = 0;
-  translations: any = [];
   constructor(
     public recipeService: RecipeService,
     public router: Router,
@@ -97,19 +96,6 @@ export class BillingComponent extends BaseComponent implements OnInit {
   }
   get rows() {
     return this.tableForm.get('rows') as FormArray;
-  }
-
-  getTranslations() {
-    this.recipeService.getTranslations({
-          language_id: 1,
-        })
-        .subscribe((response: any) => {
-          if (response.data && response.data.length > 0) {
-            response.data.forEach((item: any) => {
-              this.translations[item.key_text] = item.value;
-            });
-          }
-         });
   }
 
   addRow() {
@@ -415,12 +401,12 @@ export class BillingComponent extends BaseComponent implements OnInit {
   setPrintData() {
     this.cartData = {
       name: this.selectedLocation.name,
-      address: this.selectedLocation.name,
-      message: this.selectedLocation.name,
-      gstin: this.selectedLocation.name,
-      fssai_no: this.selectedLocation.name,
-      invoice_no: this.selectedLocation.name,
-      invoice_date: this.selectedLocation.name,
+      address: this.selectedLocation.address,
+      message: this.selectedLocation.message,
+      gstin: this.selectedLocation.gstin,
+      fssai_no: this.selectedLocation.fssai_no,
+      invoice_no: this.invoice_no,
+      invoice_date: this.invoice_date,
       customer: this.customer,
       carts: this.carts,
       billTotalRound: this.billTotalRound,

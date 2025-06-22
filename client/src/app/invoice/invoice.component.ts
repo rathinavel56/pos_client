@@ -41,6 +41,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
   isReturnAva: boolean = false;
   returnto: any = 0;
   taxs: any = [];
+  cartData: any;
   totalQty: any = 0;
   hostName: any;
   userDetail: any;
@@ -86,6 +87,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
       this.getLocations();
     }
     this.getRecords();
+    this.translations();
   }
   fillDate() {
     if (!this.from && this.to) {
@@ -261,6 +263,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
         accumulator + parseFloat(current.added_quantity),
       0
     );
+    this.setPrintData();
   }
   getInvoice(invoice: any, content: any) {
     this.showLoading();
@@ -615,5 +618,23 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
 
       }
     });
+  }
+  setPrintData() {
+    this.cartData = {
+      name: this.invoiceDetail.location.name,
+      address: this.invoiceDetail.location.address,
+      message: this.invoiceDetail.location.message,
+      gstin: this.invoiceDetail.location.gstin,
+      fssai_no: this.invoiceDetail.location.fssai_no,
+      invoice_no: this.invoiceDetail.name,
+      invoice_date: this.invoiceDetail.name,
+      customer: this.invoiceDetail.customer,
+      carts: this.carts,
+      billTotalRound: this.billTotalRound,
+      billTotaldue: this.billTotaldue,
+      totalBillAmount: this.totalBillAmount,
+      parcelCharge: this.invoiceDetail.parcel_charge,
+      taxs: this.taxs
+    };
   }
 }
