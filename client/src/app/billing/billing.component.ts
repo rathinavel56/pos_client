@@ -6,6 +6,7 @@ import { RecipeService } from '../shared/service/recipe.service';
 import Swal from 'sweetalert2';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { formatDate } from '@angular/common';
+import { quantity } from 'chartist';
 
 @Component({
   selector: 'app-billing-new',
@@ -115,7 +116,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
       selling_CGST_percentage: [''],
       selling_IGST_percentage: [''],
       selling_cess_percentage: [''],
-      total_tax: [''],
+      total_tax_amount: [''],
+      total_tax_percentage: [''],
       purchase_price: [''],
       total: [''],
       SGST: [''],
@@ -262,9 +264,9 @@ export class BillingComponent extends BaseComponent implements OnInit {
       const price = product.prices.find((item: any) => item.unit_id === +unitId);
       if (price) {
         const totalNetPrice = unitQuantity * price.selling_price;
-        const totalTax = totalNetPrice * (price.selling_CGST_percentage + price.selling_SGST_percentage + price.selling_IGST_percentage + price.selling_cess_percentage) / 100;
-        //const totalTax = price.selling_CGST_percentage + price.selling_IGST_percentage + price.selling_SGST_percentage + price.selling_cess_percentage
-        const totalAmount = totalNetPrice + totalTax;
+        const totalTaxPercentage = price.selling_CGST_percentage + price.selling_IGST_percentage + price.selling_SGST_percentage + price.selling_cess_percentage;
+        const totalTaxAmount = totalNetPrice * (totalTaxPercentage / 100);
+        const totalAmount = totalNetPrice + totalTaxAmount;
         this.rows.at(index).patchValue({
           selling_price: totalNetPrice,
           total_net_price: totalNetPrice,
@@ -274,7 +276,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
           selling_CGST_percentage: price.selling_CGST_percentage,
           selling_IGST_percentage: price.selling_IGST_percentage,
           selling_cess_percentage: price.selling_cess_percentage,
-          total_tax: totalTax,
+          total_tax_amount: totalTaxAmount,
+          total_tax_percentage: totalTaxPercentage,
           total: totalAmount,
           SGST: +price.selling_SGST_percentage ? (+price.selling_SGST_percentage * totalNetPrice / 100) : 0,
           CGST: +price.selling_CGST_percentage ? (+price.selling_CGST_percentage * totalNetPrice / 100) : 0,
@@ -307,27 +310,27 @@ export class BillingComponent extends BaseComponent implements OnInit {
     this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
       this.tableForm.value.rows.forEach((row: any) => {
-        if (row.total_tax > 0) {
-          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax === row.total_tax);
+        if (row.total_tax_amount > 0) {
+          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.name === row.total_tax_percentage);
+          let total_tax_amount = row.SGST + row.CGST + row.IGST + row.cess;
           if (existingTaxIndex > -1) {
             this.taxs[existingTaxIndex].SGST += row.SGST;
             this.taxs[existingTaxIndex].CGST += row.CGST;
             this.taxs[existingTaxIndex].IGST += row.IGST;
             this.taxs[existingTaxIndex].cess += row.cess;
-            this.taxs[existingTaxIndex].total_tax_value += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total_tax_amount += row.SGST + row.CGST + row.IGST + row.cess;
             this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
-            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_value;
+            this.taxs[existingTaxIndex].total += row.total_net_price + total_tax_amount;
           } else {
-            let total_tax = row.SGST + row.CGST + row.IGST + row.cess;
-            this.taxs.push({
+            this.taxs.push({name: row.total_tax_percentage,
               SGST: row.SGST,
               CGST: row.CGST,
               IGST: row.IGST,
               cess: row.cess,
-              total_tax: row.total_tax,
-              total_tax_value: total_tax,
+              total_tax_amount: row.total_tax_amount,
               total_net_price: row.total_net_price,
-              total : row.total_net_price + total_tax
+              total : row.total_net_price + total_tax_amount,
+              total_tax_percentage: row.total_tax_percentage
             })
           }
         }
@@ -341,6 +344,11 @@ export class BillingComponent extends BaseComponent implements OnInit {
     );
     this.setPrintData();
   }
+  parcelChargeChange () {
+    setTimeout(() => {
+      this.getTotalAmount();
+    }, 0)
+  }
   saveInvoice() {
     this.showLoading();
     this.carts = this.tableForm.value.rows.filter((p: any) => p.product_id !== '' );
@@ -349,7 +357,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
         order_type_id: 1, // Assuming 1 is the order type for retail
         payment_mode_id: 1, // Assuming 1 is the payment mode for cash
         carts: this.carts,
-        parcel_charge: null,
+        parcel_charge: this.parcelCharge,
         customer_id: this.customer ? this.customer.id : null,
         reference_no: null,
         is_take_away: true,
@@ -413,7 +421,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
       billTotaldue: this.billTotaldue,
       totalBillAmount: this.totalBillAmount,
       parcelCharge: this.parcelCharge,
-      taxs: this.taxs
+      taxs: this.taxs,
+      totalQty: this.totalQty,
     };
   }
   orderInvoice(isDraft?: boolean) {
@@ -461,6 +470,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
       rows: this.fb.array([])
     });
     this.addRow(); // initialize with one row
+    this.parcelCharge = 0;
   }
 
   getOrders(isDraft: boolean = false, content: any) {
@@ -534,7 +544,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
         product_name_tamil: prod.tamil_name,
         unit_size: prod.unit_id,
         product_stock: product ? product.quantity : 0,
-        unit_quantity: item.quantity
+        unit_quantity: item.quantity,
+        hsn_code: prod.hsn_code,
       });
       this.performCalculations(index);
     });
@@ -752,7 +763,8 @@ export class BillingComponent extends BaseComponent implements OnInit {
                   category_name: item.product_pos.category.name,
                   quantity: item.quantity,
                   purchase_price: item.product_pos.purchase_price,
-                  prices: item.product_pos.prices
+                  prices: item.product_pos.prices,
+                  hsn_code: item.product_pos.hsn_code
                 });
                 item.product_pos.prices.forEach((ele: any) => {
                   this.unitNames.push({id: ele.unit.id,name: ele.unit.name});

@@ -25,6 +25,9 @@
     </div>
     <div class="search-panel">
       <span>
+        <strong>Parcel Charge: </strong> <input #cellInput type="number" class="form-control" [(ngModel)]="parcelCharge" (change)="parcelChargeChange()" />
+      </span>
+      <span>
         <input type="text" [(ngModel)]="query" (input)="onSearch()" (click)="showSuggestions = true" (focus)="showSuggestions = true"
           (blur)="hideSuggestions()" placeholder="Search product..." class="autocomplete-input" />
 
@@ -54,9 +57,9 @@
           <th>Unit</th>
           <th>Quantity</th>
           <th>MRP</th>
-          <th>Net</th>
-          <th>Tax%</th>
-          <th>Total Net</th>
+          <th>Net Total</th>
+          <th>Net Tax</th>
+          <th>Total</th>
           <th></th>
         </tr>
       </thead>
@@ -107,7 +110,7 @@
           </td>
           <!-- tax -->
           <td class="small-col">
-            <input #cellInput type="number" class="readonly-cell" formControlName="total_tax" readonly
+            <input #cellInput type="number" class="readonly-cell" formControlName="total_tax_amount" readonly
               (keydown)="handleKeyDown($event, i)" />
           </td>
 
@@ -123,9 +126,7 @@
         </tr>
         <tr class="table-footer">
           <td colspan="3"></td>
-          <td colspan="3">
-            <strong style="margin-left: 20px;">Parcel Charge: </strong> <input #cellInput type="number" class="readonly-cell" [(ngModel)]="parcelCharge" (change)="getTotalAmount()" />
-          </td>
+          <td colspan="4"></td>
           <td style="text-align: right; padding-right: 20px;">
             <strong style="margin-left: 20px;">Tax: {{ (totalBillAmount > 0) ? (SGST + CGST + IGST + cess) : '0'
               | currency:'INR':'symbol-narrow':'1.2-2'}}</strong>

@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import { Router } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { TableUtil } from "../shared/util/tableUtil";
-import { quantity } from "chartist";
 
 
 @Component({
@@ -87,7 +86,6 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
       this.getLocations();
     }
     this.getRecords();
-    this.translations();
   }
   fillDate() {
     if (!this.from && this.to) {
@@ -231,27 +229,27 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
       this.invoiceDetail.details.forEach((row: any) => {
-        if (row.total_tax > 0) {
-          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax === row.total_tax);
+        if (row.total_tax_amount > 0) {
+          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax_amount === row.total_tax_amount);
           if (existingTaxIndex > -1) {
             this.taxs[existingTaxIndex].SGST += row.SGST;
             this.taxs[existingTaxIndex].CGST += row.CGST;
             this.taxs[existingTaxIndex].IGST += row.IGST;
             this.taxs[existingTaxIndex].cess += row.cess;
-            this.taxs[existingTaxIndex].total_tax_value += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total_tax_amount_value += row.SGST + row.CGST + row.IGST + row.cess;
             this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
-            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_value;
+            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_amount_value;
           } else {
-            let total_tax = row.SGST + row.CGST + row.IGST + row.cess;
+            let total_tax_amount = row.SGST + row.CGST + row.IGST + row.cess;
             this.taxs.push({
               SGST: row.SGST,
               CGST: row.CGST,
               IGST: row.IGST,
               cess: row.cess,
-              total_tax: row.total_tax,
-              total_tax_value: total_tax,
+              total_tax_amount: row.total_tax_amount,
+              total_tax_amount_value: total_tax_amount,
               total_net_price: row.total_net_price,
-              total : row.total_net_price + total_tax
+              total : row.total_net_price + total_tax_amount
             })
           }
         }
@@ -308,6 +306,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
               popUp.classList.remove("modal-dialog");
             }
             this.modalReference.result.then(() => {});
+            this.setPrintData();
             this.clearLoading();
           } else {
             this.clearLoading();
@@ -463,11 +462,38 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
   printInvoice() {
     let w: any = window.open();
     let html = $("#print_invoice").html();
-    let htmlToPrint = '' +
-    '<style type="text/css">' +
-    'table {' +
-      'border-collapse: collapse;' +
-      '}</style>';
+    let htmlToPrint =
+      `<style type="text/css">body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      font-size: 14px;
+    }
+    h2, h4, p {
+      margin: 0;
+      text-align: center;
+    }
+    .header, .footer {
+      text-align: center;
+    }
+    .info, .summary {
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px dashed #000;
+      padding: 5px;
+      text-align: center;
+    }
+    .no-border td {
+      border: none;
+    }
+    .bold {
+      font-weight: bold;
+    }</style>`;
     w.document.write(htmlToPrint + html); //only part of the page to print, using jquery
     w.document.close(); //this seems to be the thing doing the trick
     w.focus();
@@ -545,7 +571,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
         const totalTax = totalNetPrice * (details.selling_CGST_percentage + details.selling_SGST_percentage + details.selling_IGST_percentage + details.selling_cess_percentage) / 100;
         const totalAmount = totalNetPrice + totalTax;
         details.total_net_price = totalNetPrice,
-        details.total_tax = totalTax,
+        details.total_tax_amount = totalTax,
         details.total = totalAmount,
         details.SGST = +details.selling_SGST_percentage ? (+details.selling_SGST_percentage * totalNetPrice / 100) : 0;
         details.CGST = +details.selling_CGST_percentage ? (+details.selling_CGST_percentage * totalNetPrice / 100) : 0;

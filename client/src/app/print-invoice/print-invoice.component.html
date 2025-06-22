@@ -37,7 +37,7 @@
       <tr *ngFor="let cart of data.carts">
         <td>{{cart.product_name}} HSN: {{cart.hsn_code}}</td>
         <td>{{cart.mrp_selling_price}}</td>
-        <td>{{cart.total_tax}}%</td>
+        <td>{{cart.total_tax_percentage}}%</td>
         <td>{{cart.added_quantity}}</td>
         <td>{{cart.selling_price | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
         <td>{{cart.total | currency:'INR':'symbol-narrow':'1.2-2'}}</td>
@@ -48,7 +48,7 @@
   <table class="no-border summary">
     <tr>
       <td>Qty: <strong>{{data.totalQty}}</strong></td>
-      <td>Total: <strong>{{(data.totalBillAmount ? data.totalBillAmount : 0) |
+      <td>Total: <strong>{{(data.totalBillAmount ? (data.totalBillAmount - (data.parcelCharge ? data.parcelCharge : 0)) : 0) |
           currency:'INR':'symbol-narrow':'1.2-2'}}</strong></td>
     </tr>
     <tr>
@@ -79,7 +79,7 @@
     </thead>
     <tbody>
       <tr *ngFor="let tax of data.taxs">
-        <td>{{tax.total_tax}}%</td>
+        <td>{{tax.total_tax_percentage}}%</td>
         <td>{{tax.total_net_price |
           currency:'INR':'symbol-narrow':'1.2-2'}}</td>
         <td>{{tax.SGST |
