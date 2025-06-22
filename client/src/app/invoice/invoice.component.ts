@@ -188,14 +188,15 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     }
     this.showLoading();
     let order = {
-        carts: this.carts,
+        details: this.carts,
         parcel_charge: null,
         SGST_amount: +this.SGST,
         CGST_amount: +this.CGST,
         IGST_amount: +this.IGST,
         cess_amount: +this.cess,
         roundoff: +this.billTotalRound,
-        total: +this.totalBillAmount
+        total: +this.totalBillAmount,
+        location_id: this.invoiceDetail.details.location_id,
       };
       this.recipeService
           .returnStocks(order)
@@ -230,33 +231,31 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     if (this.totalBillAmount > 0) {
       this.invoiceDetail.details.forEach((row: any) => {
         if (row.total_tax_amount > 0) {
-          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.total_tax_amount === row.total_tax_amount);
+          let existingTaxIndex = this.taxs.findIndex((tax: any) => tax.name === row.total_tax_percentage);
+          let total_tax_amount = row.SGST + row.CGST + row.IGST + row.cess;
           if (existingTaxIndex > -1) {
             this.taxs[existingTaxIndex].SGST += row.SGST;
             this.taxs[existingTaxIndex].CGST += row.CGST;
             this.taxs[existingTaxIndex].IGST += row.IGST;
             this.taxs[existingTaxIndex].cess += row.cess;
-            this.taxs[existingTaxIndex].total_tax_amount_value += row.SGST + row.CGST + row.IGST + row.cess;
-            this.taxs[existingTaxIndex].total_net_price += row.total_net_price;
-            this.taxs[existingTaxIndex].total += row.total_net_price + this.taxs[existingTaxIndex].total_tax_amount_value;
+            this.taxs[existingTaxIndex].total_tax_amount += row.SGST + row.CGST + row.IGST + row.cess;
+            this.taxs[existingTaxIndex].total_net_price += row.selling_price;
+            this.taxs[existingTaxIndex].total += row.selling_price + total_tax_amount;
           } else {
-            let total_tax_amount = row.SGST + row.CGST + row.IGST + row.cess;
-            this.taxs.push({
+            this.taxs.push({name: row.total_tax_percentage,
               SGST: row.SGST,
               CGST: row.CGST,
               IGST: row.IGST,
               cess: row.cess,
               total_tax_amount: row.total_tax_amount,
-              total_tax_amount_value: total_tax_amount,
-              total_net_price: row.total_net_price,
-              total : row.total_net_price + total_tax_amount
+              total_net_price: row.selling_price,
+              total : row.selling_price + total_tax_amount,
+              total_tax_percentage: row.total_tax_percentage
             })
           }
         }
        });
     }
-
-    this.setPrintData();
   }
   getInvoice(invoice: any, content: any) {
     this.showLoading();
@@ -282,6 +281,10 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
                 el.total_net_price = +el.price;
                 el.total_tax_percentage = +el.CGST_percentage + +el.SGST_percentage + +el.IGST_percentage + +el.cess_percentage;
                 el.total_tax_amount = +el.price * (el.total_tax_percentage / 100);
+                el.SGST = +el.selling_SGST_percentage ? (+el.selling_SGST_percentage * el.total_net_price / 100) : 0;
+                el.CGST = +el.selling_CGST_percentage ? (+el.selling_CGST_percentage * el.total_net_price / 100) : 0;
+                el.IGST = +el.selling_IGST_percentage ? (+el.selling_IGST_percentage * el.total_net_price / 100) : 0;
+                el.cess = +el.selling_cess_percentage ? (+el.selling_cess_percentage * el.total_net_price / 100) : 0;
               });
             this.cartTotal();
             this.modalReference = this.modalService.open(content);
@@ -630,6 +633,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     });
   }
   setPrintData() {
+    this.getTotalAmount();
     this.carts = JSON.parse(JSON.stringify(this.invoiceDetail.details));
     this.totalQty = this.carts.reduce(
       (accumulator: any, current: any) =>
@@ -650,7 +654,8 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
       billTotaldue: this.billTotaldue,
       totalBillAmount: this.totalBillAmount,
       parcelCharge: this.invoiceDetail.parcel_charge,
-      taxs: this.taxs
+      taxs: this.taxs,
+      totalQty: this.totalQty,
     };
   }
 }
