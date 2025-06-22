@@ -54,7 +54,8 @@
     <tr>
       <td>Items: {{data.carts.length}}</td>
       <td>
-        <p>{{translations['rent']}}</p>: 0.00
+        <p>{{translations['rent']}}</p>: {{(data.parcelCharge ? data.parcelCharge : 0) |
+          currency:'INR':'symbol-narrow':'1.2-2'}}
       </td>
     </tr>
     <tr>

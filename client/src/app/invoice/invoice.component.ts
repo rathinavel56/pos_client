@@ -181,7 +181,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     this.returnTotal();
   }
   saveReturn() {
-    let returnItems = this.invoiceDetail.details.filter((e: any) => e.return === true && +e.return_quantity > 0);
+    let returnItems = this.invoiceDetail.details.filter((e: any) => e.return === true && +e.added_quantity > 0);
     if (returnItems.length === 0) {
       Swal.fire("Return", "Please select at least one item to return", "warning");
       return;
@@ -200,7 +200,11 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
       this.recipeService
           .returnStocks(order)
           .subscribe(() => {
-
+            Swal.fire(
+              'Saved',
+              'Your Return Order has been saved.',
+              'success'
+            );
           });
   }
   getTotalAmount() {
@@ -529,12 +533,12 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
   }
   checkReturnStock(details: any) {
     setTimeout(() => {
-      if (+details.return_quantity > +details.quantity) {
-        details.return_quantity = details.quantity;
+      if (+details.added_quantity > +details.quantity) {
+        details.added_quantity = details.quantity;
       }
-      details.is_active = (+details.return_quantity !== +details.quantity);
+      details.is_active = (+details.added_quantity !== +details.quantity);
       if (details.is_active) {
-        let totalNetPrice = details.return_quantity * details.selling_price;
+        let totalNetPrice = details.added_quantity * details.selling_price;
         const totalTax = totalNetPrice * (details.selling_CGST_percentage + details.selling_SGST_percentage + details.selling_IGST_percentage + details.selling_cess_percentage) / 100;
         const totalAmount = totalNetPrice + totalTax;
         details.total_net_price = totalNetPrice,

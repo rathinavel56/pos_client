@@ -32,6 +32,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
   selectedLocation: any;
   config: any;
   totalBillAmount: number = 0;
+  parcelCharge: number = 0;
   SGST: any;
   CGST: any;
   IGST: any;
@@ -315,7 +316,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
     }, 0);
     this.totalBillAmount = this.rows.controls.reduce((sum, row) => {
       return sum + (+row.get('total')?.value || 0);
-    }, 0);
+    }, 0) + +this.parcelCharge;
     this.billTotalRound = Math.round(this.totalBillAmount) - this.totalBillAmount;
     this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
@@ -352,20 +353,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
         accumulator + parseFloat(current.added_quantity),
       0
     );
-    this.cartData = {
-      name: this.selectedLocation.name,
-      address: this.selectedLocation.name,
-      message: this.selectedLocation.name,
-      gstin: this.selectedLocation.name,
-      fssai_no: this.selectedLocation.name,
-      invoice_no: this.selectedLocation.name,
-      invoice_date: this.selectedLocation.name,
-      customer: this.customer,
-      carts: this.carts,
-      billTotalRound: this.billTotalRound,
-      billTotaldue: this.billTotaldue,
-      taxs: this.taxs
-    };
+    this.setPrintData();
   }
   saveInvoice() {
     this.showLoading();
@@ -400,6 +388,7 @@ export class BillingComponent extends BaseComponent implements OnInit {
                 if (response.status === "success") {
                   this.invoice_no = response.invoice_no;
                   this.invoice_date = response.invoice_datetime;
+                  this.setPrintData();
                   setTimeout(()=> {
                     this.printInvoice();
                   }, 0);
@@ -423,15 +412,32 @@ export class BillingComponent extends BaseComponent implements OnInit {
               }
             );
   }
+  setPrintData() {
+    this.cartData = {
+      name: this.selectedLocation.name,
+      address: this.selectedLocation.name,
+      message: this.selectedLocation.name,
+      gstin: this.selectedLocation.name,
+      fssai_no: this.selectedLocation.name,
+      invoice_no: this.selectedLocation.name,
+      invoice_date: this.selectedLocation.name,
+      customer: this.customer,
+      carts: this.carts,
+      billTotalRound: this.billTotalRound,
+      billTotaldue: this.billTotaldue,
+      totalBillAmount: this.totalBillAmount,
+      parcelCharge: this.parcelCharge,
+      taxs: this.taxs
+    };
+  }
   orderInvoice(isDraft?: boolean) {
-
     this.showLoading();
     let order = {
         location_id: this.selectedLocation.id,
         order_type_id: 1, // Assuming 1 is the order type for retail
         payment_mode_id: 1, // Assuming 1 is the payment mode for cash1
         details: this.tableForm.value.rows.filter((p: any) => p.product_id !== '' ),
-        parcel_charge: null,
+        parcel_charge: this.parcelCharge,
         customer_id: null,
         reference_no: null,
         is_take_away: true,
@@ -910,5 +916,9 @@ export class BillingComponent extends BaseComponent implements OnInit {
     this.SGST = 0;
     this.CGST = 0;
     this.IGST = 0;
+    this.cartData = null;
+    this.parcelCharge = 0;
+    this.billTotalRound = 0;
+    this.billTotaldue = 0;
   }
 }
