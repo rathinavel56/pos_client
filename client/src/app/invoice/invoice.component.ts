@@ -224,7 +224,7 @@ export class InvoiceComponent extends BaseComponent implements OnInit {
     }, 0);
     this.totalBillAmount = this.invoiceDetail.details.reduce((sum:any, row:any) => {
       return sum + (+row['total']);
-    }, 0);
+    }, 0) + +this.invoiceDetail.parcel_charge;
     this.billTotalRound = Math.round(this.totalBillAmount) - this.totalBillAmount;
     this.billTotaldue = Math.round(this.totalBillAmount);
     if (this.totalBillAmount > 0) {
